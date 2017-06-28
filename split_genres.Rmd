@@ -2,9 +2,7 @@
 title: "Proyecto Fin de Máster"
 author: "Javier Pozueco"
 date: "23 June 2017"
-output:
-  pdf_document: default
-  html_document: default
+output: md_document
 ---
 
 ## Creación de conjunto de datos para mostrar la puntuación por género
