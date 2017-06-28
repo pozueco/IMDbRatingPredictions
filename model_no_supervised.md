@@ -1,5 +1,5 @@
-Limpieza y preparación de datos
--------------------------------
+Creación del modelo no supervisado
+----------------------------------
 
 En primer lugar se cargan los datos se desde el directorio actual, almacenados en un fichero CSV:
 

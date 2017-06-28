@@ -24,12 +24,14 @@ Seleccioneamos únicamente las columnas que serán tenidas en cuenta en el model
 # new data frame only with selected columns
 moviesDatasetClustering <- subset(moviesDataset, select=c("actor_1_facebook_likes", 
                                                           "actor_2_facebook_likes", 
-                                                          "actor_3_facebook_likes"))
+                                                          "actor_3_facebook_likes",
+                                                          "director_facebook_likes"))
 
 # filter columns with NA values
 moviesDatasetClustering <- moviesDatasetClustering[!is.na(moviesDatasetClustering[,1]),]
 moviesDatasetClustering <- moviesDatasetClustering[!is.na(moviesDatasetClustering[,2]),]
 moviesDatasetClustering <- moviesDatasetClustering[!is.na(moviesDatasetClustering[,3]),]
+moviesDatasetClustering <- moviesDatasetClustering[!is.na(moviesDatasetClustering[,4]),]
 ```
 
 Guardamos los datos procesados en un nuevo fichero para utilizarlos en el modelo no supervisado y se eliminan las filas con datos no definidos:
