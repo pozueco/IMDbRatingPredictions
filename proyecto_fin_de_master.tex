@@ -260,7 +260,17 @@ Es interesante también ver como han evolucionado los géneros más populares a 
 
 \section{Preparación y limpieza del dataset}
 
-En primer lugar se ha realizado un análisis de la calidad del dataset para saber la cantidad de datos no disponible para cada uno de los atributos. Como se puede ver en el anexo \ref{anexo:I}, el presupuesto de las películas y las ganancias en mayor medida, arrojan una mayor falta de datos que el resto de características del dataset. Como las ganancias es un dato conocido únicamente despues de haberse realizado la película, no será tenido en cuenta en la creación de los modelos exclicados en la siguientes secciones. 
+En primer lugar se ha realizado un análisis de la calidad del dataset para saber la cantidad de datos no disponible para cada uno de los atributos. Como se puede ver en el anexo \ref{anexo:I}, el presupuesto de las películas y las ganancias en mayor medida, arrojan una mayor falta de datos que el resto de características del dataset. Como las ganancias es un dato conocido únicamente despues de haberse realizado la película, no será tenido en cuenta en la creación de los modelos detallados en la siguientes secciones. 
+
+\subsection{Modelo no supervisado}
+
+A continuación se seleccionan los datos para la construcción del modelo no supervisado solamente con las siguientes columnas, y se eliminan las files con datos no definidos \href{https://github.com/pozueco/proyecto_fin_de_master/blob/master/clean_dataset.md}{R Markdown}:
+
+\begin{itemize}
+  \item Actor 1 Facebook Likes 
+  \item Actor 2 Facebook Likes 
+  \item Actor 3 Facebook Likes 
+\end{itemize}
 
 \clearpage
 

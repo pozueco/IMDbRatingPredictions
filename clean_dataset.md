@@ -1,5 +1,5 @@
-Creación de conjunto de datos para mostrar la puntuación por género
--------------------------------------------------------------------
+Limpieza y preparación de datos
+-------------------------------
 
 En primer lugar se cargan los datos se desde el directorio actual, almacenados en un fichero CSV:
 
@@ -24,7 +24,7 @@ moviesDatasetClustering <- moviesDatasetClustering[!is.na(moviesDatasetClusterin
 moviesDatasetClustering <- moviesDatasetClustering[!is.na(moviesDatasetClustering[,3]),]
 ```
 
-Guardamos los datos procesados en un nuevo fichero para utilizarlos en el modelo no supervisado:
+Guardamos los datos procesados en un nuevo fichero para utilizarlos en el modelo no supervisado y se eliminan las filas con datos no definidos:
 
 ``` r
 write.csv(moviesDatasetClustering, "./movie_metadata_clean_no_supervised.csv") 
