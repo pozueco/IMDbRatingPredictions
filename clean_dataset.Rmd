@@ -22,9 +22,9 @@ Seleccioneamos únicamente las columnas que serán tenidas en cuenta en el model
 
 ```{r}
 # new data frame only with selected columns
-moviesDatasetClustering <- data.frame(moviesDataset$actor_1_facebook_likes,
-                                      moviesDataset$actor_2_facebook_likes,
-                                      moviesDataset$actor_3_facebook_likes)
+moviesDatasetClustering <- subset(moviesDataset, select=c("actor_1_facebook_likes", 
+                                                          "actor_2_facebook_likes", 
+                                                          "actor_3_facebook_likes"))
 
 # filter columns with NA values
 moviesDatasetClustering <- moviesDatasetClustering[!is.na(moviesDatasetClustering[,1]),]
