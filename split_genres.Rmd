@@ -27,8 +27,8 @@ if(! "splitstackshape" %in% installed.packages())
   install.packages("splitstackshape", repos="http://cran.rstudio.com/", depend = TRUE)
 library(splitstackshape)
 
-x <- concat.split.multiple(moviesDataset, "genres", direction = "long", sep = "|")
-head(x[,1:10])
+moviesDatasetSplit <- concat.split.multiple(moviesDataset, "genres", direction = "long", sep = "|")
+head(moviesDatasetSplit[,1:10])
 ```
 
 Guardamos los datos procesados en un nuevo fichero para Tableau:
