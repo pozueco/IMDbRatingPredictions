@@ -2,7 +2,9 @@
 title: "Proyecto Fin de Máster"
 author: "Javier Pozueco"
 date: "23 June 2017"
-output: md_document
+output:
+  md_document:
+    variant: markdown_github
 ---
 
 ## Creación de conjunto de datos para mostrar la puntuación por género
@@ -34,5 +36,5 @@ head(moviesDatasetSplit[,1:10])
 Guardamos los datos procesados en un nuevo fichero para Tableau:
 
 ```{r results='hide', message=FALSE, warning=FALSE}
-write.csv(x, "./movie_metadata_genres.csv") 
+write.csv(moviesDatasetSplit, "./movie_metadata_genres.csv") 
 ```
