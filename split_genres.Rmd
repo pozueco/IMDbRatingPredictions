@@ -1,28 +1,166 @@
 ---
-title: "split_genres"
-output: html_document
+title: "Proyecto Fin de M?ster"
+author: "Javier Pozueco"
+date: "23 June 2017"
+output:
+  pdf_document: default
+  html_document: default
 ---
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+## Creaci?n de conjunto de datos para mostrar la puntuaci?n por g?nero
+
+Para la realizaci?n de este proyecto se ha utilizado el conjunto de datos de pel?culas disponible en la siguiente p?gina web:
+
+<https://www.kaggle.com/deepmatrix/imdb-5000-movie-dataset>
+
+Los datos se cargar?n desde el directorio actual, almacenados en un fichero CSV:
+
+```{r results='hide', message=FALSE, warning=FALSE}
+fileMovies <- file("./movie_metadata_original.csv","r") 
+moviesDataset <- read.csv(fileMovies) 
+close(fileMovies) 
+head(moviesDataset[,1:5])
 ```
 
-## R Markdown
+Dividimos la columna con el genero para poder representarlo en Tableau:
 
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+```{r}
+if(! "splitstackshape" %in% installed.packages())
+  install.packages("splitstackshape", repos="http://cran.rstudio.com/", depend = TRUE)
+library(splitstackshape)
 
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
-
-```{r cars}
-summary(cars)
+x <- concat.split.multiple(moviesDataset, "genres", direction = "long", sep = "|")
+head(x[,1:10])
 ```
 
-## Including Plots
+Guardamos los datos procesados en un nuevo fichero para Tableau:
 
-You can also embed plots, for example:
-
-```{r pressure, echo=FALSE}
-plot(pressure)
+```{r results='hide', message=FALSE, warning=FALSE}
+write.csv(x, "./movie_metadata_genres.csv") 
 ```
 
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+## An?lisis exploratorio basado en un m?todo no supervisado
+
+```{r results='hide', message=FALSE, warning=FALSE}
+if(! "dplyr" %in% installed.packages()) 
+  install.packages("dplyr", depend = TRUE) 
+if(! "plotrix" %in% installed.packages()) 
+  install.packages("plotrix", depend = TRUE) 
+if(! "knitr" %in% installed.packages()) 
+  install.packages("knitr", depend = TRUE) 
+
+library(dplyr) 
+library(plotrix) 
+library(knitr) 
+
+# new data frame only with selected columns
+moviesDatasetClustering <- data.frame(moviesDataset$actor_1_facebook_likes,
+                                      moviesDataset$actor_2_facebook_likes,
+                                      moviesDataset$actor_3_facebook_likes)
+
+# filter columns with NA values
+moviesDatasetClustering <- moviesDatasetClustering[!is.na(moviesDatasetClustering[,1]),]
+moviesDatasetClustering <- moviesDatasetClustering[!is.na(moviesDatasetClustering[,2]),]
+moviesDatasetClustering <- moviesDatasetClustering[!is.na(moviesDatasetClustering[,3]),]
+
+mydata <- moviesDatasetClustering
+wss <- (nrow(mydata)-1)*sum(apply(mydata,2,var)) 
+for (i in 2:15) 
+  wss[i] <- sum(kmeans(mydata, centers=i)$withinss) 
+
+plot(1:15, wss, type="b", xlab="Numero de Clusters", ylab="Sumas de cuadrados dentro de los grupos", 
+     main="Num de clusters ?ptimo seg?n Elbow", pch=20, cex=2)
+
+```
+```{r results='hide', message=FALSE, warning=FALSE}
+set.seed(1234) 
+kmeans.clust <- kmeans(moviesDatasetClustering, 4) 
+kmeans.clust
+
+plot(moviesDatasetClustering, col=kmeans.clust$cluster)
+```
+
+```{r}
+# instalacion de la libreria ggplot2
+if(! "ggplot2" %in% installed.packages())
+  install.packages("ggplot2", repos="http://cran.rstudio.com/", depend = TRUE)
+library("ggplot2")
+
+# subconjunto de etiquetas para la creacion de la matriz de correlacion
+matCor <- cor(moviesDatasetClustering)
+
+# instalacion de la libreria corrplot
+if(! "corrplot" %in% installed.packages()) 
+  install.packages("corrplot", repos="http://cran.rstudio.com/", depend = TRUE)
+library("corrplot")
+
+matCor[is.na(matCor)] <- 0
+
+# generacion de la paleta de colores
+col <- colorRampPalette(c("#BB4444", "#EE9988", "#FFFFFF", "#77AADD", "#4477AA"))
+```
+
+
+```{r}
+# matriz de correlacion
+corrplot(matCor, method = "shade", shade.col = NA, tl.col = "black",
+         tl.srt = 45, col = col(200), addCoef.col="black",
+         order="AOE",
+         mar = c(1,0,2,0), number.cex=0.5,
+         main = "Fig 1. Matriz de correlaci?n")
+```
+```{r}
+if(! "dplyr" %in% installed.packages()) 
+  install.packages("dplyr", depend = TRUE) 
+if(! "plotrix" %in% installed.packages()) 
+  install.packages("plotrix", depend = TRUE) 
+if(! "knitr" %in% installed.packages()) 
+  install.packages("knitr", depend = TRUE) 
+
+library(dplyr) 
+library(plotrix) 
+library(knitr) 
+
+# new data frame only with selected columns
+moviesDatasetClustering <- subset(moviesDataset, select=c("actor_1_facebook_likes", "actor_2_facebook_likes", 
+                                                          "actor_3_facebook_likes", "imdb_score"))
+
+moviesDatasetClustering$pass <- ifelse(moviesDatasetClustering$imdb_score>9, 1, 0)
+
+# particion training y test
+index.moviesDatasetClustering <- createDataPartition(moviesDatasetClustering$pass, p=0.8, list=F)
+train.moviesDatasetClustering <- moviesDataset[index.moviesDatasetClustering,]
+test.moviesDatasetClustering <- moviesDataset[-index.moviesDatasetClustering,]
+```
+
+
+
+
+models
+
+
+```{r results='hide', message=FALSE, warning=FALSE}
+# entrenamos el modelo
+# centrar variables
+xTrans.moviesDatasetClustering <- preProcess(train.moviesDatasetClustering)
+train.moviesDatasetClustering.prep <- predict( xTrans.moviesDatasetClustering, train.moviesDatasetClustering)
+train.moviesDatasetClustering.prep$pass <- train.moviesDatasetClustering$pass
+test.moviesDatasetClustering.prep <- predict( xTrans.moviesDatasetClustering, test.moviesDatasetClustering)
+test.moviesDatasetClustering.prep$pass <- test.moviesDatasetClustering$pass
+
+# aplicamos resampling de repeated k cross validation 
+control <- trainControl(method="repeatedcv", repeats=5)
+
+model1.moviesDatasetClustering.model <- train(x=train.moviesDatasetClustering[c("actor_1_facebook_likes",
+                                                                                "actor_2_facebook_likes",
+                                                                                "actor_3_facebook_likes",
+                                                                                "imdb_score")], 
+                                              y=train.moviesDatasetClustering$pass, method="rpart", 
+                                              tuneLength=10, trControl=control)
+
+model1.moviesDatasetClustering.model
+
+# precision del modelo
+plot1 <- plot(model1.moviesDatasetClustering.model, metric="Accuracy")
+print(plot1)
+```
