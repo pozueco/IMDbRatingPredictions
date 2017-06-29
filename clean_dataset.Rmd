@@ -48,18 +48,24 @@ Seleccioneamos únicamente las columnas que serán tenidas en cuenta en el model
 
 ```{r}
 # new data frame only with selected columns
-moviesDatasetSupervised <- subset(moviesDataset, select=c("actor_1_facebook_likes", 
+moviesDatasetSupervised <- subset(moviesDataset, select=c("imdb_score",
+                                                          "actor_1_facebook_likes", 
                                                           "actor_2_facebook_likes", 
                                                           "actor_3_facebook_likes",
                                                           "director_facebook_likes",
                                                           "duration",
                                                           "budget",
-                                                          "imdb_score",
                                                           "title_year",
                                                           "facenumber_in_poster",
                                                           "movie_facebook_likes",
                                                           "cast_total_facebook_likes",
-                                                          "num_critic_for_reviews"))
+                                                          "num_critic_for_reviews",
+                                                          "color",
+                                                          "director_name",
+                                                          "actor_1_name",
+                                                          "actor_2_name",
+                                                          "actor_3_name",
+                                                          "genres"))
 
 # filter columns with NA values
 moviesDatasetSupervised <- moviesDatasetSupervised[!is.na(moviesDatasetSupervised[,1]),]
@@ -74,10 +80,65 @@ moviesDatasetSupervised <- moviesDatasetSupervised[!is.na(moviesDatasetSupervise
 moviesDatasetSupervised <- moviesDatasetSupervised[!is.na(moviesDatasetSupervised[,10]),]
 moviesDatasetSupervised <- moviesDatasetSupervised[!is.na(moviesDatasetSupervised[,11]),]
 moviesDatasetSupervised <- moviesDatasetSupervised[!is.na(moviesDatasetSupervised[,12]),]
+moviesDatasetSupervised <- moviesDatasetSupervised[!is.na(moviesDatasetSupervised[,13]),]
+moviesDatasetSupervised <- moviesDatasetSupervised[!is.na(moviesDatasetSupervised[,14]),]
+moviesDatasetSupervised <- moviesDatasetSupervised[!is.na(moviesDatasetSupervised[,15]),]
+moviesDatasetSupervised <- moviesDatasetSupervised[!is.na(moviesDatasetSupervised[,16]),]
+moviesDatasetSupervised <- moviesDatasetSupervised[!is.na(moviesDatasetSupervised[,17]),]
+moviesDatasetSupervised <- moviesDatasetSupervised[!is.na(moviesDatasetSupervised[,18]),]
+
+# new column for color
+moviesDatasetSupervised$color = with(moviesDatasetSupervised, ifelse(color == "Color", 1, 0))
+
+# create new columns for each genre
+moviesDatasetSupervised$drama_genre = ifelse(grepl("Drama",moviesDatasetSupervised$genres), 1, 0)
+moviesDatasetSupervised$comedy_genre = ifelse(grepl("Comedy",moviesDatasetSupervised$genres), 1, 0)
+moviesDatasetSupervised$thriller_genre = ifelse(grepl("Thriller",moviesDatasetSupervised$genres), 1, 0)
+moviesDatasetSupervised$action_genre = ifelse(grepl("Action",moviesDatasetSupervised$genres), 1, 0)
+moviesDatasetSupervised$romance_genre = ifelse(grepl("Romance",moviesDatasetSupervised$genres), 1, 0)
+moviesDatasetSupervised$adventure_genre = ifelse(grepl("Adventure",moviesDatasetSupervised$genres), 1, 0)
+moviesDatasetSupervised$crime_genre = ifelse(grepl("Crime",moviesDatasetSupervised$genres), 1, 0)
+moviesDatasetSupervised$scifi_genre = ifelse(grepl("Sci-Fi",moviesDatasetSupervised$genres), 1, 0)
+moviesDatasetSupervised$fantasy_genre = ifelse(grepl("Fantasy",moviesDatasetSupervised$genres), 1, 0)
+moviesDatasetSupervised$horror_genre = ifelse(grepl("Horror",moviesDatasetSupervised$genres), 1, 0)
+moviesDatasetSupervised$family_genre = ifelse(grepl("Family",moviesDatasetSupervised$genres), 1, 0)
+moviesDatasetSupervised$mystery_genre = ifelse(grepl("Mystery",moviesDatasetSupervised$genres), 1, 0)
+moviesDatasetSupervised$biography_genre = ifelse(grepl("Biography",moviesDatasetSupervised$genres), 1, 0)
+moviesDatasetSupervised$animation_genre = ifelse(grepl("Animation",moviesDatasetSupervised$genres), 1, 0)
+moviesDatasetSupervised$music_genre = ifelse(grepl("Music",moviesDatasetSupervised$genres), 1, 0)
+moviesDatasetSupervised$war_genre = ifelse(grepl("War",moviesDatasetSupervised$genres), 1, 0)
+moviesDatasetSupervised$history_genre = ifelse(grepl("History",moviesDatasetSupervised$genres), 1, 0)
+moviesDatasetSupervised$sport_genre = ifelse(grepl("Sport",moviesDatasetSupervised$genres), 1, 0)
+moviesDatasetSupervised$musical_genre = ifelse(grepl("Musical",moviesDatasetSupervised$genres), 1, 0)
+moviesDatasetSupervised$documentary_genre = ifelse(grepl("Documentary",moviesDatasetSupervised$genres), 1, 0)
+moviesDatasetSupervised$western_genre = ifelse(grepl("Western",moviesDatasetSupervised$genres), 1, 0)
+moviesDatasetSupervised$filmnoir_genre = ifelse(grepl("Film-Noir",moviesDatasetSupervised$genres), 1, 0)
+moviesDatasetSupervised$short_genre = ifelse(grepl("Short",moviesDatasetSupervised$genres), 1, 0)
+moviesDatasetSupervised$news_genre = ifelse(grepl("News",moviesDatasetSupervised$genres), 1, 0)
+
+# new column with the number of movies per director
+director_movies <- table(moviesDatasetSupervised$director_name)
+moviesDatasetSupervised$director_movies = director_movies[moviesDatasetSupervised$director_name]
+
+# new column with the number of movies per actor
+actor_1_movies <- table(moviesDatasetSupervised$actor_1_name)
+moviesDatasetSupervised$actor_1_movies = actor_1_movies[moviesDatasetSupervised$actor_1_name]
+actor_2_movies <- table(moviesDatasetSupervised$actor_2_name)
+moviesDatasetSupervised$actor_2_movies = actor_2_movies[moviesDatasetSupervised$actor_2_name]
+actor_3_movies <- table(moviesDatasetSupervised$actor_3_name)
+moviesDatasetSupervised$actor_3_movies = actor_3_movies[moviesDatasetSupervised$actor_3_name]
+
+# borrar columnas no numericas
+moviesDatasetSupervised$genres <- NULL
+moviesDatasetSupervised$director_name <- NULL
+moviesDatasetSupervised$actor_1_name <- NULL
+moviesDatasetSupervised$actor_2_name <- NULL
+moviesDatasetSupervised$actor_3_name <- NULL
+
 ```
 
 Guardamos los datos procesados en un nuevo fichero para utilizarlos en el modelo no supervisado y se eliminan las filas con datos no definidos:
 
 ```{r results='hide', message=FALSE, warning=FALSE}
-write.csv(moviesDatasetSupervised, "./movie_metadata_clean_supervised.csv", row.names=FALSE)
+write.csv(moviesDatasetSupervised, "./movie_metadata_clean_supervised.csv", row.names = FALSE)
 ```

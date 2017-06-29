@@ -12,8 +12,9 @@ En primer lugar se cargan los datos se desde el directorio actual, almacenados e
 ```{r results='hide', message=FALSE, warning=FALSE}
 fileMovies <- file("./movie_metadata_clean_supervised.csv","r") 
 moviesDatasetSupervised <- read.csv(fileMovies) 
+
 close(fileMovies) 
-head(moviesDatasetSupervised[,1:12])
+head(moviesDatasetSupervised[,1:20])
 ```
 
 Calculamos la matriz de correlación entre las diferentes columnas del dataset:
@@ -43,8 +44,169 @@ Mostramos la matriz de correlación:
 ```{r}
 # matriz de correlacion
 par(xpd = TRUE)
+png(height=2400, width=2400, pointsize=25, file="./model_supervised_files/figure-markdown_github/unnamed-chunk-3-1.png")
 corrplot(matCor, method = "shade", shade.col = NA, tl.col = "black",
          tl.srt = 40, col = col(200), addCoef.col="black",
          order="AOE",
-         mar = c(2,0,1,0), number.cex=0.6, tl.cex = 0.5)
+         mar = c(2,0,1,0), number.cex=0.6, tl.cex = 0.6)
+par(xpd = FALSE)
 ```
+
+Preparamos las entradas de los modelos de regresión:
+
+```{r}
+movies_with_good_variables = moviesDatasetSupervised[, c("imdb_score",
+                                                          "actor_1_facebook_likes", 
+                                                          "actor_2_facebook_likes", 
+                                                          "actor_3_facebook_likes",
+                                                          "director_facebook_likes",
+                                                          "duration",
+                                                          "budget",
+                                                          "title_year",
+                                                          "facenumber_in_poster",
+                                                          "num_critic_for_reviews",
+                                                          "color",
+                                                          "drama_genre",
+                                                          "comedy_genre",
+                                                          "thriller_genre",
+                                                          "action_genre",
+                                                          "romance_genre",
+                                                          "adventure_genre",
+                                                          "crime_genre",
+                                                          "scifi_genre",
+                                                          "fantasy_genre",
+                                                          "horror_genre",
+                                                          "family_genre",
+                                                          "mystery_genre",
+                                                          "biography_genre",
+                                                          "animation_genre",
+                                                          "music_genre",
+                                                          "war_genre",
+                                                          "history_genre",
+                                                          "sport_genre",
+                                                          "musical_genre",
+                                                          "documentary_genre",
+                                                          "western_genre",
+                                                          "filmnoir_genre",
+                                                          "short_genre",
+                                                          "news_genre",
+                                                          "director_movies",
+                                                          "actor_1_movies",
+                                                          "actor_2_movies",
+                                                          "actor_3_movies"
+                                                         )]
+x = as.matrix(movies_with_good_variables[, -1])
+y = movies_with_good_variables[, 1]
+```
+
+Incluímos las librerías necesarias para crear los modelos detallados a continuación:
+
+```{r}
+if(! "ggplot2" %in% installed.packages()) 
+  install.packages("ggplot2", repos="http://cran.rstudio.com/", depend = TRUE)
+library("ggplot2")
+
+if(! "VIM" %in% installed.packages()) 
+  install.packages("VIM", repos="http://cran.rstudio.com/", depend = TRUE)
+library("VIM")
+
+if(! "mice" %in% installed.packages()) 
+  install.packages("mice", repos="http://cran.rstudio.com/", depend = TRUE)
+library("mice")
+
+if(! "vcd" %in% installed.packages()) 
+  install.packages("vcd", repos="http://cran.rstudio.com/", depend = TRUE)
+library("vcd")
+
+if(! "car" %in% installed.packages()) 
+  install.packages("car", repos="http://cran.rstudio.com/", depend = TRUE)
+library("car")
+
+if(! "tabplot" %in% installed.packages()) 
+  install.packages("tabplot", repos="http://cran.rstudio.com/", depend = TRUE)
+library("tabplot")
+
+if(! "PerformanceAnalytics" %in% installed.packages()) 
+  install.packages("PerformanceAnalytics", repos="http://cran.rstudio.com/", depend = TRUE)
+library("PerformanceAnalytics")
+
+if(! "MASS" %in% installed.packages()) 
+  install.packages("MASS", repos="http://cran.rstudio.com/", depend = TRUE)
+library("MASS")
+
+if(! "glmnet" %in% installed.packages()) 
+  install.packages("glmnet", repos="http://cran.rstudio.com/", depend = TRUE)
+library("glmnet")
+```
+
+Calculamos el primer modelo en base a ridge regression:
+
+```{r}
+# Crear modelo de regresion Ridge
+grid = 10^seq(5, -2, length = 100)
+ridge.models = glmnet(x, y, alpha = 0, lambda = grid)
+dim(coef(ridge.models)) 
+coef(ridge.models) 
+
+# Visualizar los resultados
+plot(ridge.models, xvar = "lambda", label = TRUE)
+
+# Training dataset del 70%
+set.seed(0)
+train = sample(1:nrow(x), 7*nrow(x)/10)
+test = (-train)
+y.test = y[test]
+
+length(train)/nrow(x)
+length(y.test)/nrow(x)
+
+# Optimización de los parámetros del modelo
+set.seed(0)
+cv.ridge.out = cv.glmnet(x[train, ], y[train], lambda = grid, alpha = 0, nfolds = 10)
+plot(cv.ridge.out)
+bestlambda.ridge = cv.ridge.out$lambda.min
+bestlambda.ridge
+log(bestlambda.ridge)
+
+# Error de cada uno de los parámetros
+ridge.bestlambdatrain = predict(ridge.models, s = bestlambda.ridge, newx = x[test, ])
+mean((ridge.bestlambdatrain - y.test)^2)
+
+# Utilizar el mejor parámetro encontrado
+ridge.out = glmnet(x, y, alpha = 0)
+predict(ridge.out, type = "coefficients", s = bestlambda.ridge)
+
+# MSE del modelo creado finalmente
+ridge.bestlambda = predict(ridge.out, s = bestlambda.ridge, newx = x)
+mean((ridge.bestlambda - y)^2)
+
+```
+
+```{r}
+# Utilizar el modelo de regresión Lasso
+lasso.models = glmnet(x, y, alpha = 1, lambda = grid)
+
+dim(coef(lasso.models)) 
+coef(lasso.models) 
+
+# Validación cruzada para obtener los parámetros optimos
+set.seed(0)
+cv.lasso.out = cv.glmnet(x[train, ], y[train], lambda = grid, alpha = 1, nfolds = 10)
+plot(cv.lasso.out)
+bestlambda.lasso = cv.lasso.out$lambda.min
+bestlambda.lasso
+log(bestlambda.lasso)
+
+# Error según cada uno de los parámetros obtenidos
+lasso.bestlambdatrain = predict(lasso.models, s = bestlambda.lasso, newx = x[test, ])
+mean((lasso.bestlambdatrain - y.test)^2)
+
+# Recalcular el modelo según el error obtenido
+lasso.out = glmnet(x, y, alpha = 1)
+predict(lasso.out, type = "coefficients", s = bestlambda.lasso)
+
+# Valor final del error MSE
+lasso.bestlambda = predict(lasso.out, s = bestlambda.lasso, newx = x)
+mean((lasso.bestlambda - y)^2)
+```
+

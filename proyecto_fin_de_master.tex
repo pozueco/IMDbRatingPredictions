@@ -264,12 +264,10 @@ En primer lugar se ha realizado un análisis de la calidad del dataset para sabe
 
 \subsection{Modelo no supervisado}
 
-A continuación se seleccionan los datos para la construcción del modelo no supervisado solamente con las siguientes columnas, y se eliminan las files con datos no definidos \href{https://github.com/pozueco/proyecto_fin_de_master/blob/master/clean_dataset.md}{R Markdown}:
+A continuación se seleccionan los datos para la construcción del modelo no supervisado solamente con las siguientes columnas, y se eliminan las files con datos no definidos con \href{https://github.com/pozueco/proyecto_fin_de_master/blob/master/clean_dataset.md}{R Markdown}:
 
 \begin{itemize}
-  \item Actor 1 Facebook Likes 
-  \item Actor 2 Facebook Likes 
-  \item Actor 3 Facebook Likes 
+  \item Actor 1 Facebook Likes, Actor 2 Facebook Likes y Actor 3 Facebook Likes 
   \item Director Facebook Likes
   \item Duration
   \item Budget
@@ -277,7 +275,23 @@ A continuación se seleccionan los datos para la construcción del modelo no sup
 
 \subsection{Modelo supervisado}
 
-\blindtext
+Para la construción de los modelos de regresión se utilizarán las siguientes columnas y eliminándose como en el caso anterior las files con datos no definidos con \href{https://github.com/pozueco/proyecto_fin_de_master/blob/master/clean_dataset.md}{R Markdown}. Cabe destacar que se ha creado una columna por género de la película con el valor 0 o 1 si la película pertenece a ese género, una columna con el valor 0 o 1 si la película es el blanco y negro o en color, y una columna para el director, el actor 1, el actor 2 y el actor 3, con el número de películas en las que participan:
+
+\begin{itemize}
+  \item Actor 1 Facebook Likes, Actor 2 Facebook Likes y Actor 3 Facebook Likes
+  \item Director Facebook Likes
+  \item Duration
+  \item Budget
+  \item Title Year
+  \item Face Number in Poster
+  \item Number Critic for Reviews
+  \item Color
+  \item Genre
+  \item Director Movies
+  \item Actor 1 Movies, Actor 2 Movies y Actor 3 Movies
+  \end{itemize}
+
+\clearpage
 
 \subsection{Recomendador}
 
@@ -291,7 +305,7 @@ Para la creación del modelo no supervisado se utilizará el conjunto de datos g
 
 \begin{figure}[h]
 \centering
-\includegraphics[width=3in,clip,keepaspectratio]{./model_no_supervised_files/figure-markdown_github/unnamed-chunk-2-1}
+\includegraphics[width=2.5in,clip,keepaspectratio]{./model_no_supervised_files/figure-markdown_github/unnamed-chunk-2-1}
 \end{figure}
 
 En la siguiente imagen se puede ver la relación entre los distintos clusters generados según el número óptimo calculado previamente, que en este caso es 4:
@@ -303,11 +317,39 @@ En la siguiente imagen se puede ver la relación entre los distintos clusters ge
 
 \clearpage
 
-\section{Selección de variables, elección, construcción, optimización y evaluación de modelos de Machine Learning Supervisado}
+\section{Modelos de Machine Learning supervisados}
+
+Para la creación del modelo no supervisado se utilizará el conjunto de datos generado anteriormente y se calculará el número óptimo de clusters según \href{https://github.com/pozueco/proyecto_fin_de_master/blob/master/model_supervised.md}{R Markdown}:
 
 \begin{figure}[h]
 \centering
-\includegraphics[width=5in,clip,keepaspectratio]{./model_supervised_files/figure-markdown_github/unnamed-chunk-3-1}
+\includegraphics[width=6in,clip,keepaspectratio]{./model_supervised_files/figure-markdown_github/unnamed-chunk-3-1}
+\end{figure}
+
+\clearpage
+
+Según la matriz de correlación anterior, existe una gran influencia entre los atributos Cast Total Facebook Likes y Actor 1 Facebook Likes, por lo que se ha eliminado esta primera para la construcción de los siguientes modelos de regresión.
+
+El primero de ellos será un modelo de regresión Ridge\cite{glmnet} el cual será optimizado para obtener los mejores parámetros que minimicen el error del modelo obtenido con \href{https://github.com/pozueco/proyecto_fin_de_master/blob/master/model_supervised.md}{R Markdown}:
+
+
+\begin{figure}[h]
+\centering
+\subfigure[Número de likes de los actores]{
+\centering
+\includegraphics[width=2.6in]{./model_supervised_files/figure-markdown_github/unnamed-chunk-6-1}
+}
+\subfigure[Número de likes de los directores]{
+\centering
+\includegraphics[width=2.6in]{./model_supervised_files/figure-markdown_github/unnamed-chunk-6-2}
+}
+\end{figure}
+
+El segundo de ellos será un modelo de regresión Lasso\cite{glmnet} el cual también será optimizado para obtener los mejores parámetros que minimicen el error del modelo obtenido con \href{https://github.com/pozueco/proyecto_fin_de_master/blob/master/model_supervised.md}{R Markdown}:
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=3in,clip,keepaspectratio]{./model_supervised_files/figure-markdown_github/unnamed-chunk-7-1}
 \end{figure}
 
 \clearpage
@@ -341,6 +383,9 @@ M.~Lanzagorta, \href{http://www.popmatters.com/column/horror-cinema-by-the-numbe
 
 \bibitem{justgeek}
 Z.~Brown, \href{http://www.justgeek.de/watching-all-the-movies-ever-made/}{Watching all the movies ever made}, \relax Justgeek, 2014.
+
+\bibitem{glmnet}
+T.~Hastie and J.~Qian, \href{https://web.stanford.edu/~hastie/glmnet/glmnet_alpha.html}{Glmnet Vignette}, \relax Stanford University, 2014.
 
 \end{thebibliography}
 
