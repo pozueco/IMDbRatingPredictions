@@ -1,0 +1,50 @@
+---
+title: "Proyecto Fin de Máster"
+author: "Javier Pozueco"
+date: "23 June 2017"
+output:
+  md_document:
+    variant: markdown_github
+---
+
+En primer lugar se cargan los datos se desde el directorio actual, almacenados en un fichero CSV:
+
+```{r results='hide', message=FALSE, warning=FALSE}
+fileMovies <- file("./movie_metadata_clean_supervised.csv","r") 
+moviesDatasetSupervised <- read.csv(fileMovies) 
+close(fileMovies) 
+head(moviesDatasetSupervised[,1:12])
+```
+
+Calculamos la matriz de correlación entre las diferentes columnas del dataset:
+
+```{r}
+# instalacion de la libreria ggplot2
+if(! "ggplot2" %in% installed.packages())
+  install.packages("ggplot2", repos="http://cran.rstudio.com/", depend = TRUE)
+library("ggplot2")
+
+# subconjunto de etiquetas para la creacion de la matriz de correlacion
+matCor <- cor(moviesDatasetSupervised)
+
+# instalacion de la libreria corrplot
+if(! "corrplot" %in% installed.packages()) 
+  install.packages("corrplot", repos="http://cran.rstudio.com/", depend = TRUE)
+library("corrplot")
+
+matCor[is.na(matCor)] <- 0
+
+# generacion de la paleta de colores
+col <- colorRampPalette(c("#BB4444", "#EE9988", "#FFFFFF", "#77AADD", "#4477AA"))
+```
+
+Mostramos la matriz de correlación:
+
+```{r}
+# matriz de correlacion
+par(xpd = TRUE)
+corrplot(matCor, method = "shade", shade.col = NA, tl.col = "black",
+         tl.srt = 40, col = col(200), addCoef.col="black",
+         order="AOE",
+         mar = c(2,0,1,0), number.cex=0.6, tl.cex = 0.5)
+```

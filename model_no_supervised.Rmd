@@ -15,7 +15,7 @@ En primer lugar se cargan los datos se desde el directorio actual, almacenados e
 fileMovies <- file("./movie_metadata_clean_no_supervised.csv","r") 
 moviesDatasetClustering <- read.csv(fileMovies) 
 close(fileMovies) 
-head(moviesDatasetClustering[,1:3])
+head(moviesDatasetClustering[,1:6])
 ```
 
 A continuación se calcula el número ideal de conjuntos y se muestran los resultados:
@@ -32,12 +32,12 @@ library(dplyr)
 library(plotrix) 
 library(knitr) 
 
-wss <- (nrow(moviesDatasetClustering)-1)*sum(apply(moviesDatasetClustering,2,var)) 
+wss <- (nrow(moviesDatasetClustering) - 1)*sum(apply(moviesDatasetClustering, 2, var)) 
 for (i in 2:15) 
   wss[i] <- sum(kmeans(moviesDatasetClustering, centers=i)$withinss) 
 
-plot(1:15, wss, type="b", xlab="Numero de Clusters", ylab="Sumas de cuadrados dentro de los grupos", 
-     main="Num de clusters optimo segun Elbow", pch=20, cex=2)
+plot(1:15, wss, type = "b", xlab = "Número de Clusters", ylab = "Sumas de cuadrados dentro de los grupos", 
+     main = "Número de clusters optimo segun Elbow", pch = 20, cex = 2)
 
 set.seed(1234) 
 kmeans.clust <- kmeans(moviesDatasetClustering, 4) 

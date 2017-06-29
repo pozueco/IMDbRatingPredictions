@@ -25,17 +25,59 @@ Seleccioneamos únicamente las columnas que serán tenidas en cuenta en el model
 moviesDatasetClustering <- subset(moviesDataset, select=c("actor_1_facebook_likes", 
                                                           "actor_2_facebook_likes", 
                                                           "actor_3_facebook_likes",
-                                                          "director_facebook_likes"))
+                                                          "director_facebook_likes",
+                                                          "duration",
+                                                          "budget"))
 
 # filter columns with NA values
 moviesDatasetClustering <- moviesDatasetClustering[!is.na(moviesDatasetClustering[,1]),]
 moviesDatasetClustering <- moviesDatasetClustering[!is.na(moviesDatasetClustering[,2]),]
 moviesDatasetClustering <- moviesDatasetClustering[!is.na(moviesDatasetClustering[,3]),]
 moviesDatasetClustering <- moviesDatasetClustering[!is.na(moviesDatasetClustering[,4]),]
+moviesDatasetClustering <- moviesDatasetClustering[!is.na(moviesDatasetClustering[,5]),]
+moviesDatasetClustering <- moviesDatasetClustering[!is.na(moviesDatasetClustering[,6]),]
 ```
 
 Guardamos los datos procesados en un nuevo fichero para utilizarlos en el modelo no supervisado y se eliminan las filas con datos no definidos:
 
 ```{r results='hide', message=FALSE, warning=FALSE}
-write.csv(moviesDatasetClustering, "./movie_metadata_clean_no_supervised.csv") 
+write.csv(moviesDatasetClustering, "./movie_metadata_clean_no_supervised.csv", row.names=FALSE)
+```
+
+Seleccioneamos únicamente las columnas que serán tenidas en cuenta en el modelo no supervisado:
+
+```{r}
+# new data frame only with selected columns
+moviesDatasetSupervised <- subset(moviesDataset, select=c("actor_1_facebook_likes", 
+                                                          "actor_2_facebook_likes", 
+                                                          "actor_3_facebook_likes",
+                                                          "director_facebook_likes",
+                                                          "duration",
+                                                          "budget",
+                                                          "imdb_score",
+                                                          "title_year",
+                                                          "facenumber_in_poster",
+                                                          "movie_facebook_likes",
+                                                          "cast_total_facebook_likes",
+                                                          "num_critic_for_reviews"))
+
+# filter columns with NA values
+moviesDatasetSupervised <- moviesDatasetSupervised[!is.na(moviesDatasetSupervised[,1]),]
+moviesDatasetSupervised <- moviesDatasetSupervised[!is.na(moviesDatasetSupervised[,2]),]
+moviesDatasetSupervised <- moviesDatasetSupervised[!is.na(moviesDatasetSupervised[,3]),]
+moviesDatasetSupervised <- moviesDatasetSupervised[!is.na(moviesDatasetSupervised[,4]),]
+moviesDatasetSupervised <- moviesDatasetSupervised[!is.na(moviesDatasetSupervised[,5]),]
+moviesDatasetSupervised <- moviesDatasetSupervised[!is.na(moviesDatasetSupervised[,6]),]
+moviesDatasetSupervised <- moviesDatasetSupervised[!is.na(moviesDatasetSupervised[,7]),]
+moviesDatasetSupervised <- moviesDatasetSupervised[!is.na(moviesDatasetSupervised[,8]),]
+moviesDatasetSupervised <- moviesDatasetSupervised[!is.na(moviesDatasetSupervised[,9]),]
+moviesDatasetSupervised <- moviesDatasetSupervised[!is.na(moviesDatasetSupervised[,10]),]
+moviesDatasetSupervised <- moviesDatasetSupervised[!is.na(moviesDatasetSupervised[,11]),]
+moviesDatasetSupervised <- moviesDatasetSupervised[!is.na(moviesDatasetSupervised[,12]),]
+```
+
+Guardamos los datos procesados en un nuevo fichero para utilizarlos en el modelo no supervisado y se eliminan las filas con datos no definidos:
+
+```{r results='hide', message=FALSE, warning=FALSE}
+write.csv(moviesDatasetSupervised, "./movie_metadata_clean_supervised.csv", row.names=FALSE)
 ```
