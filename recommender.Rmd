@@ -77,41 +77,64 @@ En nuestro recomendador, en base al título de la película buscaremos las pel?c
 
 ```{r}
 
-# title of the film to recommend
-movie = "The Matrix"
-vec1 = subset(moviesRecommender, moviesRecommender$movie_title==movie)[1,]
-
-# get films with the same genres
-moviesRecommenderFiltered <- c()
-for(p in c(toString(vec1$actor_1_name), 
-           toString(vec1$actor_2_name), 
-           toString(vec1$actor_3_name), 
-           toString(vec1$director_name))){
-  print(p)
+get_movie_recommendations=function(title)
+{
+  # title of the film to recommend
+  movie = title
+  vec1 = subset(moviesRecommender, moviesRecommender$movie_title==movie)[1,]
   
-  moviesRecommenderFiltered <- rbind(moviesRecommenderFiltered,
-                                     subset(moviesRecommender, grepl(p, moviesRecommender$actor_1_name)))
-  moviesRecommenderFiltered <- rbind(moviesRecommenderFiltered,
-                                     subset(moviesRecommender, grepl(p, moviesRecommender$actor_2_name)))
-  moviesRecommenderFiltered <- rbind(moviesRecommenderFiltered,
-                                     subset(moviesRecommender, grepl(p, moviesRecommender$actor_3_name)))
-  moviesRecommenderFiltered <- rbind(moviesRecommenderFiltered,
-                                     subset(moviesRecommender, grepl(p, moviesRecommender$director_name)))
+  # get films with the same genres
+  moviesRecommenderFiltered <- c()
+  for(p in c(toString(vec1$actor_1_name), 
+             toString(vec1$actor_2_name), 
+             toString(vec1$actor_3_name), 
+             toString(vec1$director_name))){
+
+    moviesRecommenderFiltered <- rbind(moviesRecommenderFiltered,
+                                       subset(moviesRecommender, grepl(p, moviesRecommender$actor_1_name)))
+    moviesRecommenderFiltered <- rbind(moviesRecommenderFiltered,
+                                       subset(moviesRecommender, grepl(p, moviesRecommender$actor_2_name)))
+    moviesRecommenderFiltered <- rbind(moviesRecommenderFiltered,
+                                       subset(moviesRecommender, grepl(p, moviesRecommender$actor_3_name)))
+    moviesRecommenderFiltered <- rbind(moviesRecommenderFiltered,
+                                       subset(moviesRecommender, grepl(p, moviesRecommender$director_name)))
+  }
+  
+  # prepare films to recommend
+  col = colnames(moviesRecommenderFiltered)[9:length(colnames(moviesRecommenderFiltered))]
+  col = c("imdb_score", col)
+  features = moviesRecommenderFiltered[,col]
+  
+  # search similar films
+  sim <- apply(features, 1, function(x) sum(vec1[,col] * x,na.rm=T)/(sqrt(sum(vec1[,col]^2,na.rm=T))*sqrt(sum(x^2,na.rm=T))))
+  
+  # show recommendations
+  data <- cbind(moviesRecommenderFiltered, sim)
+  data = data[order(data$sim, data$movie_title, decreasing = T),]
+  data = subset(data, movie_title != movie)
+  
+  # add movie to recommend to the results
+  data$movie_title_recommend <- rep(vec1$movie_title, nrow(data)) 
+  data$title_year_recommend <- rep(vec1$title_year, nrow(data))  
+  data
 }
+```
 
-# prepare films to recommend
-col = colnames(moviesRecommenderFiltered)[9:length(colnames(moviesRecommenderFiltered))]
-col = c("imdb_score", col)
-features = moviesRecommenderFiltered[,col]
+Calcular las recomendaciones para todas las películas:
 
-# search similar films
-sim <- apply(features, 1, function(x) sum(vec1[,col] * x,na.rm=T)/(sqrt(sum(vec1[,col]^2,na.rm=T))*sqrt(sum(x^2,na.rm=T))))
+```{r}
 
-# show recommendations
-data <- cbind(moviesRecommenderFiltered, sim)
-data=data[order(data$sim, data$movie_title, decreasing = T),]
-data=subset(data,movie_title!=movie)
+all_recommendations <- c()
+for(t in moviesRecommender$movie_title){
+  recommendations <- get_movie_recommendations(t)
+  all_recommendations <- rbind(all_recommendations, recommendations)
+}
+all_recommendations
 
-subset(data, select=c("imdb_score", "movie_title", "title_year", "sim"))
+```
 
+Guardar los resultados:
+
+```{r results='hide', message=FALSE, warning=FALSE}
+write.csv(all_recommendations, "./movie_all_recommendations.csv", row.names = FALSE)
 ```
