@@ -236,7 +236,7 @@ Como curiosidad se puede ver cómo ha variado la duración de las películas a l
 
 \subsection{Análisis del género de las películas}
 
-Para saber si el género de las películas influye en el rating de las mismas se muestra a continuación cómo aquellos géneros menos populares son los que mayor puntuación reciben y el drama, que es el género más popular, se situa tras de estos, disponible en \href{https://public.tableau.com/profile/javier6580\#!/vizhome/proyecto_fin_de_master_dataset/rating_genre}{Tableau Public} y el script utilizado para dividir el género en \href{https://github.com/pozueco/proyecto_fin_de_master/blob/master/split_genres.md}{R Markdown}:
+Para saber si el género de las películas influye en el rating de las mismas se muestra a continuación cómo aquellos géneros menos populares son los que mayor puntuación reciben y el drama, que es el género más popular, se situa tras de estos, disponible en \href{https://public.tableau.com/profile/javier6580\#!/vizhome/proyecto_fin_de_master_genre/rating_genre}{Tableau Public} y el script utilizado para dividir el género en \href{https://github.com/pozueco/proyecto_fin_de_master/blob/master/split_genres.md}{R Markdown}:
 
 \begin{figure}[h]
 \centering
@@ -343,6 +343,8 @@ El segundo que se va a construir será un modelo de regresión Lasso\cite{glmnet
 \includegraphics[width=3.5in,clip,keepaspectratio]{./model_supervised_files/figure-markdown_github/unnamed-chunk-7-1}
 \end{figure}
 
+En ambos modelos se puede observar como la popularidad del primer actor y del director, junto con su número de películas es importante a la hora de predecir los resultados. También como la duración de las películas influye en gran medida en su calidad y como ciertos géneros como el de guerra, drama, crimen, animación o noticias, pueden llegar a explicar los resultados.
+
 \clearpage
 
 \section{Creación de un sistema de recomendación}
@@ -357,17 +359,17 @@ En nuestro caso dado el título de una película, vamos a obtener aquellas pelí
 
 \begin{figure}[h]
 \centering
-\includegraphics[width=4in,clip,keepaspectratio]{./images_latex/recommender1}
+\includegraphics[width=5in,clip,keepaspectratio]{./images_latex/recommender1}
 \end{figure}
 
 \begin{figure}[h]
 \centering
-\includegraphics[width=4in,clip,keepaspectratio]{./images_latex/recommender2}
+\includegraphics[width=5in,clip,keepaspectratio]{./images_latex/recommender2}
 \end{figure}
 
 \begin{figure}[h]
 \centering
-\includegraphics[width=4in,clip,keepaspectratio]{./images_latex/recommender3}
+\includegraphics[width=5in,clip,keepaspectratio]{./images_latex/recommender3}
 \end{figure}
 
 En el ejemplo anterior se pueden ver los resultados de nuestro recomendador para la película "The Matrix", en el que se muestra por order de similitud, las películas recomendadas con su título y año. 
@@ -376,7 +378,11 @@ En el ejemplo anterior se pueden ver los resultados de nuestro recomendador para
 
 \section{Conclusiones y próximos pasos}
 
-\blindtext
+En este trabajo hemos hemos analízado una base de datos de películas en IMDb para la creación de un modelo no supervisado y dos modelos de regresión supervisados. También se ha creado un sencillo recomendador que en base al título de una película, calcula las películas semejantes con algún actor o el director en común, en base a su puntuación en IMDb y a su genéro. 
+
+Se ha conseguido predecir la puntuación de las películas con un margen de error relativamente pequeño, utilizando parte de los atributos proporcionados. Sería interesante en primer lugar completar aquella información en el conjunto de datos que no está disponible y en segundo lugar mejorar ciertos datos como el presupuesto y la recaudación, ya que la moneda utilizada no se ha unificado y tampoco se ha tenido en cuenta la inflación. Además, para películas antiguas y determinados países, parece que también faltan datos.
+
+Con respecto al recomendador sólo se han tenido en cuenta películas con un reparto similar, pero también se podrían tener en cuenta el resto de atributos disponibles en el conjunto de datos. 
 
 \clearpage
 
