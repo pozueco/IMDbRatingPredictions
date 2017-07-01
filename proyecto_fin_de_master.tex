@@ -53,11 +53,11 @@ IMDb, Kaggle %IEEEtran, journal, \LaTeX, paper, template.
 
 Para intentar predecir si una película tendrá éxito vamos a analizar las características de una película conocidas antes de que esta vea la luz y que están disponibles a través de la página web IMDb. Utilizaremos una base de datos ya existente e intentaremos utilizar estas características para saber si tienen alguna relación con la puntuación otorgada por los usuarios del portal web. 
 
-En primer lugar cargaremos la información de esta base de datos y comprobaremos cuál es su calidad. También analizaremos su distribución a lo largo del tiempo y cómo influye el país, el género, el director o el reparto en la variabilidad de las puntuaciones.
+En primer lugar, cargaremos la información de esta base de datos y comprobaremos cuál es su calidad. También analizaremos su distribución a lo largo del tiempo y cómo influye el país, el género, el director o el reparto en la variabilidad de las puntuaciones.
 
-En base a esta información crearemos un modelo no supervisado que nos permita agrupar los datos de las películas si tener en cuenta su puntuación. A continuación crearemos varios modelos de regresión teniendo en cuenta su puntuación, para ver si somos capaces de predecir su éxito. Finalmente crearemos un sencillo recomendador, que dado el título de una película nos devuelva el título de películas similares que nos podrían llegar a gustar.
+En base a esta información crearemos un modelo no supervisado que nos permita agrupar los datos de las películas si tener en cuenta su puntuación. A continuación, crearemos varios modelos de regresión teniendo en cuenta su puntuación, para ver si somos capaces de predecir su éxito. Finalmente crearemos un sencillo recomendador, que dado el título de una película nos devuelva el título de películas similares que nos podrían llegar a gustar.
 
-El análisis de los datos que van a ser utilizados se realizará utilizando Tableau. Para la limpieza y transformacíon de los datos se utilizará R, lenguaje también utilizado para crear los modelos no supervisados y supervisados. También se utilizará R para crear el sistema de recomendacíon.  
+El análisis de los datos que van a ser utilizados se realizará utilizando Tableau. Para la limpieza y transformación de los datos se utilizará R, lenguaje también utilizado para crear los modelos no supervisados y supervisados. También se utilizará R para crear el sistema de recomendación.  
 
 \clearpage
 
@@ -79,10 +79,10 @@ A pesar IMDb sólo presenta su información a través de su portal web, hay trab
   \item Mediante el reconocimiento de imágenes, también se sabe para cada película el número de caras que aparecen en su póster.
 \end{itemize}
 
-A continuación se incluyen notas importantes del autor, sobre cada uno de los atributos extraídos de las películas, que deberemos  tener en cuenta en el análisis que se realizará más adelante:
+A continuación se incluyen notas importantes del autor, sobre cada uno de los atributos extraídos de las películas, que deberemos tener en cuenta en el análisis que se realizará más adelante:
 
 \begin{itemize}
-  \item En aproximadamente 800 películas las ganacias son 0, debido a que esta información no está disponible o porque la herramienta utilizada para extraer el dato no devolvió ninguna respuesta en un tiempo razonable.
+  \item En aproximadamente 800 películas las ganancias son 0, debido a que esta información no está disponible o porque la herramienta utilizada para extraer el dato no devolvió ninguna respuesta en un tiempo razonable.
   \item En 908 directores de las películas descargadas, el número de likes en Facebook es 0 debido, como en el caso anterior, a que los valores aparecen en un marco que no se carga junto con el resto de la página.
   \item Hay películas para las que no se ha tenido en cuenta la moneda del país que las ha producido, y aunque en los datos se muestran dólares, en realidad es la moneda del país correspondiente.
   \item Para calcular los actores principales de cada película, se han tenido en cuenta todos los actores y actrices del reparto, y aquellos tres con mayor número likes en Facebook, son considerados los principales.
@@ -185,7 +185,7 @@ Con respecto a los directores destaca Steven Spielberg como el actor mas prolíf
 
 \clearpage
 
-Para saber si influye el número de likes en la puntuacíon de las películas, podemos ver en los siguientes gráficos como es más importante en los actores tener más likes para obtener mejores resultados, y sobre todo el en actor principal de la película, como se puede ver en \href{https://public.tableau.com/profile/javier6580\#!/vizhome/proyecto_fin_de_master_dataset/likes_actors_rating}{Tableau Public}:
+Para saber si influye el número de likes en la puntuación de las películas, podemos ver en los siguientes gráficos como es más importante en los actores tener más likes para obtener mejores resultados, y sobre todo el en actor principal de la película, como se puede ver en \href{https://public.tableau.com/profile/javier6580\#!/vizhome/proyecto_fin_de_master_dataset/likes_actors_rating}{Tableau Public}:
 
 \begin{figure}[h]
 \centering
@@ -226,7 +226,7 @@ La combinación de estos dos factores nos muestra que una gran duración y presu
 
 \clearpage
 
-Como curiosidad se puede ver cómo ha variado la duración de las películas a lo largo del tiempo\cite{justgeek}, podemos representar los ragos de duración anualmente y ver como son cada vez más populares las películas con una duración de entre 90 y 120 minutos, disponible en \href{https://public.tableau.com/profile/javier6580\#!/vizhome/proyecto_fin_de_master_dataset/duration_year}{Tableau Public}:
+Como curiosidad se puede ver cómo ha variado la duración de las películas a lo largo del tiempo\cite{justgeek}, podemos representar los rangos de duración anualmente y ver como son cada vez más populares las películas con una duración de entre 90 y 120 minutos, disponible en \href{https://public.tableau.com/profile/javier6580\#!/vizhome/proyecto_fin_de_master_dataset/duration_year}{Tableau Public}:
 
 \begin{figure}[h]
 \centering
@@ -236,7 +236,7 @@ Como curiosidad se puede ver cómo ha variado la duración de las películas a l
 
 \subsection{Análisis del género de las películas}
 
-Para saber si el género de las películas influye en el rating de las mismas se muestra a continuación cómo aquellos géneros menos populares son los que mayor puntuación reciben y el drama, que es el género más popular, se situa tras de estos, disponible en \href{https://public.tableau.com/profile/javier6580\#!/vizhome/proyecto_fin_de_master_genre/rating_genre}{Tableau Public} y el script utilizado para dividir el género en \href{https://github.com/pozueco/proyecto_fin_de_master/blob/master/split_genres.md}{R Markdown}:
+Para saber si el género de las películas influye en el rating de las mismas se muestra a continuación cómo aquellos géneros menos populares son los que mayor puntuación reciben y el drama, que es el género más popular, se sitúa tras de estos, disponible en \href{https://public.tableau.com/profile/javier6580\#!/vizhome/proyecto_fin_de_master_genre/rating_genre}{Tableau Public} y el script utilizado para dividir el género en \href{https://github.com/pozueco/proyecto_fin_de_master/blob/master/split_genres.md}{R Markdown}:
 
 \begin{figure}[h]
 \centering
@@ -245,7 +245,7 @@ Para saber si el género de las películas influye en el rating de las mismas se
 
 \clearpage
 
-Es interesante también ver como han evolucionado los géneros más populares a lo largo del tiempo, para ver como la acción, el thriller o la comedia son cada vez más populares y otros como el drama y el romance, ya no tanto, como se puede ver en \href{https://public.tableau.com/profile/javier6580\#!/vizhome/proyecto_fin_de_master_genre/rating_genre}{Tableau Public}:
+Es interesante también ver cómo han evolucionado los géneros más populares a lo largo del tiempo, para ver como la acción, el thriller o la comedia son cada vez más populares y otros como el drama y el romance, ya no tanto, como se puede ver en \href{https://public.tableau.com/profile/javier6580\#!/vizhome/proyecto_fin_de_master_genre/rating_genre}{Tableau Public}:
 
 \begin{figure}[h]
 \centering
@@ -256,7 +256,7 @@ Es interesante también ver como han evolucionado los géneros más populares a 
 
 \section{Preparación y limpieza del dataset}
 
-En primer lugar se ha realizado un análisis de la calidad del dataset para saber la cantidad de datos no disponible para cada uno de los atributos. Como se puede ver en el anexo \ref{anexo:I}, el presupuesto de las películas y las ganancias en mayor medida, arrojan una mayor falta de datos que el resto de características del dataset. Como las ganancias es un dato conocido únicamente despues de haberse realizado la película, no será tenido en cuenta en la creación de los modelos detallados en la siguientes secciones. 
+En primer lugar se ha realizado un análisis de la calidad del dataset para saber la cantidad de datos no disponible para cada uno de los atributos. Como se puede ver en el anexo \ref{anexo:I}, el presupuesto de las películas y las ganancias en mayor medida, arrojan una mayor falta de datos que el resto de características del dataset. Como las ganancias es un dato conocido únicamente después de haberse realizado la película, no será tenido en cuenta en la creación de los modelos detallados en la siguientes secciones. 
 
 \subsection{Modelo no supervisado}
 
@@ -271,11 +271,10 @@ A continuación se seleccionan los datos para la construcción del modelo no sup
 
 \subsection{Modelo supervisado}
 
-Para la construción de los modelos de regresión se utilizarán las siguientes columnas y eliminándose como en el caso anterior las filas con datos no definidos y los países que no son USA, utilizando \href{https://github.com/pozueco/proyecto_fin_de_master/blob/master/clean_dataset.md}{R Markdown}. Cabe destacar, en base a \cite{cleansing}, que se ha creado una columna por género de la película con el valor 0 o 1 si la película pertenece a ese género, una columna con el valor 0 o 1 si la película es el blanco y negro o en color, y una columna para el director, el actor 1, el actor 2 y el actor 3, con el número de películas en las que participan:
+Para la construcción de los modelos de regresión se utilizarán las siguientes columnas y eliminándose como en el caso anterior las filas con datos no definidos y los países que no son USA, utilizando \href{https://github.com/pozueco/proyecto_fin_de_master/blob/master/clean_dataset.md}{R Markdown}. Cabe destacar, en base a \cite{cleansing}, que se ha creado una columna por género de la película con el valor 0 o 1 si la película pertenece a ese género, una columna con el valor 0 o 1 si la película es el blanco y negro o en color, y una columna para el director, el actor 1, el actor 2 y el actor 3, con el número de películas en las que participan:
 
 \begin{itemize}
-  \item Actor 1 Facebook Likes, Actor 2 Facebook Likes y Actor 3 Facebook Likes
-  \item Director Facebook Likes
+  \item Director Facebook Likes, Actor 1 Facebook Likes, Actor 2 Facebook Likes y Actor 3 Facebook Likes
   \item Duration
   \item Budget
   \item Title Year
@@ -283,8 +282,7 @@ Para la construción de los modelos de regresión se utilizarán las siguientes 
   \item Number Critic for Reviews
   \item Color
   \item Genre
-  \item Director Movies
-  \item Actor 1 Movies, Actor 2 Movies y Actor 3 Movies
+  \item Director Movies, Actor 1 Movies, Actor 2 Movies y Actor 3 Movies
 \end{itemize}
 
 \clearpage
@@ -322,7 +320,7 @@ Según la matriz de correlación anterior, existe una gran influencia entre los 
 
 \clearpage
 
-El primero de ellos será un modelo de regresión Ridge\cite{glmnet} que será optimizado para obtener el valor del parámetro lambda que hará que se obtengan los mejores resultados en cuanto al valor del error MSE, utilizando \href{https://github.com/pozueco/proyecto_fin_de_master/blob/master/model_supervised.md}{R Markdown}. En la primera imagen se pueden ver las diferentes curvas del modelo considerado con respecto a cada uno de los valores del parámetro a optimiar, y en la segunda imagen el error obtenido con cada valor del parámetro. El error del parámetro óptimo es $0.707641$:
+El primero de ellos será un modelo de regresión Ridge\cite{glmnet} que será optimizado para obtener el valor del parámetro lambda que hará que se obtengan los mejores resultados en cuanto al valor del error MSE, utilizando \href{https://github.com/pozueco/proyecto_fin_de_master/blob/master/model_supervised.md}{R Markdown}. En la primera imagen se pueden ver las diferentes curvas del modelo considerado con respecto a cada uno de los valores del parámetro a optimizar, y en la segunda imagen el error obtenido con cada valor del parámetro. El error del parámetro óptimo es $0.707641$:
 
 \begin{figure}[h]
 \centering
@@ -372,13 +370,13 @@ En nuestro caso dado el título de una película, vamos a obtener aquellas pelí
 \includegraphics[width=5in,clip,keepaspectratio]{./images_latex/recommender3}
 \end{figure}
 
-En el ejemplo anterior se pueden ver los resultados de nuestro recomendador para la película "The Matrix", en el que se muestra por order de similitud, las películas recomendadas con su título y año. 
+En el ejemplo anterior se pueden ver los resultados de nuestro recomendador para la película "The Matrix", en el que se muestra por orden de similitud, las películas recomendadas con su título y año. Se ha creado un dashboard con toda esta información disponible en \href{https://public.tableau.com/profile/javier6580\#!/vizhome/proyecto_fin_de_master_recommender/recommender}{Tableau Public}
 
 \clearpage
 
 \section{Conclusiones y próximos pasos}
 
-En este trabajo hemos hemos analízado una base de datos de películas en IMDb para la creación de un modelo no supervisado y dos modelos de regresión supervisados. También se ha creado un sencillo recomendador que en base al título de una película, calcula las películas semejantes con algún actor o el director en común, en base a su puntuación en IMDb y a su genéro. 
+En este trabajo hemos analizado una base de datos de películas en IMDb para la creación de un modelo no supervisado y dos modelos de regresión supervisados. También se ha creado un sencillo recomendador que en base al título de una película, calcula las películas semejantes con algún actor o el director en común, en base a su puntuación en IMDb y a su género.
 
 Se ha conseguido predecir la puntuación de las películas con un margen de error relativamente pequeño, utilizando parte de los atributos proporcionados. Sería interesante en primer lugar completar aquella información en el conjunto de datos que no está disponible y en segundo lugar mejorar ciertos datos como el presupuesto y la recaudación, ya que la moneda utilizada no se ha unificado y tampoco se ha tenido en cuenta la inflación. Además, para películas antiguas y determinados países, parece que también faltan datos.
 
