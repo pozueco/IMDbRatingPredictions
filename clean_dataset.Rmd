@@ -15,19 +15,22 @@ En primer lugar se cargan los datos se desde el directorio actual, almacenados e
 fileMovies <- file("./movie_metadata_original.csv","r") 
 moviesDataset <- read.csv(fileMovies) 
 close(fileMovies) 
-head(moviesDataset[,1:5])
+head(moviesDataset[,1:21])
 ```
 
 Seleccioneamos únicamente las columnas que serán tenidas en cuenta en el modelo no supervisado:
 
 ```{r}
+# filter columns from South Korea and Japan
+moviesDatasetClustering <- moviesDataset[moviesDataset[,21] == "USA",]
+
 # new data frame only with selected columns
-moviesDatasetClustering <- subset(moviesDataset, select=c("actor_1_facebook_likes", 
-                                                          "actor_2_facebook_likes", 
-                                                          "actor_3_facebook_likes",
-                                                          "director_facebook_likes",
-                                                          "duration",
-                                                          "budget"))
+moviesDatasetClustering <- subset(moviesDatasetClustering, select=c("actor_1_facebook_likes", 
+                                                                    "actor_2_facebook_likes", 
+                                                                    "actor_3_facebook_likes",
+                                                                    "director_facebook_likes",
+                                                                    "duration",
+                                                                    "budget"))
 
 # filter columns with NA values
 moviesDatasetClustering <- moviesDatasetClustering[!is.na(moviesDatasetClustering[,1]),]
@@ -36,6 +39,7 @@ moviesDatasetClustering <- moviesDatasetClustering[!is.na(moviesDatasetClusterin
 moviesDatasetClustering <- moviesDatasetClustering[!is.na(moviesDatasetClustering[,4]),]
 moviesDatasetClustering <- moviesDatasetClustering[!is.na(moviesDatasetClustering[,5]),]
 moviesDatasetClustering <- moviesDatasetClustering[!is.na(moviesDatasetClustering[,6]),]
+
 ```
 
 Guardamos los datos procesados en un nuevo fichero para utilizarlos en el modelo no supervisado y se eliminan las filas con datos no definidos:
@@ -48,6 +52,9 @@ Seleccioneamos únicamente las columnas que serán tenidas en cuenta en el model
 
 ```{r}
 # new data frame only with selected columns
+# filter columns from South Korea and Japan
+moviesDatasetSupervised <- moviesDataset[moviesDataset[,21] == "USA",]
+
 moviesDatasetSupervised <- subset(moviesDataset, select=c("imdb_score",
                                                           "actor_1_facebook_likes", 
                                                           "actor_2_facebook_likes", 

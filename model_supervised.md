@@ -35,13 +35,13 @@ Mostramos la matriz de correlación:
 ``` r
 # matriz de correlacion
 par(xpd = TRUE)
+png(height=2400, width=2400, pointsize=25, file="./model_supervised_files/figure-markdown_github/unnamed-chunk-3-1.png")
 corrplot(matCor, method = "shade", shade.col = NA, tl.col = "black",
          tl.srt = 40, col = col(200), addCoef.col="black",
          order="AOE",
-         mar = c(2,0,1,0), number.cex=0.2, tl.cex = 0.2)
+         mar = c(2,0,1,0), number.cex=0.6, tl.cex = 0.6)
+par(xpd = FALSE)
 ```
-
-![](model_supervised_files/figure-markdown_github/unnamed-chunk-3-1.png)
 
 Preparamos las entradas de los modelos de regresión:
 
@@ -80,7 +80,11 @@ movies_with_good_variables = moviesDatasetSupervised[, c("imdb_score",
                                                           "western_genre",
                                                           "filmnoir_genre",
                                                           "short_genre",
-                                                          "news_genre"
+                                                          "news_genre",
+                                                          "director_movies",
+                                                          "actor_1_movies",
+                                                          "actor_2_movies",
+                                                          "actor_3_movies"
                                                          )]
 x = as.matrix(movies_with_good_variables[, -1])
 y = movies_with_good_variables[, 1]
@@ -169,7 +173,7 @@ library("tabplot")
 
     ## Attaching package ff
 
-    ## - getOption("fftempdir")=="C:/Users/JAVIER~1.POZ/AppData/Local/Temp/RtmpsHIngh"
+    ## - getOption("fftempdir")=="C:/Users/JAVIER~1.POZ/AppData/Local/Temp/RtmpqKd6vs"
 
     ## - getOption("ffextension")=="ff"
 
@@ -267,1257 +271,1392 @@ library("glmnet")
 Calculamos el primer modelo en base a ridge regression:
 
 ``` r
-# Fitting the ridge regression. Alpha = 0 for ridge regression.
+# Crear modelo de regresion Ridge
 grid = 10^seq(5, -2, length = 100)
 ridge.models = glmnet(x, y, alpha = 0, lambda = grid)
-dim(coef(ridge.models)) #20 different coefficients, estimated 100 times --once each per lambda value.
+dim(coef(ridge.models)) 
 ```
 
-    ## [1]  35 100
+    ## [1]  39 100
 
 ``` r
-coef(ridge.models) #Inspecting the various coefficient estimates.
+coef(ridge.models) 
 ```
 
-    ## 35 x 100 sparse Matrix of class "dgCMatrix"
+    ## 39 x 100 sparse Matrix of class "dgCMatrix"
 
     ##    [[ suppressing 100 column names 's0', 's1', 's2' ... ]]
 
     ##                                                                  
-    ## (Intercept)              6.422798e+00  6.422869e+00  6.422952e+00
-    ## actor_1_facebook_likes   6.715634e-11  7.902887e-11  9.300163e-11
-    ## actor_2_facebook_likes   2.819704e-10  3.318187e-10  3.904856e-10
-    ## actor_3_facebook_likes   4.471952e-10  5.262524e-10  6.192950e-10
-    ## director_facebook_likes  7.489159e-10  8.813203e-10  1.037143e-09
-    ## duration                 1.942957e-07  2.286463e-07  2.690724e-07
-    ## budget                   1.824351e-15  2.146905e-15  2.526489e-15
-    ## title_year              -2.101525e-07 -2.473096e-07 -2.910361e-07
-    ## facenumber_in_poster    -3.719013e-07 -4.376559e-07 -5.150375e-07
-    ## num_critic_for_reviews   3.403499e-08  4.005274e-08  4.713440e-08
-    ## color                   -8.514477e-06 -1.001985e-05 -1.179143e-05
-    ## drama_genre              7.461276e-06  8.780424e-06  1.033286e-05
-    ## comedy_genre            -4.479345e-06 -5.271320e-06 -6.203316e-06
-    ## thriller_genre          -1.853903e-06 -2.181667e-06 -2.567408e-06
-    ## action_genre            -2.805149e-06 -3.301120e-06 -3.884789e-06
-    ## romance_genre            3.221520e-07  3.790977e-07  4.461200e-07
-    ## adventure_genre          5.913625e-08  6.960804e-08  8.191746e-08
-    ## crime_genre              1.278770e-06  1.504861e-06  1.770933e-06
-    ## scifi_genre             -2.254739e-06 -2.653367e-06 -3.122499e-06
-    ## fantasy_genre           -2.058413e-06 -2.422322e-06 -2.850597e-06
-    ## horror_genre            -7.311018e-06 -8.603647e-06 -1.012483e-05
-    ## family_genre            -2.624406e-06 -3.088407e-06 -3.634445e-06
-    ## mystery_genre            1.411871e-07  1.661669e-07  1.955475e-07
-    ## biography_genre          8.550873e-06  1.006268e-05  1.184181e-05
-    ## animation_genre          1.996533e-06  2.349571e-06  2.765035e-06
-    ## music_genre              3.606953e-07  4.244629e-07  4.995086e-07
-    ## war_genre                7.451102e-06  8.768464e-06  1.031876e-05
-    ## history_genre            7.449465e-06  8.766554e-06  1.031650e-05
-    ## sport_genre              1.709737e-06  2.012025e-06  2.367757e-06
-    ## musical_genre            1.307173e-06  1.538292e-06  1.810272e-06
-    ## documentary_genre        7.224995e-06  8.502455e-06  1.000579e-05
-    ## western_genre            3.284980e-06  3.865779e-06  4.549261e-06
-    ## filmnoir_genre           1.442877e-05  1.697987e-05  1.998201e-05
-    ## short_genre              7.528299e-06  8.859432e-06  1.042594e-05
-    ## news_genre               1.308581e-05  1.539950e-05  1.812227e-05
+    ## (Intercept)              6.422792e+00  6.422862e+00  6.422944e+00
+    ## actor_1_facebook_likes   6.715634e-11  7.902773e-11  9.300004e-11
+    ## actor_2_facebook_likes   2.819704e-10  3.318142e-10  3.904794e-10
+    ## actor_3_facebook_likes   4.471952e-10  5.262450e-10  6.192847e-10
+    ## director_facebook_likes  7.489159e-10  8.813127e-10  1.037133e-09
+    ## duration                 1.942957e-07  2.286456e-07  2.690714e-07
+    ## budget                   1.824351e-15  2.146892e-15  2.526472e-15
+    ## title_year              -2.101525e-07 -2.473095e-07 -2.910360e-07
+    ## facenumber_in_poster    -3.719013e-07 -4.376566e-07 -5.150384e-07
+    ## num_critic_for_reviews   3.403499e-08  4.005260e-08  4.713421e-08
+    ## color                   -8.514477e-06 -1.001986e-05 -1.179145e-05
+    ## drama_genre              7.461276e-06  8.780421e-06  1.033286e-05
+    ## comedy_genre            -4.479345e-06 -5.271315e-06 -6.203309e-06
+    ## thriller_genre          -1.853903e-06 -2.181679e-06 -2.567424e-06
+    ## action_genre            -2.805149e-06 -3.301134e-06 -3.884809e-06
+    ## romance_genre            3.221520e-07  3.791015e-07  4.461252e-07
+    ## adventure_genre          5.913625e-08  6.959692e-08  8.190206e-08
+    ## crime_genre              1.278770e-06  1.504846e-06  1.770912e-06
+    ## scifi_genre             -2.254739e-06 -2.653369e-06 -3.122501e-06
+    ## fantasy_genre           -2.058413e-06 -2.422329e-06 -2.850606e-06
+    ## horror_genre            -7.311018e-06 -8.603629e-06 -1.012481e-05
+    ## family_genre            -2.624406e-06 -3.088401e-06 -3.634436e-06
+    ## mystery_genre            1.411871e-07  1.661589e-07  1.955364e-07
+    ## biography_genre          8.550873e-06  1.006268e-05  1.184180e-05
+    ## animation_genre          1.996533e-06  2.349583e-06  2.765051e-06
+    ## music_genre              3.606953e-07  4.244837e-07  4.995375e-07
+    ## war_genre                7.451102e-06  8.768461e-06  1.031876e-05
+    ## history_genre            7.449465e-06  8.766549e-06  1.031649e-05
+    ## sport_genre              1.709737e-06  2.012019e-06  2.367749e-06
+    ## musical_genre            1.307173e-06  1.538312e-06  1.810300e-06
+    ## documentary_genre        7.224995e-06  8.502503e-06  1.000585e-05
+    ## western_genre            3.284980e-06  3.865776e-06  4.549256e-06
+    ## filmnoir_genre           1.442877e-05  1.697990e-05  1.998205e-05
+    ## short_genre              7.528299e-06  8.859473e-06  1.042600e-05
+    ## news_genre               1.308581e-05  1.539956e-05  1.812235e-05
+    ## director_movies          6.111109e-07  7.191567e-07  8.463067e-07
+    ## actor_1_movies           1.879664e-07  2.211991e-07  2.603078e-07
+    ## actor_2_movies           3.217673e-07  3.786554e-07  4.456010e-07
+    ## actor_3_movies           3.222509e-07  3.792241e-07  4.462691e-07
     ##                                                                  
-    ## (Intercept)              6.423050e+00  6.423166e+00  6.423301e+00
-    ## actor_1_facebook_likes   1.094447e-10  1.287949e-10  1.515661e-10
-    ## actor_2_facebook_likes   4.595245e-10  5.407690e-10  6.363765e-10
-    ## actor_3_facebook_likes   7.287865e-10  8.576347e-10  1.009261e-09
-    ## director_facebook_likes  1.220516e-09  1.436308e-09  1.690251e-09
-    ## duration                 3.166459e-07  3.726302e-07  4.385123e-07
-    ## budget                   2.973184e-15  3.498851e-15  4.117453e-15
-    ## title_year              -3.424937e-07 -4.030493e-07 -4.743112e-07
-    ## facenumber_in_poster    -6.061005e-07 -7.132640e-07 -8.393743e-07
-    ## num_critic_for_reviews   5.546814e-08  6.527531e-08  7.681641e-08
-    ## color                   -1.387623e-05 -1.632962e-05 -1.921675e-05
-    ## drama_genre              1.215977e-05  1.430967e-05  1.683966e-05
-    ## comedy_genre            -7.300085e-06 -8.590757e-06 -1.010961e-05
-    ## thriller_genre          -3.021351e-06 -3.555555e-06 -4.184209e-06
-    ## action_genre            -4.571654e-06 -5.379960e-06 -6.331179e-06
-    ## romance_genre            5.249900e-07  6.178016e-07  7.270185e-07
-    ## adventure_genre          9.640406e-08  1.134531e-07  1.335180e-07
-    ## crime_genre              2.084046e-06  2.452519e-06  2.886138e-06
-    ## scifi_genre             -3.674573e-06 -4.324252e-06 -5.088791e-06
-    ## fantasy_genre           -3.354588e-06 -3.947680e-06 -4.645622e-06
-    ## horror_genre            -1.191497e-05 -1.402160e-05 -1.650067e-05
-    ## family_genre            -4.277017e-06 -5.033187e-06 -5.923036e-06
-    ## mystery_genre            2.301230e-07  2.708120e-07  3.186956e-07
-    ## biography_genre          1.393548e-05  1.639930e-05  1.929870e-05
-    ## animation_genre          3.253968e-06  3.829368e-06  4.506527e-06
-    ## music_genre              5.878216e-07  6.917471e-07  8.140447e-07
-    ## war_genre                1.214314e-05  1.429005e-05  1.681650e-05
-    ## history_genre            1.214046e-05  1.428687e-05  1.681273e-05
-    ## sport_genre              2.786380e-06  3.279009e-06  3.858729e-06
-    ## musical_genre            2.130338e-06  2.506991e-06  2.950235e-06
-    ## documentary_genre        1.177492e-05  1.385686e-05  1.630691e-05
-    ## western_genre            5.353576e-06  6.300086e-06  7.413924e-06
-    ## filmnoir_genre           2.351493e-05  2.767244e-05  3.256499e-05
-    ## short_genre              1.226945e-05  1.443894e-05  1.699206e-05
-    ## news_genre               2.132643e-05  2.509709e-05  2.953442e-05
+    ## (Intercept)              6.423041e+00  6.423154e+00  6.423288e+00
+    ## actor_1_facebook_likes   1.094425e-10  1.287919e-10  1.515619e-10
+    ## actor_2_facebook_likes   4.595159e-10  5.407571e-10  6.363601e-10
+    ## actor_3_facebook_likes   7.287723e-10  8.576150e-10  1.009234e-09
+    ## director_facebook_likes  1.220501e-09  1.436288e-09  1.690223e-09
+    ## duration                 3.166445e-07  3.726284e-07  4.385097e-07
+    ## budget                   2.973159e-15  3.498817e-15  4.117406e-15
+    ## title_year              -3.424936e-07 -4.030492e-07 -4.743111e-07
+    ## facenumber_in_poster    -6.061018e-07 -7.132658e-07 -8.393768e-07
+    ## num_critic_for_reviews   5.546788e-08  6.527494e-08  7.681590e-08
+    ## color                   -1.387625e-05 -1.632964e-05 -1.921678e-05
+    ## drama_genre              1.215976e-05  1.430966e-05  1.683965e-05
+    ## comedy_genre            -7.300075e-06 -8.590743e-06 -1.010959e-05
+    ## thriller_genre          -3.021374e-06 -3.555586e-06 -4.184253e-06
+    ## action_genre            -4.571681e-06 -5.379999e-06 -6.331232e-06
+    ## romance_genre            5.249972e-07  6.178117e-07  7.270324e-07
+    ## adventure_genre          9.638274e-08  1.134235e-07  1.334771e-07
+    ## crime_genre              2.084018e-06  2.452481e-06  2.886085e-06
+    ## scifi_genre             -3.674576e-06 -4.324257e-06 -5.088797e-06
+    ## fantasy_genre           -3.354601e-06 -3.947697e-06 -4.645646e-06
+    ## horror_genre            -1.191493e-05 -1.402155e-05 -1.650060e-05
+    ## family_genre            -4.277005e-06 -5.033172e-06 -5.923014e-06
+    ## mystery_genre            2.301076e-07  2.707907e-07  3.186661e-07
+    ## biography_genre          1.393547e-05  1.639929e-05  1.929867e-05
+    ## animation_genre          3.253991e-06  3.829399e-06  4.506571e-06
+    ## music_genre              5.878616e-07  6.918025e-07  8.141214e-07
+    ## war_genre                1.214313e-05  1.429004e-05  1.681649e-05
+    ## history_genre            1.214045e-05  1.428686e-05  1.681271e-05
+    ## sport_genre              2.786368e-06  3.278993e-06  3.858706e-06
+    ## musical_genre            2.130376e-06  2.507044e-06  2.950308e-06
+    ## documentary_genre        1.177501e-05  1.385699e-05  1.630709e-05
+    ## western_genre            5.353570e-06  6.300078e-06  7.413913e-06
+    ## filmnoir_genre           2.351498e-05  2.767252e-05  3.256509e-05
+    ## short_genre              1.226953e-05  1.443905e-05  1.699221e-05
+    ## news_genre               2.132654e-05  2.509725e-05  2.953464e-05
+    ## director_movies          9.959362e-07  1.172019e-06  1.379231e-06
+    ## actor_1_movies           3.063305e-07  3.604895e-07  4.242229e-07
+    ## actor_2_movies           5.243815e-07  6.170885e-07  7.261834e-07
+    ## actor_3_movies           5.251660e-07  6.180094e-07  7.272639e-07
     ##                                                                  
-    ## (Intercept)              6.423461e+00  6.423649e+00  6.423870e+00
-    ## actor_1_facebook_likes   1.783630e-10  2.098972e-10  2.470060e-10
-    ## actor_2_facebook_likes   7.488860e-10  8.812848e-10  1.037088e-09
-    ## actor_3_facebook_likes   1.187691e-09  1.397663e-09  1.644750e-09
-    ## director_facebook_likes  1.989089e-09  2.340758e-09  2.754597e-09
-    ## duration                 5.160419e-07  6.072778e-07  7.146428e-07
-    ## budget                   4.845417e-15  5.702074e-15  6.710170e-15
-    ## title_year              -5.581724e-07 -6.568601e-07 -7.729956e-07
-    ## facenumber_in_poster    -9.877811e-07 -1.162426e-06 -1.367948e-06
-    ## num_critic_for_reviews   9.039797e-08  1.063807e-07  1.251891e-07
-    ## color                   -2.261432e-05 -2.661254e-05 -3.131760e-05
-    ## drama_genre              1.981694e-05  2.332057e-05  2.744359e-05
-    ## comedy_genre            -1.189697e-05 -1.400031e-05 -1.647547e-05
-    ## thriller_genre          -4.924014e-06 -5.794619e-06 -6.819150e-06
-    ## action_genre            -7.450575e-06 -8.767881e-06 -1.031809e-05
-    ## romance_genre            8.555394e-07  1.006775e-06  1.184737e-06
-    ## adventure_genre          1.571325e-07  1.849250e-07  2.176353e-07
-    ## crime_genre              3.396421e-06  3.996918e-06  4.703579e-06
-    ## scifi_genre             -5.988494e-06 -7.047253e-06 -8.293184e-06
-    ## fantasy_genre           -5.466948e-06 -6.433465e-06 -7.570833e-06
-    ## horror_genre            -1.941803e-05 -2.285116e-05 -2.689122e-05
-    ## family_genre            -6.970190e-06 -8.202452e-06 -9.652534e-06
-    ## mystery_genre            3.750458e-07  4.413597e-07  5.193994e-07
-    ## biography_genre          2.271066e-05  2.672580e-05  3.145072e-05
-    ## animation_genre          5.303448e-06  6.241317e-06  7.345073e-06
-    ## music_genre              9.579614e-07  1.127318e-06  1.326611e-06
-    ## war_genre                1.978959e-05  2.328826e-05  2.740538e-05
-    ## history_genre            1.978510e-05  2.328290e-05  2.739898e-05
-    ## sport_genre              4.540930e-06  5.343728e-06  6.288433e-06
-    ## musical_genre            3.471841e-06  4.085660e-06  4.807994e-06
-    ## documentary_genre        1.919015e-05  2.258318e-05  2.657613e-05
-    ## western_genre            8.724667e-06  1.026712e-05  1.208222e-05
-    ## filmnoir_genre           3.832248e-05  4.509782e-05  5.307092e-05
-    ## short_genre              1.999666e-05  2.353259e-05  2.769382e-05
-    ## news_genre               3.475627e-05  4.090133e-05  4.813281e-05
+    ## (Intercept)              6.423445e+00  6.423630e+00  6.423848e+00
+    ## actor_1_facebook_likes   1.783571e-10  2.098891e-10  2.469948e-10
+    ## actor_2_facebook_likes   7.488632e-10  8.812533e-10  1.037045e-09
+    ## actor_3_facebook_likes   1.187653e-09  1.397610e-09  1.644677e-09
+    ## director_facebook_likes  1.989050e-09  2.340705e-09  2.754523e-09
+    ## duration                 5.160383e-07  6.072728e-07  7.146359e-07
+    ## budget                   4.845352e-15  5.701983e-15  6.710045e-15
+    ## title_year              -5.581722e-07 -6.568598e-07 -7.729951e-07
+    ## facenumber_in_poster    -9.877845e-07 -1.162431e-06 -1.367955e-06
+    ## num_critic_for_reviews   9.039726e-08  1.063797e-07  1.251878e-07
+    ## color                   -2.261436e-05 -2.661260e-05 -3.131768e-05
+    ## drama_genre              1.981693e-05  2.332055e-05  2.744357e-05
+    ## comedy_genre            -1.189694e-05 -1.400027e-05 -1.647542e-05
+    ## thriller_genre          -4.924075e-06 -5.794703e-06 -6.819267e-06
+    ## action_genre            -7.450648e-06 -8.767983e-06 -1.031823e-05
+    ## romance_genre            8.555586e-07  1.006801e-06  1.184774e-06
+    ## adventure_genre          1.570758e-07  1.848466e-07  2.175266e-07
+    ## crime_genre              3.396346e-06  3.996815e-06  4.703437e-06
+    ## scifi_genre             -5.988503e-06 -7.047266e-06 -8.293202e-06
+    ## fantasy_genre           -5.466981e-06 -6.433510e-06 -7.570895e-06
+    ## horror_genre            -1.941794e-05 -2.285103e-05 -2.689104e-05
+    ## family_genre            -6.970160e-06 -8.202410e-06 -9.652476e-06
+    ## mystery_genre            3.750049e-07  4.413032e-07  5.193210e-07
+    ## biography_genre          2.271063e-05  2.672576e-05  3.145066e-05
+    ## animation_genre          5.303508e-06  6.241401e-06  7.345189e-06
+    ## music_genre              9.580677e-07  1.127465e-06  1.326814e-06
+    ## war_genre                1.978958e-05  2.328823e-05  2.740535e-05
+    ## history_genre            1.978508e-05  2.328287e-05  2.739894e-05
+    ## sport_genre              4.540899e-06  5.343685e-06  6.288373e-06
+    ## musical_genre            3.471941e-06  4.085800e-06  4.808188e-06
+    ## documentary_genre        1.919039e-05  2.258351e-05  2.657659e-05
+    ## western_genre            8.724651e-06  1.026709e-05  1.208219e-05
+    ## filmnoir_genre           3.832263e-05  4.509802e-05  5.307120e-05
+    ## short_genre              1.999687e-05  2.353287e-05  2.769421e-05
+    ## news_genre               3.475657e-05  4.090174e-05  4.813338e-05
+    ## director_movies          1.623075e-06  1.910026e-06  2.247703e-06
+    ## actor_1_movies           4.992232e-07  5.874815e-07  6.913409e-07
+    ## actor_2_movies           8.545622e-07  1.005633e-06  1.183404e-06
+    ## actor_3_movies           8.558294e-07  1.007118e-06  1.185143e-06
     ##                                                                  
-    ## (Intercept)              6.424130e+00  6.424436e+00  6.424797e+00
-    ## actor_1_facebook_likes   2.906747e-10  3.420628e-10  4.025343e-10
-    ## actor_2_facebook_likes   1.220432e-09  1.436185e-09  1.690071e-09
-    ## actor_3_facebook_likes   1.935510e-09  2.277661e-09  2.680281e-09
-    ## director_facebook_likes  3.241593e-09  3.814678e-09  4.489065e-09
-    ## duration                 8.409877e-07  9.896672e-07  1.164628e-06
-    ## budget                   7.896473e-15  9.292475e-15  1.093524e-14
-    ## title_year              -9.096632e-07 -1.070492e-06 -1.259754e-06
-    ## facenumber_in_poster    -1.609806e-06 -1.894422e-06 -2.229355e-06
-    ## num_critic_for_reviews   1.473228e-07  1.733693e-07  2.040206e-07
-    ## color                   -3.685443e-05 -4.337006e-05 -5.103745e-05
-    ## drama_genre              3.229548e-05  3.800506e-05  4.472392e-05
-    ## comedy_genre            -1.938817e-05 -2.281573e-05 -2.684913e-05
-    ## thriller_genre          -8.024821e-06 -9.443655e-06 -1.111334e-05
-    ## action_genre            -1.214236e-05 -1.428916e-05 -1.681549e-05
-    ## romance_genre            1.394147e-06  1.640558e-06  1.930503e-06
-    ## adventure_genre          2.561342e-07  3.014473e-07  3.547822e-07
-    ## crime_genre              5.535171e-06  6.513775e-06  7.665377e-06
-    ## scifi_genre             -9.759369e-06 -1.148474e-05 -1.351509e-05
-    ## fantasy_genre           -8.909246e-06 -1.048423e-05 -1.233758e-05
-    ## horror_genre            -3.164550e-05 -3.724024e-05 -4.382397e-05
-    ## family_genre            -1.135893e-05 -1.336692e-05 -1.572979e-05
-    ## mystery_genre            6.112381e-07  7.193160e-07  8.465048e-07
-    ## biography_genre          3.701085e-05  4.355381e-05  5.125325e-05
-    ## animation_genre          8.644070e-06  1.017286e-05  1.197212e-05
-    ## music_genre              1.561129e-06  1.837096e-06  2.161834e-06
-    ## war_genre                3.225026e-05  3.795149e-05  4.466039e-05
-    ## history_genre            3.224260e-05  3.794231e-05  4.464933e-05
-    ## sport_genre              7.400123e-06  8.708305e-06  1.024769e-05
-    ## musical_genre            5.658023e-06  6.658314e-06  7.835425e-06
-    ## documentary_genre        3.127506e-05  3.680481e-05  4.331226e-05
-    ## western_genre            1.421816e-05  1.673164e-05  1.968934e-05
-    ## filmnoir_genre           6.245347e-05  7.349457e-05  8.648734e-05
-    ## short_genre              3.259095e-05  3.835416e-05  4.513665e-05
-    ## news_genre               5.664276e-05  6.665718e-05  7.844199e-05
+    ## (Intercept)              6.424105e+00  6.424407e+00  6.424762e+00
+    ## actor_1_facebook_likes   2.906592e-10  3.420413e-10  4.025046e-10
+    ## actor_2_facebook_likes   1.220372e-09  1.436101e-09  1.689955e-09
+    ## actor_3_facebook_likes   1.935410e-09  2.277522e-09  2.680089e-09
+    ## director_facebook_likes  3.241491e-09  3.814536e-09  4.488868e-09
+    ## duration                 8.409783e-07  9.896541e-07  1.164610e-06
+    ## budget                   7.896299e-15  9.292235e-15  1.093490e-14
+    ## title_year              -9.096625e-07 -1.070492e-06 -1.259753e-06
+    ## facenumber_in_poster    -1.609815e-06 -1.894434e-06 -2.229372e-06
+    ## num_critic_for_reviews   1.473209e-07  1.733667e-07  2.040170e-07
+    ## color                   -3.685455e-05 -4.337021e-05 -5.103767e-05
+    ## drama_genre              3.229545e-05  3.800502e-05  4.472386e-05
+    ## comedy_genre            -1.938810e-05 -2.281563e-05 -2.684899e-05
+    ## thriller_genre          -8.024983e-06 -9.443879e-06 -1.111365e-05
+    ## action_genre            -1.214256e-05 -1.428943e-05 -1.681587e-05
+    ## romance_genre            1.394198e-06  1.640629e-06  1.930601e-06
+    ## adventure_genre          2.559838e-07  3.012390e-07  3.544937e-07
+    ## crime_genre              5.534973e-06  6.513501e-06  7.664998e-06
+    ## scifi_genre             -9.759394e-06 -1.148477e-05 -1.351514e-05
+    ## fantasy_genre           -8.909332e-06 -1.048435e-05 -1.233774e-05
+    ## horror_genre            -3.164526e-05 -3.723990e-05 -4.382350e-05
+    ## family_genre            -1.135885e-05 -1.336681e-05 -1.572964e-05
+    ## mystery_genre            6.111296e-07  7.191658e-07  8.462968e-07
+    ## biography_genre          3.701077e-05  4.355370e-05  5.125309e-05
+    ## animation_genre          8.644231e-06  1.017308e-05  1.197243e-05
+    ## music_genre              1.561411e-06  1.837486e-06  2.162375e-06
+    ## war_genre                3.225022e-05  3.795144e-05  4.466032e-05
+    ## history_genre            3.224254e-05  3.794222e-05  4.464921e-05
+    ## sport_genre              7.400041e-06  8.708191e-06  1.024753e-05
+    ## musical_genre            5.658290e-06  6.658685e-06  7.835939e-06
+    ## documentary_genre        3.127570e-05  3.680570e-05  4.331349e-05
+    ## western_genre            1.421812e-05  1.673158e-05  1.968926e-05
+    ## filmnoir_genre           6.245386e-05  7.349511e-05  8.648808e-05
+    ## short_genre              3.259150e-05  3.835492e-05  4.513771e-05
+    ## news_genre               5.664354e-05  6.665826e-05  7.844349e-05
+    ## director_movies          2.645069e-06  3.112674e-06  3.662928e-06
+    ## actor_1_movies           8.135584e-07  9.573779e-07  1.126616e-06
+    ## actor_2_movies           1.392594e-06  1.638751e-06  1.928405e-06
+    ## actor_3_movies           1.394628e-06  1.641129e-06  1.931181e-06
     ##                                                                  
-    ## (Intercept)              6.425221e+00  6.425720e+00  6.426307e+00
-    ## actor_1_facebook_likes   4.736943e-10  5.574314e-10  6.559672e-10
-    ## actor_2_facebook_likes   1.988828e-09  2.340384e-09  2.754063e-09
-    ## actor_3_facebook_likes   3.154052e-09  3.711539e-09  4.367525e-09
-    ## director_facebook_likes  5.282655e-09  6.216512e-09  7.315416e-09
-    ## duration                 1.370516e-06  1.612794e-06  1.897892e-06
-    ## budget                   1.286835e-14  1.514313e-14  1.781993e-14
-    ## title_year              -1.482475e-06 -1.744567e-06 -2.052990e-06
-    ## facenumber_in_poster    -2.623499e-06 -3.087320e-06 -3.633133e-06
-    ## num_critic_for_reviews   2.400903e-07  2.825363e-07  3.324853e-07
-    ## color                   -6.006017e-05 -7.067771e-05 -8.317186e-05
-    ## drama_genre              5.263041e-05  6.193439e-05  7.288276e-05
-    ## comedy_genre            -3.159542e-05 -3.718054e-05 -4.375266e-05
-    ## thriller_genre          -1.307821e-05 -1.539046e-05 -1.811149e-05
-    ## action_genre            -1.978845e-05 -2.328697e-05 -2.740396e-05
-    ## romance_genre            2.271665e-06  2.673081e-06  3.145379e-06
-    ## adventure_genre          4.175609e-07  4.914584e-07  5.784480e-07
-    ## crime_genre              9.020554e-06  1.061528e-05  1.249190e-05
-    ## scifi_genre             -1.590432e-05 -1.871585e-05 -2.202427e-05
-    ## fantasy_genre           -1.451848e-05 -1.708477e-05 -2.010454e-05
-    ## horror_genre            -5.157149e-05 -6.068844e-05 -7.141680e-05
-    ## family_genre            -1.851024e-05 -2.178200e-05 -2.563184e-05
-    ## mystery_genre            9.961842e-07  1.172331e-06  1.379627e-06
-    ## biography_genre          6.031350e-05  7.097498e-05  8.352050e-05
-    ## animation_genre          1.408973e-05  1.658207e-05  1.951550e-05
-    ## music_genre              2.543959e-06  2.993604e-06  3.522692e-06
-    ## war_genre                5.255498e-05  6.184468e-05  7.277590e-05
-    ## history_genre            5.254162e-05  6.182848e-05  7.275618e-05
-    ## sport_genre              1.205913e-05  1.419067e-05  1.669883e-05
-    ## musical_genre            9.220603e-06  1.085061e-05  1.276871e-05
-    ## documentary_genre        5.097028e-05  5.998229e-05  7.058767e-05
-    ## western_genre            2.316975e-05  2.726519e-05  3.208428e-05
-    ## filmnoir_genre           1.017766e-04  1.197682e-04  1.409394e-04
-    ## short_genre              5.311877e-05  6.251277e-05  7.356850e-05
-    ## news_genre               9.231013e-05  1.086298e-04  1.278343e-04
+    ## (Intercept)              6.425180e+00  6.425671e+00  6.426250e+00
+    ## actor_1_facebook_likes   4.736532e-10  5.573744e-10  6.558883e-10
+    ## actor_2_facebook_likes   1.988668e-09  2.340162e-09  2.753756e-09
+    ## actor_3_facebook_likes   3.153785e-09  3.711170e-09  4.367013e-09
+    ## director_facebook_likes  5.282382e-09  6.216134e-09  7.314893e-09
+    ## duration                 1.370491e-06  1.612759e-06  1.897843e-06
+    ## budget                   1.286789e-14  1.514250e-14  1.781904e-14
+    ## title_year              -1.482473e-06 -1.744565e-06 -2.052987e-06
+    ## facenumber_in_poster    -2.623523e-06 -3.087354e-06 -3.633180e-06
+    ## num_critic_for_reviews   2.400853e-07  2.825294e-07  3.324758e-07
+    ## color                   -6.006047e-05 -7.067813e-05 -8.317244e-05
+    ## drama_genre              5.263033e-05  6.193428e-05  7.288261e-05
+    ## comedy_genre            -3.159523e-05 -3.718028e-05 -4.375230e-05
+    ## thriller_genre          -1.307864e-05 -1.539105e-05 -1.811231e-05
+    ## action_genre            -1.978897e-05 -2.328769e-05 -2.740495e-05
+    ## romance_genre            2.271800e-06  2.673269e-06  3.145639e-06
+    ## adventure_genre          4.171615e-07  4.909053e-07  5.776821e-07
+    ## crime_genre              9.020029e-06  1.061456e-05  1.249089e-05
+    ## scifi_genre             -1.590439e-05 -1.871594e-05 -2.202440e-05
+    ## fantasy_genre           -1.451870e-05 -1.708509e-05 -2.010498e-05
+    ## horror_genre            -5.157084e-05 -6.068754e-05 -7.141555e-05
+    ## family_genre            -1.851002e-05 -2.178171e-05 -2.563143e-05
+    ## mystery_genre            9.958961e-07  1.171932e-06  1.379075e-06
+    ## biography_genre          6.031329e-05  7.097468e-05  8.352009e-05
+    ## animation_genre          1.409016e-05  1.658266e-05  1.951632e-05
+    ## music_genre              2.544708e-06  2.994642e-06  3.524128e-06
+    ## war_genre                5.255487e-05  6.184453e-05  7.277570e-05
+    ## history_genre            5.254144e-05  6.182824e-05  7.275585e-05
+    ## sport_genre              1.205891e-05  1.419036e-05  1.669841e-05
+    ## musical_genre            9.221314e-06  1.085160e-05  1.277007e-05
+    ## documentary_genre        5.097199e-05  5.998465e-05  7.059094e-05
+    ## western_genre            2.316964e-05  2.726504e-05  3.208407e-05
+    ## filmnoir_genre           1.017776e-04  1.197696e-04  1.409414e-04
+    ## short_genre              5.312024e-05  6.251480e-05  7.357130e-05
+    ## news_genre               9.231220e-05  1.086327e-04  1.278382e-04
+    ## director_movies          4.310434e-06  5.072372e-06  5.968952e-06
+    ## actor_1_movies           1.325762e-06  1.560100e-06  1.835844e-06
+    ## actor_2_movies           2.269236e-06  2.670278e-06  3.142158e-06
+    ## actor_3_movies           2.272472e-06  2.674043e-06  3.146528e-06
     ##                                                                  
-    ## (Intercept)              6.426998e+00  6.427812e+00  6.428769e+00
-    ## actor_1_facebook_likes   7.719159e-10  9.083526e-10  1.068895e-09
-    ## actor_2_facebook_likes   3.240836e-09  3.813607e-09  4.487557e-09
-    ## actor_3_facebook_likes   5.139398e-09  6.047608e-09  7.116211e-09
-    ## director_facebook_likes  8.608523e-09  1.013014e-08  1.192060e-08
-    ## duration                 2.233374e-06  2.628140e-06  3.092658e-06
-    ## budget                   2.096974e-14  2.467612e-14  2.903731e-14
-    ## title_year              -2.415932e-06 -2.843026e-06 -3.345609e-06
-    ## facenumber_in_poster    -4.275429e-06 -5.031257e-06 -5.920678e-06
-    ## num_critic_for_reviews   3.912634e-07  4.604305e-07  5.418221e-07
-    ## color                   -9.787415e-05 -1.151747e-04 -1.355322e-04
-    ## drama_genre              8.576603e-05  1.009260e-04  1.187646e-04
-    ## comedy_genre            -5.148611e-05 -6.058594e-05 -7.129338e-05
-    ## thriller_genre          -2.131356e-05 -2.508169e-05 -2.951593e-05
-    ## action_genre            -3.224871e-05 -3.794984e-05 -4.465868e-05
-    ## romance_genre            3.701058e-06  4.354808e-06  5.123903e-06
-    ## adventure_genre          6.808546e-07  8.014177e-07  9.433670e-07
-    ## crime_genre              1.470021e-05  1.729882e-05  2.035667e-05
-    ## scifi_genre             -2.591738e-05 -3.049842e-05 -3.588889e-05
-    ## fantasy_genre           -2.365785e-05 -2.783887e-05 -3.275839e-05
-    ## horror_genre            -8.404126e-05 -9.889676e-05 -1.163774e-04
-    ## family_genre            -3.016181e-05 -3.549194e-05 -4.176342e-05
-    ## mystery_genre            1.623581e-06  1.910676e-06  2.248543e-06
-    ## biography_genre          9.828279e-05  1.156533e-04  1.360923e-04
-    ## animation_genre          2.296819e-05  2.703217e-05  3.181583e-05
-    ## music_genre              4.145244e-06  4.877756e-06  5.739623e-06
-    ## war_genre                8.563848e-05  1.007734e-04  1.185816e-04
-    ## history_genre            8.561436e-05  1.007437e-04  1.185449e-04
-    ## sport_genre              1.965012e-05  2.312274e-05  2.720869e-05
-    ## musical_genre            1.502579e-05  1.768172e-05  2.080694e-05
-    ## documentary_genre        8.306813e-05  9.775517e-05  1.150389e-04
-    ## western_genre            3.775478e-05  4.442697e-05  5.227761e-05
-    ## filmnoir_genre           1.658520e-04  1.951667e-04  2.296606e-04
-    ## short_genre              8.658006e-05  1.018937e-04  1.199169e-04
-    ## news_genre               1.504333e-04  1.770268e-04  2.083204e-04
+    ## (Intercept)              6.426931e+00  6.427732e+00  6.428675e+00
+    ## actor_1_facebook_likes   7.718066e-10  9.082012e-10  1.068685e-09
+    ## actor_2_facebook_likes   3.240410e-09  3.813018e-09  4.486741e-09
+    ## actor_3_facebook_likes   5.138689e-09  6.046627e-09  7.114852e-09
+    ## director_facebook_likes  8.607799e-09  1.012913e-08  1.191921e-08
+    ## duration                 2.233307e-06  2.628048e-06  3.092531e-06
+    ## budget                   2.096852e-14  2.467443e-14  2.903497e-14
+    ## title_year              -2.415927e-06 -2.843020e-06 -3.345600e-06
+    ## facenumber_in_poster    -4.275493e-06 -5.031346e-06 -5.920802e-06
+    ## num_critic_for_reviews   3.912501e-07  4.604121e-07  5.417967e-07
+    ## color                   -9.787496e-05 -1.151758e-04 -1.355338e-04
+    ## drama_genre              8.576582e-05  1.009257e-04  1.187642e-04
+    ## comedy_genre            -5.148561e-05 -6.058525e-05 -7.129242e-05
+    ## thriller_genre          -2.131470e-05 -2.508327e-05 -2.951812e-05
+    ## action_genre            -3.225009e-05 -3.795175e-05 -4.466132e-05
+    ## romance_genre            3.701417e-06  4.355306e-06  5.124593e-06
+    ## adventure_genre          6.797939e-07  7.999491e-07  9.413335e-07
+    ## crime_genre              1.469881e-05  1.729689e-05  2.035400e-05
+    ## scifi_genre             -2.591755e-05 -3.049866e-05 -3.588922e-05
+    ## fantasy_genre           -2.365845e-05 -2.783971e-05 -3.275955e-05
+    ## horror_genre            -8.403953e-05 -9.889437e-05 -1.163741e-04
+    ## family_genre            -3.016124e-05 -3.549116e-05 -4.176233e-05
+    ## mystery_genre            1.622816e-06  1.909616e-06  2.247076e-06
+    ## biography_genre          9.828223e-05  1.156525e-04  1.360912e-04
+    ## animation_genre          2.296932e-05  2.703373e-05  3.181800e-05
+    ## music_genre              4.147234e-06  4.880510e-06  5.743438e-06
+    ## war_genre                8.563820e-05  1.007730e-04  1.185810e-04
+    ## history_genre            8.561390e-05  1.007431e-04  1.185441e-04
+    ## sport_genre              1.964954e-05  2.312194e-05  2.720757e-05
+    ## musical_genre            1.502767e-05  1.768433e-05  2.081056e-05
+    ## documentary_genre        8.307265e-05  9.776143e-05  1.150476e-04
+    ## western_genre            3.775448e-05  4.442655e-05  5.227703e-05
+    ## filmnoir_genre           1.658547e-04  1.951704e-04  2.296659e-04
+    ## short_genre              8.658394e-05  1.018990e-04  1.199243e-04
+    ## news_genre               1.504388e-04  1.770344e-04  2.083310e-04
+    ## director_movies          7.023953e-06  8.265343e-06  9.726023e-06
+    ## actor_1_movies           2.160303e-06  2.542077e-06  2.991279e-06
+    ## actor_2_movies           3.697373e-06  4.350620e-06  5.119178e-06
+    ## actor_3_movies           3.702433e-06  4.356459e-06  5.125891e-06
     ##                                                                  
-    ## (Intercept)              6.429895e+00  6.431220e+00  6.432780e+00
-    ## actor_1_facebook_likes   1.257797e-09  1.480066e-09  1.741585e-09
-    ## actor_2_facebook_likes   5.280537e-09  6.213544e-09  7.311265e-09
-    ## actor_3_facebook_likes   8.373490e-09  9.852706e-09  1.159296e-08
-    ## director_facebook_likes  1.402739e-08  1.650633e-08  1.942309e-08
-    ## duration                 3.639245e-06  4.282385e-06  5.039116e-06
-    ## budget                   3.416891e-14  4.020686e-14  4.731103e-14
-    ## title_year              -3.937016e-06 -4.632938e-06 -5.451835e-06
-    ## facenumber_in_poster    -6.967297e-06 -8.198882e-06 -9.648105e-06
-    ## num_critic_for_reviews   6.375979e-07  7.502985e-07  8.829127e-07
-    ## color                   -1.594867e-04 -1.876730e-04 -2.208381e-04
-    ## drama_genre              1.397549e-04  1.644532e-04  1.935138e-04
-    ## comedy_genre            -8.389214e-05 -9.871591e-05 -1.161571e-04
-    ## thriller_genre          -3.473402e-05 -4.087445e-05 -4.810023e-05
-    ## action_genre            -5.255329e-05 -6.184315e-05 -7.277472e-05
-    ## romance_genre            6.028642e-06  7.092877e-06  8.344628e-06
-    ## adventure_genre          1.110510e-06  1.307339e-06  1.539153e-06
-    ## crime_genre              2.395489e-05  2.818891e-05  3.317097e-05
-    ## scifi_genre             -4.223168e-05 -4.969488e-05 -5.847618e-05
-    ## fantasy_genre           -3.854670e-05 -4.535700e-05 -5.336943e-05
-    ## horror_genre            -1.369466e-04 -1.611498e-04 -1.896283e-04
-    ## family_genre            -4.914225e-05 -5.782367e-05 -6.803716e-05
-    ## mystery_genre            2.646162e-06  3.114105e-06  3.664814e-06
-    ## biography_genre          1.601415e-04  1.884375e-04  2.217294e-04
-    ## animation_genre          3.744687e-05  4.407570e-05  5.187957e-05
-    ## music_genre              6.753657e-06  7.946675e-06  9.350207e-06
-    ## war_genre                1.395348e-04  1.641876e-04  1.931921e-04
-    ## history_genre            1.394892e-04  1.641306e-04  1.931204e-04
-    ## sport_genre              3.201614e-05  3.767232e-05  4.432679e-05
-    ## musical_genre            2.448430e-05  2.881128e-05  3.390249e-05
-    ## documentary_genre        1.353784e-04  1.593139e-04  1.874810e-04
-    ## western_genre            6.151457e-05  7.238231e-05  8.516821e-05
-    ## filmnoir_genre           2.702483e-04  3.180049e-04  3.741953e-04
-    ## short_genre              1.411297e-04  1.660969e-04  1.954840e-04
-    ## news_genre               2.451444e-04  2.884758e-04  3.394635e-04
+    ## (Intercept)              6.429785e+00  6.431091e+00  6.432628e+00
+    ## actor_1_facebook_likes   1.257507e-09  1.479664e-09  1.741029e-09
+    ## actor_2_facebook_likes   5.279407e-09  6.211979e-09  7.309099e-09
+    ## actor_3_facebook_likes   8.371609e-09  9.850101e-09  1.158935e-08
+    ## director_facebook_likes  1.402547e-08  1.650367e-08  1.941940e-08
+    ## duration                 3.639068e-06  4.282140e-06  5.038777e-06
+    ## budget                   3.416567e-14  4.020236e-14  4.730481e-14
+    ## title_year              -3.937004e-06 -4.632922e-06 -5.451812e-06
+    ## facenumber_in_poster    -6.967468e-06 -8.199120e-06 -9.648434e-06
+    ## num_critic_for_reviews   6.375628e-07  7.502498e-07  8.828453e-07
+    ## color                   -1.594888e-04 -1.876760e-04 -2.208422e-04
+    ## drama_genre              1.397543e-04  1.644524e-04  1.935127e-04
+    ## comedy_genre            -8.389081e-05 -9.871407e-05 -1.161545e-04
+    ## thriller_genre          -3.473705e-05 -4.087865e-05 -4.810604e-05
+    ## action_genre            -5.255695e-05 -6.184821e-05 -7.278173e-05
+    ## romance_genre            6.029597e-06  7.094200e-06  8.346459e-06
+    ## adventure_genre          1.107695e-06  1.303441e-06  1.533756e-06
+    ## crime_genre              2.395119e-05  2.818378e-05  3.316387e-05
+    ## scifi_genre             -4.223215e-05 -4.969552e-05 -5.847707e-05
+    ## fantasy_genre           -3.854831e-05 -4.535922e-05 -5.337251e-05
+    ## horror_genre            -1.369420e-04 -1.611435e-04 -1.896196e-04
+    ## family_genre            -4.914075e-05 -5.782159e-05 -6.803428e-05
+    ## mystery_genre            2.644131e-06  3.111293e-06  3.660920e-06
+    ## biography_genre          1.601400e-04  1.884355e-04  2.217266e-04
+    ## animation_genre          3.744987e-05  4.407985e-05  5.188533e-05
+    ## music_genre              6.758938e-06  7.953989e-06  9.360333e-06
+    ## war_genre                1.395340e-04  1.641865e-04  1.931906e-04
+    ## history_genre            1.394880e-04  1.641289e-04  1.931181e-04
+    ## sport_genre              3.201460e-05  3.767019e-05  4.432384e-05
+    ## musical_genre            2.448932e-05  2.881822e-05  3.391209e-05
+    ## documentary_genre        1.353904e-04  1.593305e-04  1.875040e-04
+    ## western_genre            6.151378e-05  7.238121e-05  8.516668e-05
+    ## filmnoir_genre           2.702555e-04  3.180150e-04  3.742093e-04
+    ## short_genre              1.411400e-04  1.661112e-04  1.955037e-04
+    ## news_genre               2.451591e-04  2.884960e-04  3.394916e-04
+    ## director_movies          1.144469e-05  1.346684e-05  1.584600e-05
+    ## actor_1_movies           3.519802e-06  4.141632e-06  4.873211e-06
+    ## actor_2_movies           6.023365e-06  7.087059e-06  8.338324e-06
+    ## actor_3_movies           6.031044e-06  7.095791e-06  8.348177e-06
     ##                                                                  
-    ## (Intercept)              6.434614e+00  6.436773e+00  6.439314e+00
-    ## actor_1_facebook_likes   2.049277e-09  2.411281e-09  2.837163e-09
-    ## actor_2_facebook_likes   8.602727e-09  1.012205e-08  1.190934e-08
-    ## actor_3_facebook_likes   1.364021e-08  1.604846e-08  1.888118e-08
-    ## director_facebook_likes  2.285489e-08  2.689253e-08  3.164279e-08
-    ## duration                 5.929475e-06  6.977023e-06  8.209461e-06
-    ## budget                   5.566942e-14  6.550308e-14  7.707185e-14
-    ## title_year              -6.415422e-06 -7.549243e-06 -8.883345e-06
-    ## facenumber_in_poster    -1.135340e-05 -1.335998e-05 -1.572102e-05
-    ## num_critic_for_reviews   1.038956e-06  1.222565e-06  1.438603e-06
-    ## color                   -2.598604e-04 -3.057728e-04 -3.597900e-04
-    ## drama_genre              2.277062e-04  2.679354e-04  3.152653e-04
-    ## comedy_genre            -1.366771e-04 -1.608184e-04 -1.892186e-04
-    ## thriller_genre          -5.660310e-05 -6.660867e-05 -7.838237e-05
-    ## action_genre            -8.563795e-05 -1.007739e-04 -1.185839e-04
-    ## romance_genre            9.816797e-06  1.154801e-05  1.358359e-05
-    ## adventure_genre          1.812208e-06  2.133893e-06  2.512941e-06
-    ## crime_genre              3.903312e-05  4.593067e-05  5.404626e-05
-    ## scifi_genre             -6.880805e-05 -8.096388e-05 -9.526505e-05
-    ## fantasy_genre           -6.279578e-05 -7.388497e-05 -8.692954e-05
-    ## horror_genre            -2.231366e-04 -2.625616e-04 -3.089467e-04
-    ## family_genre            -8.005252e-05 -9.418679e-05 -1.108125e-04
-    ## mystery_genre            4.312931e-06  5.075695e-06  5.973397e-06
-    ## biography_genre          2.608977e-04  3.069775e-04  3.611856e-04
-    ## animation_genre          6.106740e-05  7.188546e-05  8.462422e-05
-    ## music_genre              1.100131e-05  1.294353e-05  1.522802e-05
-    ## war_genre                2.273151e-04  2.674576e-04  3.146789e-04
-    ## history_genre            2.272243e-04  2.673419e-04  3.145303e-04
-    ## sport_genre              5.215537e-05  6.136470e-05  7.219760e-05
-    ## musical_genre            3.989274e-05  4.694055e-05  5.523231e-05
-    ## documentary_genre        2.206279e-04  2.596347e-04  3.055374e-04
-    ## western_genre            1.002101e-04  1.179052e-04  1.387200e-04
-    ## filmnoir_genre           4.403068e-04  5.180880e-04  6.095948e-04
-    ## short_genre              2.300745e-04  2.707911e-04  3.187211e-04
-    ## news_genre               3.994595e-04  4.700539e-04  5.531167e-04
+    ## (Intercept)              6.434436e+00  6.436563e+00  6.439066e+00
+    ## actor_1_facebook_likes   2.048507e-09  2.410214e-09  2.835686e-09
+    ## actor_2_facebook_likes   8.599728e-09  1.011790e-08  1.190359e-08
+    ## actor_3_facebook_likes   1.363521e-08  1.604155e-08  1.887161e-08
+    ## director_facebook_likes  2.284978e-08  2.688547e-08  3.163301e-08
+    ## duration                 5.929005e-06  6.976372e-06  8.208560e-06
+    ## budget                   5.566081e-14  6.549116e-14  7.705535e-14
+    ## title_year              -6.415391e-06 -7.549200e-06 -8.883284e-06
+    ## facenumber_in_poster    -1.135385e-05 -1.336061e-05 -1.572189e-05
+    ## num_critic_for_reviews   1.038863e-06  1.222436e-06  1.438424e-06
+    ## color                   -2.598661e-04 -3.057807e-04 -3.598009e-04
+    ## drama_genre              2.277047e-04  2.679333e-04  3.152624e-04
+    ## comedy_genre            -1.366736e-04 -1.608135e-04 -1.892119e-04
+    ## thriller_genre          -5.661114e-05 -6.661980e-05 -7.839779e-05
+    ## action_genre            -8.564766e-05 -1.007874e-04 -1.186025e-04
+    ## romance_genre            9.819332e-06  1.155152e-05  1.358844e-05
+    ## adventure_genre          1.804735e-06  2.123548e-06  2.498621e-06
+    ## crime_genre              3.902329e-05  4.591706e-05  5.402742e-05
+    ## scifi_genre             -6.880928e-05 -8.096558e-05 -9.526740e-05
+    ## fantasy_genre           -6.280004e-05 -7.389088e-05 -8.693772e-05
+    ## horror_genre            -2.231244e-04 -2.625448e-04 -3.089234e-04
+    ## family_genre            -8.004853e-05 -9.418127e-05 -1.108049e-04
+    ## mystery_genre            4.307540e-06  5.068232e-06  5.963066e-06
+    ## biography_genre          2.608938e-04  3.069721e-04  3.611780e-04
+    ## animation_genre          6.107536e-05  7.189650e-05  8.463949e-05
+    ## music_genre              1.101533e-05  1.296294e-05  1.525489e-05
+    ## war_genre                2.273130e-04  2.674548e-04  3.146750e-04
+    ## history_genre            2.272210e-04  2.673374e-04  3.145241e-04
+    ## sport_genre              5.215128e-05  6.135904e-05  7.218976e-05
+    ## musical_genre            3.990604e-05  4.695896e-05  5.525780e-05
+    ## documentary_genre        2.206597e-04  2.596788e-04  3.055984e-04
+    ## western_genre            1.002080e-04  1.179023e-04  1.387159e-04
+    ## filmnoir_genre           4.403261e-04  5.181147e-04  6.096318e-04
+    ## short_genre              2.301018e-04  2.708289e-04  3.187734e-04
+    ## news_genre               3.994984e-04  4.701077e-04  5.531912e-04
+    ## director_movies          1.864507e-05  2.193802e-05  2.581177e-05
+    ## actor_1_movies           5.733869e-06  6.746323e-06  7.937267e-06
+    ## actor_2_movies           9.810131e-06  1.154121e-05  1.357702e-05
+    ## actor_3_movies           9.821140e-06  1.155335e-05  1.359020e-05
     ##                                                                  
-    ## (Intercept)              6.442303e+00  6.445820e+00  6.449958e+00
-    ## actor_1_facebook_likes   3.338169e-09  3.927513e-09  4.620720e-09
-    ## actor_2_facebook_likes   1.401172e-08  1.648454e-08  1.939282e-08
-    ## actor_3_facebook_likes   2.221290e-08  2.613113e-08  3.073858e-08
-    ## director_facebook_likes  3.723115e-08  4.380512e-08  5.153801e-08
-    ## duration                 9.659354e-06  1.136498e-05  1.337130e-05
-    ## budget                   9.068113e-14  1.066898e-13  1.255195e-13
-    ## title_year              -1.045306e-05 -1.229996e-05 -1.447289e-05
-    ## facenumber_in_poster    -1.849907e-05 -2.176770e-05 -2.561341e-05
-    ## num_critic_for_reviews   1.692790e-06  1.991853e-06  2.343701e-06
-    ## color                   -4.233400e-04 -4.981013e-04 -5.860467e-04
-    ## drama_genre              3.709467e-04  4.364496e-04  5.135016e-04
-    ## comedy_genre            -2.226271e-04 -2.619244e-04 -3.081445e-04
-    ## thriller_genre          -9.223646e-05 -1.085382e-04 -1.277198e-04
-    ## action_genre            -1.395398e-04 -1.641967e-04 -1.932072e-04
-    ## romance_genre            1.597667e-05  1.878956e-05  2.209520e-05
-    ## adventure_genre          2.959681e-06  3.486336e-06  4.107392e-06
-    ## crime_genre              6.359466e-05  7.482841e-05  8.804438e-05
-    ## scifi_genre             -1.120894e-04 -1.318809e-04 -1.551613e-04
-    ## fantasy_genre           -1.022732e-04 -1.203196e-04 -1.415426e-04
-    ## horror_genre            -3.635182e-04 -4.277178e-04 -5.032401e-04
-    ## family_genre            -1.303672e-04 -1.533647e-04 -1.804081e-04
-    ## mystery_genre            7.029923e-06  8.273395e-06  9.736919e-06
-    ## biography_genre          4.249516e-04  4.999554e-04  5.881697e-04
-    ## animation_genre          9.962630e-05  1.172961e-04  1.381111e-04
-    ## music_genre              1.791487e-05  2.107461e-05  2.479002e-05
-    ## war_genre                3.702231e-04  4.355518e-04  5.123810e-04
-    ## history_genre            3.700312e-04  4.353023e-04  5.120547e-04
-    ## sport_genre              8.493930e-05  9.992479e-05  1.175473e-04
-    ## musical_genre            6.498712e-05  7.646248e-05  8.996100e-05
-    ## documentary_genre        3.595546e-04  4.231208e-04  4.979232e-04
-    ## western_genre            1.632027e-04  1.919970e-04  2.258588e-04
-    ## filmnoir_genre           7.172437e-04  8.438744e-04  9.928233e-04
-    ## short_genre              3.751452e-04  4.415727e-04  5.197828e-04
-    ## news_genre               6.508475e-04  7.658325e-04  9.011127e-04
+    ## (Intercept)              6.442012e+00  6.445478e+00  6.449555e+00
+    ## actor_1_facebook_likes   3.336124e-09  3.924683e-09  4.616803e-09
+    ## actor_2_facebook_likes   1.400377e-08  1.647353e-08  1.937758e-08
+    ## actor_3_facebook_likes   2.219965e-08  2.611279e-08  3.071320e-08
+    ## director_facebook_likes  3.721761e-08  4.378637e-08  5.151205e-08
+    ## duration                 9.658107e-06  1.136325e-05  1.336891e-05
+    ## budget                   9.065829e-14  1.066582e-13  1.254757e-13
+    ## title_year              -1.045298e-05 -1.229984e-05 -1.447273e-05
+    ## facenumber_in_poster    -1.850028e-05 -2.176937e-05 -2.561572e-05
+    ## num_critic_for_reviews   1.692542e-06  1.991510e-06  2.343227e-06
+    ## color                   -4.233550e-04 -4.981221e-04 -5.860754e-04
+    ## drama_genre              3.709427e-04  4.364441e-04  5.134940e-04
+    ## comedy_genre            -2.226178e-04 -2.619114e-04 -3.081265e-04
+    ## thriller_genre          -9.225779e-05 -1.085678e-04 -1.277606e-04
+    ## action_genre            -1.395656e-04 -1.642323e-04 -1.932565e-04
+    ## romance_genre            1.598339e-05  1.879886e-05  2.210807e-05
+    ## adventure_genre          2.939858e-06  3.458901e-06  4.069424e-06
+    ## crime_genre              6.356859e-05  7.479232e-05  8.799442e-05
+    ## scifi_genre             -1.120926e-04 -1.318854e-04 -1.551675e-04
+    ## fantasy_genre           -1.022845e-04 -1.203352e-04 -1.415643e-04
+    ## horror_genre            -3.634859e-04 -4.276732e-04 -5.031782e-04
+    ## family_genre            -1.303566e-04 -1.533501e-04 -1.803879e-04
+    ## mystery_genre            7.015622e-06  8.253599e-06  9.709522e-06
+    ## biography_genre          4.249411e-04  4.999409e-04  5.881497e-04
+    ## animation_genre          9.964744e-05  1.173254e-04  1.381516e-04
+    ## music_genre              1.795206e-05  2.112608e-05  2.486126e-05
+    ## war_genre                3.702178e-04  4.355444e-04  5.123708e-04
+    ## history_genre            3.700226e-04  4.352904e-04  5.120382e-04
+    ## sport_genre              8.492845e-05  9.990976e-05  1.175265e-04
+    ## musical_genre            6.502239e-05  7.651131e-05  9.002857e-05
+    ## documentary_genre        3.596392e-04  4.232378e-04  4.980852e-04
+    ## western_genre            1.631971e-04  1.919893e-04  2.258481e-04
+    ## filmnoir_genre           7.172949e-04  8.439453e-04  9.929214e-04
+    ## short_genre              3.752176e-04  4.416730e-04  5.199215e-04
+    ## news_genre               6.509506e-04  7.659752e-04  9.013101e-04
+    ## director_movies          3.036846e-05  3.572809e-05  4.203158e-05
+    ## actor_1_movies           9.338060e-06  1.098553e-05  1.292290e-05
+    ## actor_2_movies           1.597095e-05  1.878560e-05  2.209437e-05
+    ## actor_3_movies           1.598490e-05  1.879986e-05  2.210819e-05
     ##                                                                  
-    ## (Intercept)              6.454826e+00  6.460554e+00  6.467291e+00
-    ## actor_1_facebook_likes   5.436024e-09  6.394834e-09  7.522273e-09
-    ## actor_2_facebook_likes   2.281285e-08  2.683420e-08  3.156186e-08
-    ## actor_3_facebook_likes   3.615576e-08  4.252393e-08  5.000864e-08
-    ## director_facebook_likes  6.063340e-08  7.133039e-08  8.390962e-08
-    ## duration                 1.573116e-05  1.850661e-05  2.177047e-05
-    ## budget                   1.476652e-13  1.737083e-13  2.043308e-13
-    ## title_year              -1.702932e-05 -2.003677e-05 -2.357462e-05
-    ## facenumber_in_poster    -3.013789e-05 -3.546072e-05 -4.172240e-05
-    ## num_critic_for_reviews   2.757632e-06  3.244572e-06  3.817361e-06
-    ## color                   -6.894938e-04 -8.111651e-04 -9.542575e-04
-    ## drama_genre              6.041322e-04  7.107249e-04  8.360782e-04
-    ## comedy_genre            -3.625018e-04 -4.264217e-04 -5.015763e-04
-    ## thriller_genre          -1.502893e-04 -1.768443e-04 -2.080877e-04
-    ## action_genre            -2.273389e-04 -2.674941e-04 -3.147334e-04
-    ## romance_genre            2.597895e-05  3.054058e-05  3.589657e-05
-    ## adventure_genre          4.840028e-06  5.704647e-06  6.725512e-06
-    ## crime_genre              1.035915e-04  1.218797e-04  1.433909e-04
-    ## scifi_genre             -1.825435e-04 -2.147472e-04 -2.526172e-04
-    ## fantasy_genre           -1.664987e-04 -1.958403e-04 -2.303325e-04
-    ## horror_genre            -5.920758e-04 -6.965637e-04 -8.194503e-04
-    ## family_genre            -2.122050e-04 -2.495851e-04 -2.935206e-04
-    ## mystery_genre            1.145948e-05  1.348698e-05  1.587348e-05
-    ## biography_genre          6.919109e-04  8.138971e-04  9.573169e-04
-    ## animation_genre          1.626354e-04  1.915361e-04  2.256021e-04
-    ## music_genre              2.915819e-05  3.429293e-05  4.032754e-05
-    ## war_genre                6.027247e-04  7.089459e-04  8.338148e-04
-    ## history_genre            6.022955e-04  7.083782e-04  8.330602e-04
-    ## sport_genre              1.382682e-04  1.626288e-04  1.912632e-04
-    ## musical_genre            1.058382e-04  1.245114e-04  1.464708e-04
-    ## documentary_genre        5.859477e-04  6.895304e-04  8.114201e-04
-    ## western_genre            2.656749e-04  3.124855e-04  3.675099e-04
-    ## filmnoir_genre           1.168009e-03  1.374032e-03  1.616292e-03
-    ## short_genre              6.118730e-04  7.203174e-04  8.480347e-04
-    ## news_genre               1.060263e-03  1.247484e-03  1.467714e-03
+    ## (Intercept)              6.454353e+00  6.459996e+00  6.466636e+00
+    ## actor_1_facebook_likes   5.430603e-09  6.387332e-09  7.511893e-09
+    ## actor_2_facebook_likes   2.279176e-08  2.680501e-08  3.152148e-08
+    ## actor_3_facebook_likes   3.612064e-08  4.247535e-08  4.994143e-08
+    ## director_facebook_likes  6.059748e-08  7.128067e-08  8.384082e-08
+    ## duration                 1.572786e-05  1.850203e-05  2.176415e-05
+    ## budget                   1.476047e-13  1.736245e-13  2.042150e-13
+    ## title_year              -1.702910e-05 -2.003646e-05 -2.357419e-05
+    ## facenumber_in_poster    -3.014109e-05 -3.546514e-05 -4.172853e-05
+    ## num_critic_for_reviews   2.756975e-06  3.243663e-06  3.816105e-06
+    ## color                   -6.895336e-04 -8.112202e-04 -9.543337e-04
+    ## drama_genre              6.041217e-04  7.107104e-04  8.360580e-04
+    ## comedy_genre            -3.624769e-04 -4.263873e-04 -5.015287e-04
+    ## thriller_genre          -1.503458e-04 -1.769226e-04 -2.081960e-04
+    ## action_genre            -2.274071e-04 -2.675885e-04 -3.148640e-04
+    ## romance_genre            2.599676e-05  3.056521e-05  3.593064e-05
+    ## adventure_genre          4.787490e-06  5.631959e-06  6.624963e-06
+    ## crime_genre              1.035223e-04  1.217841e-04  1.432585e-04
+    ## scifi_genre             -1.825521e-04 -2.147591e-04 -2.526335e-04
+    ## fantasy_genre           -1.665287e-04 -1.958819e-04 -2.303900e-04
+    ## horror_genre            -5.919902e-04 -6.964453e-04 -8.192865e-04
+    ## family_genre            -2.121770e-04 -2.495463e-04 -2.934669e-04
+    ## mystery_genre            1.142156e-05  1.343452e-05  1.580090e-05
+    ## biography_genre          6.918831e-04  8.138587e-04  9.572637e-04
+    ## animation_genre          1.626915e-04  1.916137e-04  2.257095e-04
+    ## music_genre              2.925677e-05  3.442933e-05  4.051625e-05
+    ## war_genre                6.027106e-04  7.089264e-04  8.337878e-04
+    ## history_genre            6.022727e-04  7.083467e-04  8.330166e-04
+    ## sport_genre              1.382394e-04  1.625889e-04  1.912080e-04
+    ## musical_genre            1.059316e-04  1.246407e-04  1.466497e-04
+    ## documentary_genre        5.861719e-04  6.898406e-04  8.118492e-04
+    ## western_genre            2.656601e-04  3.124651e-04  3.674816e-04
+    ## filmnoir_genre           1.168145e-03  1.374220e-03  1.616553e-03
+    ## short_genre              6.120650e-04  7.205829e-04  8.484019e-04
+    ## news_genre               1.060536e-03  1.247862e-03  1.468237e-03
+    ## director_movies          4.944435e-05  5.816052e-05  6.840778e-05
+    ## actor_1_movies           1.520090e-05  1.787903e-05  2.102701e-05
+    ## actor_2_movies           2.598329e-05  3.055305e-05  3.592145e-05
+    ## actor_3_movies           2.599544e-05  3.056167e-05  3.592373e-05
     ##                                                                  
-    ## (Intercept)              6.475216e+00  6.484538e+00  6.495502e+00
-    ## actor_1_facebook_likes   8.847811e-09  1.040600e-08  1.223731e-08
-    ## actor_2_facebook_likes   3.711894e-08  4.364959e-08  5.132250e-08
-    ## actor_3_facebook_likes   5.880368e-08  6.913575e-08  8.126970e-08
-    ## director_facebook_likes  9.870041e-08  1.160890e-07  1.365279e-07
-    ## duration                 2.560824e-05  3.012015e-05  3.542372e-05
-    ## budget                   2.403328e-13  2.826520e-13  3.323867e-13
-    ## title_year              -2.773612e-05 -3.263083e-05 -3.838738e-05
-    ## facenumber_in_poster    -4.908808e-05 -5.775174e-05 -6.794119e-05
-    ## num_critic_for_reviews   4.491086e-06  5.283461e-06  6.215285e-06
-    ## color                   -1.122523e-03 -1.320364e-03 -1.552943e-03
-    ## drama_genre              9.834758e-04  1.156770e-03  1.360476e-03
-    ## comedy_genre            -5.899263e-04 -6.937695e-04 -8.157960e-04
-    ## thriller_genre          -2.448457e-04 -2.880898e-04 -3.389615e-04
-    ## action_genre            -3.703034e-04 -4.356686e-04 -5.125493e-04
-    ## romance_genre            4.218271e-05  4.955700e-05  5.820294e-05
-    ## adventure_genre          7.931530e-06  9.357193e-06  1.104375e-05
-    ## crime_genre              1.686906e-04  1.984431e-04  2.334279e-04
-    ## scifi_genre             -2.971447e-04 -3.494922e-04 -4.110220e-04
-    ## fantasy_genre           -2.708717e-04 -3.185073e-04 -3.744669e-04
-    ## horror_genre            -9.639595e-04 -1.133874e-03 -1.333630e-03
-    ## family_genre            -3.451500e-04 -4.058053e-04 -4.770432e-04
-    ## mystery_genre            1.868266e-05  2.198953e-05  2.588248e-05
-    ## biography_genre          1.125908e-03  1.324050e-03  1.556869e-03
-    ## animation_genre          2.657681e-04  3.131416e-04  3.690373e-04
-    ## music_genre              4.741807e-05  5.574694e-05  6.552720e-05
-    ## war_genre                9.805775e-04  1.153034e-03  1.355631e-03
-    ## history_genre            9.795697e-04  1.151683e-03  1.353812e-03
-    ## sport_genre              2.249143e-04  2.644517e-04  3.108915e-04
-    ## musical_genre            1.722914e-04  2.026477e-04  2.383302e-04
-    ## documentary_genre        9.548506e-04  1.123626e-03  1.322223e-03
-    ## western_genre            4.321763e-04  5.081563e-04  5.974042e-04
-    ## filmnoir_genre           1.901125e-03  2.235955e-03  2.629485e-03
-    ## short_genre              9.984704e-04  1.175693e-03  1.384511e-03
-    ## news_genre               1.726752e-03  2.031411e-03  2.389687e-03
+    ## (Intercept)              6.474446e+00  6.483633e+00  6.494437e+00
+    ## actor_1_facebook_likes   8.833451e-09  1.038614e-08  1.220985e-08
+    ## actor_2_facebook_likes   3.706308e-08  4.357233e-08  5.121568e-08
+    ## actor_3_facebook_likes   5.871072e-08  6.900720e-08  8.109200e-08
+    ## director_facebook_likes  9.860521e-08  1.159573e-07  1.363458e-07
+    ## duration                 2.559949e-05  3.010804e-05  3.540698e-05
+    ## budget                   2.401725e-13  2.824304e-13  3.320804e-13
+    ## title_year              -2.773552e-05 -3.263000e-05 -3.838623e-05
+    ## facenumber_in_poster    -4.909655e-05 -5.776344e-05 -6.795737e-05
+    ## num_critic_for_reviews   4.489348e-06  5.281057e-06  6.211961e-06
+    ## color                   -1.122629e-03 -1.320510e-03 -1.553144e-03
+    ## drama_genre              9.834479e-04  1.156731e-03  1.360423e-03
+    ## comedy_genre            -5.898606e-04 -6.936787e-04 -8.156706e-04
+    ## thriller_genre          -2.449955e-04 -2.882969e-04 -3.392478e-04
+    ## action_genre            -3.704841e-04 -4.359184e-04 -5.128946e-04
+    ## romance_genre            4.222982e-05  4.962213e-05  5.829294e-05
+    ## adventure_genre          7.792467e-06  9.164911e-06  1.077796e-05
+    ## crime_genre              1.685075e-04  1.981899e-04  2.330778e-04
+    ## scifi_genre             -2.971672e-04 -3.495233e-04 -4.110650e-04
+    ## fantasy_genre           -2.709512e-04 -3.186174e-04 -3.746191e-04
+    ## horror_genre            -9.637329e-04 -1.133561e-03 -1.333197e-03
+    ## family_genre            -3.450758e-04 -4.057027e-04 -4.769014e-04
+    ## mystery_genre            1.858226e-05  2.185068e-05  2.569051e-05
+    ## biography_genre          1.125835e-03  1.323949e-03  1.556729e-03
+    ## animation_genre          2.659166e-04  3.133469e-04  3.693213e-04
+    ## music_genre              4.767908e-05  5.610788e-05  6.602618e-05
+    ## war_genre                9.805402e-04  1.152983e-03  1.355560e-03
+    ## history_genre            9.795094e-04  1.151600e-03  1.353697e-03
+    ## sport_genre              2.248380e-04  2.643460e-04  3.107452e-04
+    ## musical_genre            1.725388e-04  2.029898e-04  2.388030e-04
+    ## documentary_genre        9.554442e-04  1.124448e-03  1.323359e-03
+    ## western_genre            4.321372e-04  5.081022e-04  5.973295e-04
+    ## filmnoir_genre           1.901485e-03  2.236453e-03  2.630173e-03
+    ## short_genre              9.989780e-04  1.176395e-03  1.385481e-03
+    ## news_genre               1.727476e-03  2.032411e-03  2.391070e-03
+    ## director_movies          8.045299e-05  9.460874e-05  1.112409e-04
+    ## actor_1_movies           2.472651e-05  2.907312e-05  3.417857e-05
+    ## actor_2_movies           4.222614e-05  4.962772e-05  5.831335e-05
+    ## actor_3_movies           4.221795e-05  4.960305e-05  5.826355e-05
     ##                                                                  
-    ## (Intercept)              6.508395e+00  6.523555e+00  6.541378e+00
-    ## actor_1_facebook_likes   1.438914e-08  1.691688e-08  1.988529e-08
-    ## actor_2_facebook_likes   6.033492e-08  7.091711e-08  8.333760e-08
-    ## actor_3_facebook_likes   9.551461e-08  1.122306e-07  1.318364e-07
-    ## director_facebook_likes  1.605474e-07  1.887678e-07  2.219143e-07
-    ## duration                 4.165658e-05  4.897983e-05  5.758180e-05
-    ## budget                   3.908227e-13  4.594629e-13  5.400630e-13
-    ## title_year              -4.515679e-05 -5.311624e-05 -6.247350e-05
-    ## facenumber_in_poster    -7.992391e-05 -9.401375e-05 -1.105788e-04
-    ## num_critic_for_reviews   7.310964e-06  8.599124e-06  1.011332e-05
-    ## color                   -1.826308e-03 -2.147542e-03 -2.524931e-03
-    ## drama_genre              1.599884e-03  1.881185e-03  2.211622e-03
-    ## comedy_genre            -9.591533e-04 -1.127519e-03 -1.325187e-03
-    ## thriller_genre          -3.988025e-04 -4.691886e-04 -5.519708e-04
-    ## action_genre            -6.029654e-04 -7.092881e-04 -8.342989e-04
-    ## romance_genre            6.833306e-05  8.019280e-05  9.406456e-05
-    ## adventure_genre          1.304065e-05  1.540728e-05  1.821521e-05
-    ## crime_genre              2.745594e-04  3.229094e-04  3.797337e-04
-    ## scifi_genre             -4.833299e-04 -5.682827e-04 -6.680631e-04
-    ## fantasy_genre           -4.401846e-04 -5.173340e-04 -6.078648e-04
-    ## horror_genre            -1.568428e-03 -1.844355e-03 -2.168539e-03
-    ## family_genre            -5.606808e-04 -6.588358e-04 -7.739726e-04
-    ## mystery_genre            3.046568e-05  3.586195e-05  4.221609e-05
-    ## biography_genre          1.830360e-03  2.151526e-03  2.528536e-03
-    ## animation_genre          4.350175e-04  5.129414e-04  6.050258e-04
-    ## music_genre              7.700727e-05  9.047636e-05  1.062704e-04
-    ## war_genre                1.593562e-03  1.872890e-03  2.200676e-03
-    ## history_genre            1.591105e-03  1.869561e-03  2.196157e-03
-    ## sport_genre              3.654206e-04  4.294229e-04  5.045094e-04
-    ## musical_genre            2.802648e-04  3.295348e-04  3.874069e-04
-    ## documentary_genre        1.555906e-03  1.830866e-03  2.154387e-03
-    ## western_genre            7.022025e-04  8.252133e-04  9.695359e-04
-    ## filmnoir_genre           3.091900e-03  3.635115e-03  4.273049e-03
-    ## short_genre              1.630610e-03  1.920716e-03  2.262797e-03
-    ## news_genre               2.810964e-03  3.306248e-03  3.888443e-03
+    ## (Intercept)              6.507144e+00  6.522085e+00  6.539652e+00
+    ## actor_1_facebook_likes   1.435116e-08  1.686440e-08  1.981278e-08
+    ## actor_2_facebook_likes   6.018726e-08  7.071308e-08  8.305578e-08
+    ## actor_3_facebook_likes   9.526905e-08  1.118914e-07  1.313680e-07
+    ## director_facebook_likes  1.602955e-07  1.884195e-07  2.214329e-07
+    ## duration                 4.163343e-05  4.894783e-05  5.753760e-05
+    ## budget                   3.903994e-13  4.588782e-13  5.392555e-13
+    ## title_year              -4.515518e-05 -5.311400e-05 -6.247038e-05
+    ## facenumber_in_poster    -7.994626e-05 -9.404461e-05 -1.106214e-04
+    ## num_critic_for_reviews   7.306369e-06  8.592774e-06  1.010455e-05
+    ## color                   -1.826586e-03 -2.147927e-03 -2.525463e-03
+    ## drama_genre              1.599810e-03  1.881084e-03  2.211482e-03
+    ## comedy_genre            -9.589802e-04 -1.127281e-03 -1.324858e-03
+    ## thriller_genre          -3.991982e-04 -4.697354e-04 -5.527260e-04
+    ## action_genre            -6.034426e-04 -7.099473e-04 -8.352092e-04
+    ## romance_genre            6.845738e-05  8.036444e-05  9.430142e-05
+    ## adventure_genre          1.267336e-05  1.489993e-05  1.751471e-05
+    ## crime_genre              2.740753e-04  3.222404e-04  3.788096e-04
+    ## scifi_genre             -4.833890e-04 -5.683640e-04 -6.681748e-04
+    ## fantasy_genre           -4.403951e-04 -5.176249e-04 -6.082668e-04
+    ## horror_genre            -1.567828e-03 -1.843527e-03 -2.167395e-03
+    ## family_genre            -5.604849e-04 -6.585652e-04 -7.735990e-04
+    ## mystery_genre            3.020033e-05  3.549530e-05  4.170967e-05
+    ## biography_genre          1.830166e-03  2.151258e-03  2.528167e-03
+    ## animation_genre          4.354100e-04  5.134839e-04  6.057752e-04
+    ## music_genre              7.769690e-05  9.142915e-05  1.075862e-04
+    ## war_genre                1.593464e-03  1.872754e-03  2.200490e-03
+    ## history_genre            1.590946e-03  1.869342e-03  2.195854e-03
+    ## sport_genre              3.652183e-04  4.291431e-04  5.041225e-04
+    ## musical_genre            2.809181e-04  3.304372e-04  3.886526e-04
+    ## documentary_genre        1.557475e-03  1.833034e-03  2.157382e-03
+    ## western_genre            7.020994e-04  8.250709e-04  9.693396e-04
+    ## filmnoir_genre           3.092852e-03  3.636432e-03  4.274869e-03
+    ## short_genre              1.631948e-03  1.922563e-03  2.265346e-03
+    ## news_genre               2.812875e-03  3.308888e-03  3.892089e-03
+    ## director_movies          1.307771e-04  1.537170e-04  1.806431e-04
+    ## actor_1_movies           4.017334e-05  4.720959e-05  5.546446e-05
+    ## actor_2_movies           6.850067e-05  8.044231e-05  9.443067e-05
+    ## actor_3_movies           6.841339e-05  8.030000e-05  9.420857e-05
     ##                                                                  
-    ## (Intercept)              6.562328e+00  6.586950e+00  6.615879e+00
-    ## actor_1_facebook_likes   2.336988e-08  2.745863e-08  3.225384e-08
-    ## actor_2_facebook_likes   9.790898e-08  1.149944e-07  1.350147e-07
-    ## actor_3_facebook_likes   1.548181e-07  1.817381e-07  2.132456e-07
-    ## director_facebook_likes  2.608336e-07  3.065132e-07  3.601022e-07
-    ## duration                 6.768247e-05  7.953837e-05  9.344821e-05
-    ## budget                   6.346701e-13  7.456683e-13  8.758279e-13
-    ## title_year              -7.347211e-05 -8.639727e-05 -1.015827e-04
-    ## facenumber_in_poster    -1.300506e-04 -1.529347e-04 -1.798225e-04
-    ## num_critic_for_reviews   1.189287e-05  1.398377e-05  1.643983e-05
-    ## color                   -2.968161e-03 -3.488533e-03 -4.099224e-03
-    ## drama_genre              2.599651e-03  3.055141e-03  3.589584e-03
-    ## comedy_genre            -1.557161e-03 -1.829260e-03 -2.148245e-03
-    ## thriller_genre          -6.493217e-04 -7.637907e-04 -8.983678e-04
-    ## action_genre            -9.812597e-04 -1.153993e-03 -1.356973e-03
-    ## romance_genre            1.102718e-04  1.291831e-04  1.512153e-04
-    ## adventure_genre          2.155090e-05  2.551912e-05  3.024721e-05
-    ## crime_genre              4.465024e-04  5.249350e-04  6.170403e-04
-    ## scifi_genre             -7.852191e-04 -9.227220e-04 -1.084030e-03
-    ## fantasy_genre           -7.140449e-04 -8.385060e-04 -9.842948e-04
-    ## horror_genre            -2.549309e-03 -2.996391e-03 -3.521125e-03
-    ## family_genre            -9.089524e-04 -1.067090e-03 -1.252213e-03
-    ## mystery_genre            4.969898e-05  5.851229e-05  6.889420e-05
-    ## biography_genre          2.970909e-03  3.489708e-03  4.097768e-03
-    ## animation_genre          7.139182e-04  8.427880e-04  9.954372e-04
-    ## music_genre              1.247788e-04  1.464512e-04  1.718054e-04
-    ## war_genre                2.585138e-03  3.035811e-03  3.563733e-03
-    ## history_genre            2.578988e-03  3.027427e-03  3.552287e-03
-    ## sport_genre              5.925516e-04  6.957189e-04  8.165188e-04
-    ## musical_genre            4.553597e-04  5.351171e-04  6.286851e-04
-    ## documentary_genre        2.535032e-03  2.982871e-03  3.509741e-03
-    ## western_genre            1.138772e-03  1.337099e-03  1.569344e-03
-    ## filmnoir_genre           5.021945e-03  5.900723e-03  6.931388e-03
-    ## short_genre              2.666300e-03  3.142436e-03  3.704527e-03
-    ## news_genre               4.572660e-03  5.376590e-03  6.320916e-03
+    ## (Intercept)              6.560302e+00  6.584572e+00  6.613090e+00
+    ## actor_1_facebook_likes   2.326974e-08  2.732041e-08  3.206316e-08
+    ## actor_2_facebook_likes   9.751988e-08  1.144575e-07  1.342743e-07
+    ## actor_3_facebook_likes   1.541716e-07  1.808465e-07  2.120167e-07
+    ## director_facebook_likes  2.601686e-07  3.055948e-07  3.588345e-07
+    ## duration                 6.762143e-05  7.945411e-05  9.333198e-05
+    ## budget                   6.335558e-13  7.441315e-13  8.737098e-13
+    ## title_year              -7.346777e-05 -8.639121e-05 -1.015742e-04
+    ## facenumber_in_poster    -1.301094e-04 -1.530157e-04 -1.799340e-04
+    ## num_critic_for_reviews   1.188076e-05  1.396706e-05  1.641678e-05
+    ## color                   -2.968895e-03 -3.489546e-03 -4.100621e-03
+    ## drama_genre              2.599459e-03  3.054876e-03  3.589219e-03
+    ## comedy_genre            -1.556707e-03 -1.828636e-03 -2.147386e-03
+    ## thriller_genre          -6.503643e-04 -7.652292e-04 -9.003512e-04
+    ## action_genre            -9.825161e-04 -1.155726e-03 -1.359362e-03
+    ## romance_genre            1.105985e-04  1.296332e-04  1.518351e-04
+    ## adventure_genre          2.058424e-05  2.418598e-05  2.841000e-05
+    ## crime_genre              4.452264e-04  5.231740e-04  6.146116e-04
+    ## scifi_genre             -7.853724e-04 -9.229319e-04 -1.084317e-03
+    ## fantasy_genre           -7.146001e-04 -8.392725e-04 -9.853524e-04
+    ## horror_genre            -2.547729e-03 -2.994210e-03 -3.518118e-03
+    ## family_genre            -9.084370e-04 -1.066379e-03 -1.251233e-03
+    ## mystery_genre            4.899983e-05  5.754759e-05  6.756395e-05
+    ## biography_genre          2.970399e-03  3.489004e-03  4.096800e-03
+    ## animation_genre          7.149530e-04  8.442161e-04  9.974070e-04
+    ## music_genre              1.265950e-04  1.489568e-04  1.752595e-04
+    ## war_genre                2.584881e-03  3.035457e-03  3.563247e-03
+    ## history_genre            2.578571e-03  3.026852e-03  3.551496e-03
+    ## sport_genre              5.920167e-04  6.949798e-04  8.154978e-04
+    ## musical_genre            4.570785e-04  5.374871e-04  6.319506e-04
+    ## documentary_genre        2.539167e-03  2.988578e-03  3.517612e-03
+    ## western_genre            1.138502e-03  1.336726e-03  1.568831e-03
+    ## filmnoir_genre           5.024460e-03  5.904196e-03  6.936183e-03
+    ## short_genre              2.669814e-03  3.147276e-03  3.711188e-03
+    ## news_genre               4.577693e-03  5.383532e-03  6.330484e-03
+    ## director_movies          2.122337e-04  2.492772e-04  2.926876e-04
+    ## actor_1_movies           6.514375e-05  7.648609e-05  8.976731e-05
+    ## actor_2_movies           1.108032e-04  1.299480e-04  1.523091e-04
+    ## actor_3_movies           1.104665e-04  1.294480e-04  1.515779e-04
     ##                                                                  
-    ## (Intercept)              6.649886e+00  6.689799e+00  6.736651e+00
-    ## actor_1_facebook_likes   3.782003e-08  4.438257e-08  5.205856e-08
-    ## actor_2_facebook_likes   1.581897e-07  1.855130e-07  2.174241e-07
-    ## actor_3_facebook_likes   2.496840e-07  2.925611e-07  3.425417e-07
-    ## director_facebook_likes  4.224962e-07  4.959565e-07  5.819362e-07
-    ## duration                 1.096531e-04  1.287279e-04  1.510571e-04
-    ## budget                   1.028223e-12  1.206790e-12  1.415704e-12
-    ## title_year              -1.194260e-04 -1.403708e-04 -1.649541e-04
-    ## facenumber_in_poster    -2.113559e-04 -2.484232e-04 -2.919282e-04
-    ## num_critic_for_reviews   1.932633e-05  2.271265e-05  2.668604e-05
-    ## color                   -4.813328e-03 -5.652275e-03 -6.634977e-03
-    ## drama_genre              4.213466e-03  4.946965e-03  5.805823e-03
-    ## comedy_genre            -2.522011e-03 -2.959496e-03 -3.471158e-03
-    ## thriller_genre          -1.055311e-03 -1.240744e-03 -1.458517e-03
-    ## action_genre            -1.595108e-03 -1.875053e-03 -2.203698e-03
-    ## romance_genre            1.763841e-04  2.059461e-04  2.401248e-04
-    ## adventure_genre          3.655091e-05  4.354170e-05  5.195645e-05
-    ## crime_genre              7.248499e-04  8.516040e-04  1.000242e-03
-    ## scifi_genre             -1.271943e-03 -1.493100e-03 -1.751953e-03
-    ## fantasy_genre           -1.153614e-03 -1.352647e-03 -1.585025e-03
-    ## horror_genre            -4.135995e-03 -4.857510e-03 -5.702902e-03
-    ## family_genre            -1.468601e-03 -1.721525e-03 -2.016650e-03
-    ## mystery_genre            8.188383e-05  9.658299e-05  1.139642e-04
-    ## biography_genre          4.808474e-03  5.641355e-03  6.614980e-03
-    ## animation_genre          1.176653e-03  1.391596e-03  1.647100e-03
-    ## music_genre              2.012164e-04  2.357129e-04  2.758928e-04
-    ## war_genre                4.180311e-03  4.902382e-03  5.745709e-03
-    ## history_genre            4.165885e-03  4.882655e-03  5.718715e-03
-    ## sport_genre              9.578436e-04  1.123004e-03  1.315787e-03
-    ## musical_genre            7.384538e-04  8.670234e-04  1.017555e-03
-    ## documentary_genre        4.129413e-03  4.858461e-03  5.715979e-03
-    ## western_genre            1.841101e-03  2.158716e-03  2.529510e-03
-    ## filmnoir_genre           8.139484e-03  9.554547e-03  1.121068e-02
-    ## short_genre              4.368374e-03  5.152944e-03  6.080749e-03
-    ## news_genre               7.429784e-03  8.731384e-03  1.025852e-02
+    ## (Intercept)              6.646617e+00  6.685969e+00  6.732167e+00
+    ## actor_1_facebook_likes   3.751236e-08  4.395914e-08  5.147646e-08
+    ## actor_2_facebook_likes   1.569955e-07  1.838703e-07  2.151672e-07
+    ## actor_3_facebook_likes   2.477027e-07  2.898377e-07  3.388032e-07
+    ## director_facebook_likes  4.204457e-07  4.931314e-07  5.780474e-07
+    ## duration                 1.094653e-04  1.284694e-04  1.507018e-04
+    ## budget                   1.024809e-12  1.202097e-12  1.409263e-12
+    ## title_year              -1.194118e-04 -1.403509e-04 -1.649260e-04
+    ## facenumber_in_poster    -2.115360e-04 -2.486705e-04 -2.922676e-04
+    ## num_critic_for_reviews   1.928909e-05  2.266141e-05  2.661562e-05
+    ## color                   -4.815582e-03 -5.655375e-03 -6.639237e-03
+    ## drama_genre              4.212879e-03  4.946160e-03  5.804720e-03
+    ## comedy_genre            -2.520631e-03 -2.957606e-03 -3.468573e-03
+    ## thriller_genre          -1.058510e-03 -1.245144e-03 -1.464561e-03
+    ## action_genre            -1.598962e-03 -1.880351e-03 -2.210972e-03
+    ## romance_genre            1.773832e-04  2.073179e-04  2.420053e-04
+    ## adventure_genre          3.358332e-05  3.946184e-05  4.635453e-05
+    ## crime_genre              7.209264e-04  8.462047e-04  9.928194e-04
+    ## scifi_genre             -1.272402e-03 -1.493723e-03 -1.752797e-03
+    ## fantasy_genre           -1.155327e-03 -1.355007e-03 -1.588273e-03
+    ## horror_genre            -4.131131e-03 -4.850814e-03 -5.693693e-03
+    ## family_genre            -1.467023e-03 -1.719357e-03 -2.013675e-03
+    ## mystery_genre            7.973442e-05  9.362573e-05  1.099001e-04
+    ## biography_genre          4.806910e-03  5.639207e-03  6.612032e-03
+    ## animation_genre          1.179837e-03  1.395979e-03  1.653126e-03
+    ## music_genre              2.067916e-04  2.433798e-04  2.864236e-04
+    ## war_genre                4.179526e-03  4.901306e-03  5.744238e-03
+    ## history_genre            4.164608e-03  4.880902e-03  5.716313e-03
+    ## sport_genre              9.561910e-04  1.120725e-03  1.312646e-03
+    ## musical_genre            7.437257e-04  8.742688e-04  1.027500e-03
+    ## documentary_genre        4.142131e-03  4.875961e-03  5.740032e-03
+    ## western_genre            1.840275e-03  2.157583e-03  2.527960e-03
+    ## filmnoir_genre           8.147237e-03  9.565229e-03  1.122539e-02
+    ## short_genre              4.379111e-03  5.167675e-03  6.100927e-03
+    ## news_genre               7.445239e-03  8.752639e-03  1.028771e-02
+    ## director_movies          3.434372e-04  4.028834e-04  4.723608e-04
+    ## actor_1_movies           1.052843e-04  1.234367e-04  1.446254e-04
+    ## actor_2_movies           1.783750e-04  2.087480e-04  2.440570e-04
+    ## actor_3_movies           1.773419e-04  2.072670e-04  2.419506e-04
     ##                                                                  
-    ## (Intercept)              6.791626e+00  6.856098e+00  6.931664e+00
-    ## actor_1_facebook_likes   6.102750e-08  7.149428e-08  8.369154e-08
-    ## actor_2_facebook_likes   2.546438e-07  2.979878e-07  3.483719e-07
-    ## actor_3_facebook_likes   4.007048e-07  4.682560e-07  5.465280e-07
-    ## director_facebook_likes  6.824741e-07  7.999049e-07  9.368900e-07
-    ## duration                 1.771724e-04  2.076830e-04  2.432844e-04
-    ## budget                   1.659872e-12  1.944898e-12  2.277149e-12
-    ## title_year              -1.937947e-04 -2.276119e-04 -2.672401e-04
-    ## facenumber_in_poster    -3.429650e-04 -4.028040e-04 -4.729171e-04
-    ## num_critic_for_reviews   3.134593e-05  3.680769e-05  4.320493e-05
-    ## color                   -7.785137e-03 -9.130021e-03 -1.070086e-02
-    ## drama_genre              6.810593e-03  7.984875e-03  9.355652e-03
-    ## comedy_genre            -4.068931e-03 -4.766435e-03 -5.579119e-03
-    ## thriller_genre          -1.714175e-03 -2.014178e-03 -2.366036e-03
-    ## action_genre            -2.589351e-03 -3.041675e-03 -3.571886e-03
-    ## romance_genre            2.795107e-04  3.247177e-04  3.763589e-04
-    ## adventure_genre          6.210999e-05  7.439162e-05  8.928241e-05
-    ## crime_genre              1.174437e-03  1.378445e-03  1.617177e-03
-    ## scifi_genre             -2.054646e-03 -2.408221e-03 -2.820711e-03
-    ## fantasy_genre           -1.855963e-03 -2.171359e-03 -2.537829e-03
-    ## horror_genre            -6.692691e-03 -7.850520e-03 -9.203526e-03
-    ## family_genre            -2.360515e-03 -2.760488e-03 -3.224804e-03
-    ## mystery_genre            1.345324e-04  1.588926e-04  1.877717e-04
-    ## biography_genre          7.751814e-03  9.077416e-03  1.062068e-02
-    ## animation_genre          1.951260e-03  2.313923e-03  2.747096e-03
-    ## music_genre              3.226011e-04  3.767712e-04  4.394168e-04
-    ## war_genre                6.729356e-03  7.874897e-03  9.206569e-03
-    ## history_genre            6.692402e-03  7.824300e-03  9.137300e-03
-    ## sport_genre              1.540491e-03  1.801962e-03  2.105619e-03
-    ## musical_genre            1.193634e-03  1.399365e-03  1.639420e-03
-    ## documentary_genre        6.724503e-03  7.910481e-03  9.304925e-03
-    ## western_genre            2.961780e-03  3.464890e-03  4.049317e-03
-    ## filmnoir_genre           1.314710e-02  1.540866e-02  1.804648e-02
-    ## short_genre              7.178743e-03  8.479211e-03  1.002088e-02
-    ## news_genre               1.204933e-02  1.414802e-02  1.660576e-02
+    ## (Intercept)              6.786379e+00  6.849964e+00  6.924500e+00
+    ## actor_1_facebook_likes   6.022827e-08  7.039857e-08  8.219194e-08
+    ## actor_2_facebook_likes   2.515474e-07  2.937462e-07  3.425725e-07
+    ## actor_3_facebook_likes   3.955804e-07  4.612446e-07  5.369546e-07
+    ## director_facebook_likes  6.771267e-07  7.925607e-07  9.268177e-07
+    ## duration                 1.766844e-04  2.070138e-04  2.423682e-04
+    ## budget                   1.651044e-12  1.932822e-12  2.260663e-12
+    ## title_year              -1.937551e-04 -2.275561e-04 -2.671610e-04
+    ## facenumber_in_poster    -3.434297e-04 -4.034393e-04 -4.737835e-04
+    ## num_critic_for_reviews   3.124926e-05  3.667520e-05  4.302366e-05
+    ## color                   -7.790982e-03 -9.138029e-03 -1.071181e-02
+    ## drama_genre              6.809087e-03  7.982824e-03  9.352865e-03
+    ## comedy_genre            -4.065404e-03 -4.761636e-03 -5.572608e-03
+    ## thriller_genre          -1.722467e-03 -2.025534e-03 -2.381559e-03
+    ## action_genre            -2.599324e-03 -3.055325e-03 -3.590531e-03
+    ## romance_genre            2.820841e-04  3.282321e-04  3.811469e-04
+    ## adventure_genre          5.442951e-05  6.387949e-05  7.492348e-05
+    ## crime_genre              1.164247e-03  1.364476e-03  1.598060e-03
+    ## scifi_genre             -2.055785e-03 -2.409751e-03 -2.822751e-03
+    ## fantasy_genre           -1.860428e-03 -2.177490e-03 -2.546235e-03
+    ## horror_genre            -6.680042e-03 -7.833171e-03 -9.179769e-03
+    ## family_genre            -2.356440e-03 -2.754918e-03 -3.217204e-03
+    ## mystery_genre            1.289544e-04  1.512486e-04  1.773152e-04
+    ## biography_genre          7.747776e-03  9.071896e-03  1.061315e-02
+    ## animation_genre          1.959536e-03  2.325270e-03  2.762630e-03
+    ## music_genre              3.370451e-04  3.965498e-04  4.664482e-04
+    ## war_genre                6.727347e-03  7.872163e-03  9.202856e-03
+    ## history_genre            6.689116e-03  7.819814e-03  9.131192e-03
+    ## sport_genre              1.536166e-03  1.796012e-03  2.097443e-03
+    ## musical_genre            1.207262e-03  1.418009e-03  1.664872e-03
+    ## documentary_genre        6.757522e-03  7.955738e-03  9.366848e-03
+    ## western_genre            2.959662e-03  3.462003e-03  4.045394e-03
+    ## filmnoir_genre           1.316732e-02  1.543644e-02  1.808457e-02
+    ## short_genre              7.206332e-03  8.516846e-03  1.007209e-02
+    ## news_genre               1.208937e-02  1.420285e-02  1.668069e-02
+    ## director_movies          5.534661e-04  6.480142e-04  7.580557e-04
+    ## actor_1_movies           1.693237e-04  1.980660e-04  2.314506e-04
+    ## actor_2_movies           2.850165e-04  3.324116e-04  3.870924e-04
+    ## actor_3_movies           2.820397e-04  3.282281e-04  3.812414e-04
     ##                                                                  
-    ## (Intercept)              7.020173e+00  7.123757e+00  7.244874e+00
-    ## actor_1_facebook_likes   9.788166e-08  1.143582e-07  1.334464e-07
-    ## actor_2_facebook_likes   4.068147e-07  4.744363e-07  5.524501e-07
-    ## actor_3_facebook_likes   6.369740e-07  7.411500e-07  8.606843e-07
-    ## director_facebook_likes  1.096444e-06  1.281958e-06  1.497214e-06
-    ## duration                 2.847659e-04  3.330174e-04  3.890341e-04
-    ## budget                   2.663806e-12  3.112899e-12  3.633321e-12
-    ## title_year              -3.136442e-04 -3.679375e-04 -4.313995e-04
-    ## facenumber_in_poster    -5.550046e-04 -6.510237e-04 -7.632175e-04
-    ## num_critic_for_reviews   5.069188e-05  5.944604e-05  6.967088e-05
-    ## color                   -1.253325e-02 -1.466753e-02 -1.714909e-02
-    ## drama_genre              1.095361e-02  1.281343e-02  1.497405e-02
-    ## comedy_genre            -6.524390e-03 -7.621699e-03 -8.892567e-03
-    ## thriller_genre          -2.778458e-03 -3.261517e-03 -3.826826e-03
-    ## action_genre            -4.192970e-03 -4.919915e-03 -5.769966e-03
-    ## romance_genre            4.350100e-04  5.011549e-04  5.751075e-04
-    ## adventure_genre          1.073754e-04  1.293986e-04  1.562389e-04
-    ## crime_genre              1.896288e-03  2.222266e-03  2.602527e-03
-    ## scifi_genre             -3.301226e-03 -3.860037e-03 -4.508627e-03
-    ## fantasy_genre           -2.962731e-03 -3.454153e-03 -4.020874e-03
-    ## horror_genre            -1.078272e-02 -1.262334e-02 -1.476519e-02
-    ## family_genre            -3.762573e-03 -4.383755e-03 -5.099081e-03
-    ## mystery_genre            2.220445e-04  2.627658e-04  3.112101e-04
-    ## biography_genre          1.241403e-02  1.449348e-02  1.689863e-02
-    ## animation_genre          3.265463e-03  3.887014e-03  4.633825e-03
-    ## music_genre              5.116148e-04  5.944725e-04  6.890744e-04
-    ## war_genre                1.075134e-02  1.253890e-02  1.460144e-02
-    ## history_genre            1.065655e-02  1.240927e-02  1.442435e-02
-    ## sport_genre              2.457453e-03  2.864008e-03  3.332309e-03
-    ## musical_genre            1.919079e-03  2.244251e-03  2.621474e-03
-    ## documentary_genre        1.094418e-02  1.287079e-02  1.513449e-02
-    ## western_genre            4.726670e-03  5.509642e-03  6.411889e-03
-    ## filmnoir_genre           2.111835e-02  2.468918e-02  2.883118e-02
-    ## short_genre              1.185030e-02  1.402348e-02  1.660791e-02
-    ## news_genre               1.948149e-02  2.284295e-02  2.676757e-02
+    ## (Intercept)              7.011814e+00  7.114015e+00  7.233532e+00
+    ## actor_1_facebook_likes   9.583340e-08  1.115670e-07  1.296531e-07
+    ## actor_2_facebook_likes   3.989025e-07  4.636687e-07  5.378397e-07
+    ## actor_3_facebook_likes   6.239337e-07  7.234372e-07  8.367029e-07
+    ## director_facebook_likes  1.082653e-06  1.263112e-06  1.471516e-06
+    ## duration                 2.835141e-04  3.313109e-04  3.867137e-04
+    ## budget                   2.641353e-12  3.082408e-12  3.592047e-12
+    ## title_year              -3.135319e-04 -3.677777e-04 -4.311717e-04
+    ## facenumber_in_poster    -5.561831e-04 -6.526218e-04 -7.653770e-04
+    ## num_critic_for_reviews   5.044437e-05  5.910889e-05  6.921288e-05
+    ## color                   -1.254819e-02 -1.468787e-02 -1.717669e-02
+    ## drama_genre              1.094984e-02  1.280834e-02  1.496722e-02
+    ## comedy_genre            -6.515588e-03 -7.609850e-03 -8.876694e-03
+    ## thriller_genre          -2.799630e-03 -3.290321e-03 -3.865897e-03
+    ## action_genre            -4.218378e-03 -4.954448e-03 -5.816753e-03
+    ## romance_genre            4.415152e-04  5.099648e-04  5.869943e-04
+    ## adventure_genre          8.780776e-05  1.028049e-04  1.202096e-04
+    ## crime_genre              1.870179e-03  2.186692e-03  2.554187e-03
+    ## scifi_genre             -3.303930e-03 -3.863588e-03 -4.513242e-03
+    ## fantasy_genre           -2.974235e-03 -3.469868e-03 -4.042291e-03
+    ## horror_genre            -1.075025e-02 -1.257906e-02 -1.470496e-02
+    ## family_genre            -3.752231e-03 -4.369724e-03 -5.080109e-03
+    ## mystery_genre            2.077702e-04  2.433267e-04  2.848109e-04
+    ## biography_genre          1.240378e-02  1.447958e-02  1.687984e-02
+    ## animation_genre          3.286687e-03  3.915945e-03  4.673160e-03
+    ## music_genre              5.484762e-04  6.446086e-04  7.570619e-04
+    ## war_genre                1.074632e-02  1.253213e-02  1.459236e-02
+    ## history_genre            1.064826e-02  1.239805e-02  1.440922e-02
+    ## sport_genre              2.446235e-03  2.848641e-03  3.311295e-03
+    ## musical_genre            1.953739e-03  2.291320e-03  2.685186e-03
+    ## documentary_genre        1.102873e-02  1.298596e-02  1.529095e-02
+    ## western_genre            4.721355e-03  5.502470e-03  6.402255e-03
+    ## filmnoir_genre           2.117051e-02  2.476049e-02  2.892843e-02
+    ## short_genre              1.191976e-02  1.411738e-02  1.673432e-02
+    ## news_genre               1.958366e-02  2.298190e-02  2.695597e-02
+    ## director_movies          8.858893e-04  1.034068e-03  1.205397e-03
+    ## actor_1_movies           2.701417e-04  3.148676e-04  3.664161e-04
+    ## actor_2_movies           4.499613e-04  5.219527e-04  6.040007e-04
+    ## actor_3_movies           4.418140e-04  5.106543e-04  5.883941e-04
     ##                                                                  
-    ## (Intercept)              7.386339e+00  7.551366e+00  7.743606e+00
-    ## actor_1_facebook_likes   1.555025e-07  1.809114e-07  2.100812e-07
-    ## actor_2_facebook_likes   6.421474e-07  7.448690e-07  8.619634e-07
-    ## actor_3_facebook_likes   9.972266e-07  1.152373e-06  1.327557e-06
-    ## director_facebook_likes  1.746385e-06  2.034016e-06  2.364979e-06
-    ## duration                 4.539186e-04  5.288782e-04  6.152169e-04
-    ## budget                   4.234783e-12  4.927727e-12  5.723138e-12
-    ## title_year              -5.054956e-04 -5.918958e-04 -6.924936e-04
-    ## facenumber_in_poster    -8.941439e-04 -1.046701e-03 -1.224150e-03
-    ## num_critic_for_reviews   8.159864e-05  9.549304e-05  1.116517e-04
-    ## color                   -2.002857e-02 -2.336189e-02 -2.721007e-02
-    ## drama_genre              1.747876e-02  2.037525e-02  2.371537e-02
-    ## comedy_genre            -1.036051e-02 -1.205086e-02 -1.399037e-02
-    ## thriller_genre          -4.487711e-03 -5.259400e-03 -6.159178e-03
-    ## action_genre            -6.762876e-03 -7.921162e-03 -9.270341e-03
-    ## romance_genre            6.569043e-04  7.461577e-04  8.418627e-04
-    ## adventure_genre          1.889659e-04  2.288498e-04  2.773672e-04
-    ## crime_genre              3.045506e-03  3.560758e-03  4.159039e-03
-    ## scifi_genre             -5.259719e-03 -6.127260e-03 -7.126338e-03
-    ## fantasy_genre           -4.672262e-03 -5.418113e-03 -6.268402e-03
-    ## horror_genre            -1.725292e-02 -2.013613e-02 -2.346936e-02
-    ## family_genre            -5.919898e-03 -6.857931e-03 -7.924943e-03
-    ## mystery_genre            3.689192e-04  4.377597e-04  5.199906e-04
-    ## biography_genre          1.967237e-02  2.286036e-02  2.651012e-02
-    ## animation_genre          5.533009e-03  6.617859e-03  7.929202e-03
-    ## music_genre              7.963979e-04  9.171884e-04  1.051777e-03
-    ## war_genre                1.697331e-02  1.969025e-02  2.278841e-02
-    ## history_genre            1.673168e-02  1.936114e-02  2.234107e-02
-    ## sport_genre              3.869736e-03  4.483824e-03  5.181961e-03
-    ## musical_genre            3.057872e-03  3.561049e-03  4.138892e-03
-    ## documentary_genre        1.779335e-02  2.091500e-02  2.457805e-02
-    ## western_genre            7.447800e-03  8.632115e-03  9.979356e-03
-    ## filmnoir_genre           3.362369e-02  3.915268e-02  4.550955e-02
-    ## short_genre              1.968498e-02  2.335285e-02  2.772982e-02
-    ## news_genre               3.134341e-02  3.666996e-02  4.285874e-02
+    ## (Intercept)              7.373147e+00  7.536040e+00  7.725814e+00
+    ## actor_1_facebook_likes   1.503633e-07  1.739735e-07  2.007535e-07
+    ## actor_2_facebook_likes   6.223894e-07  7.182537e-07  8.262706e-07
+    ## actor_3_facebook_likes   9.648804e-07  1.108933e-06  1.269511e-06
+    ## director_facebook_likes  1.711433e-06  1.986618e-06  2.300922e-06
+    ## duration                 4.507731e-04  5.246289e-04  6.094994e-04
+    ## budget                   4.179125e-12  4.852999e-12  5.623307e-12
+    ## title_year              -5.051701e-04 -5.914297e-04 -6.918254e-04
+    ## facenumber_in_poster    -8.970499e-04 -1.050593e-03 -1.229333e-03
+    ## num_critic_for_reviews   8.097846e-05  9.465630e-05  1.105275e-04
+    ## color                   -2.006591e-02 -2.341222e-02 -2.727761e-02
+    ## drama_genre              1.746965e-02  2.036316e-02  2.369946e-02
+    ## comedy_genre            -1.033937e-02 -1.202289e-02 -1.395365e-02
+    ## thriller_genre          -4.540531e-03 -5.330527e-03 -6.254533e-03
+    ## action_genre            -6.826036e-03 -8.006072e-03 -9.383950e-03
+    ## romance_genre            6.728738e-04  7.675060e-04  8.702400e-04
+    ## adventure_genre          1.403300e-04  1.634702e-04  1.899000e-04
+    ## crime_genre              2.980025e-03  3.472376e-03  4.040242e-03
+    ## scifi_genre             -5.265640e-03 -6.134734e-03 -7.135578e-03
+    ## fantasy_genre           -4.701375e-03 -5.457567e-03 -6.321682e-03
+    ## horror_genre            -1.717124e-02 -2.002574e-02 -2.332076e-02
+    ## family_genre            -5.894346e-03 -6.823675e-03 -7.879255e-03
+    ## mystery_genre            3.331825e-04  3.895603e-04  4.552554e-04
+    ## biography_genre          1.964708e-02  2.282647e-02  2.646495e-02
+    ## animation_genre          5.586328e-03  6.689884e-03  8.026112e-03
+    ## music_genre              8.882752e-04  1.040858e-03  1.217483e-03
+    ## war_genre                1.696119e-02  1.967419e-02  2.276727e-02
+    ## history_genre            1.671139e-02  1.933407e-02  2.230515e-02
+    ## sport_genre              3.841065e-03  4.444805e-03  5.129012e-03
+    ## musical_genre            3.143788e-03  3.676408e-03  4.293021e-03
+    ## documentary_genre        1.800520e-02  2.120082e-02  2.496203e-02
+    ## western_genre            7.434928e-03  8.615027e-03  9.956838e-03
+    ## filmnoir_genre           3.375601e-02  3.933221e-02  4.575236e-02
+    ## short_genre              1.985436e-02  2.357853e-02  2.802861e-02
+    ## news_genre               3.159795e-02  3.701246e-02  4.331746e-02
+    ## director_movies          1.402915e-03  1.629859e-03  1.889605e-03
+    ## actor_1_movies           4.256239e-04  4.933607e-04  5.705040e-04
+    ## actor_2_movies           6.969925e-04  8.017056e-04  9.187239e-04
+    ## actor_3_movies           6.755186e-04  7.722749e-04  8.785527e-04
     ##                                                                  
-    ## (Intercept)              7.967181e+00  8.226717e+00  8.527358e+00
-    ## actor_1_facebook_likes   2.434355e-07  2.814016e-07  3.243947e-07
-    ## actor_2_facebook_likes   9.947252e-07  1.144313e-06  1.311642e-06
-    ## actor_3_facebook_likes   1.523905e-06  1.742046e-06  1.981868e-06
-    ## director_facebook_likes  2.744395e-06  3.177502e-06  3.669478e-06
-    ## duration                 7.143186e-04  8.276211e-04  9.565775e-04
-    ## budget                   6.632251e-12  7.666112e-12  8.834960e-12
-    ## title_year              -8.094227e-04 -9.450707e-04 -1.102088e-03
-    ## facenumber_in_poster    -1.430120e-03 -1.668610e-03 -1.943958e-03
-    ## num_critic_for_reviews   1.304084e-04  1.521341e-04  1.772377e-04
-    ## color                   -3.163860e-02 -3.671655e-02 -4.251489e-02
-    ## drama_genre              2.755469e-02  3.195165e-02  3.696641e-02
-    ## comedy_genre            -1.620665e-02 -1.872730e-02 -2.157874e-02
-    ## thriller_genre          -7.206533e-03 -8.423233e-03 -9.833340e-03
-    ## action_genre            -1.083913e-02 -1.265956e-02 -1.476701e-02
-    ## romance_genre            9.421482e-04  1.043965e-03  1.142706e-03
-    ## adventure_genre          3.361831e-04  4.070925e-04  4.918994e-04
-    ## crime_genre              4.852396e-03  5.654224e-03  6.579317e-03
-    ## scifi_genre             -8.273022e-03 -9.584114e-03 -1.107678e-02
-    ## fantasy_genre           -7.232940e-03 -8.320934e-03 -9.540443e-03
-    ## horror_genre            -2.731184e-02 -3.172689e-02 -3.678100e-02
-    ## family_genre            -9.132271e-03 -1.049025e-02 -1.200752e-02
-    ## mystery_genre            6.183421e-04  7.361021e-04  8.772080e-04
-    ## biography_genre          3.066962e-02  3.538539e-02  4.069992e-02
-    ## animation_genre          9.516967e-03  1.144194e-02  1.377767e-02
-    ## music_genre              1.199823e-03  1.359964e-03  1.529343e-03
-    ## war_genre                2.630278e-02  3.026516e-02  3.470151e-02
-    ## history_genre            2.569621e-02  2.944509e-02  3.359653e-02
-    ## sport_genre              5.970960e-03  6.856500e-03  7.842396e-03
-    ## musical_genre            4.799259e-03  5.549492e-03  6.395724e-03
-    ## documentary_genre        2.887354e-02  3.390652e-02  3.979755e-02
-    ## western_genre            1.150302e-02  1.321449e-02  1.512164e-02
-    ## filmnoir_genre           5.278911e-02  6.108649e-02  7.049261e-02
-    ## short_genre              3.295820e-02  3.920875e-02  4.668535e-02
-    ## news_genre               5.003357e-02  5.833032e-02  6.789592e-02
+    ## (Intercept)              7.946539e+00  8.202771e+00  8.499569e+00
+    ## actor_1_facebook_likes   2.309534e-07  2.647874e-07  3.024132e-07
+    ## actor_2_facebook_likes   9.471033e-07  1.081144e-06  1.228401e-06
+    ## actor_3_facebook_likes   1.446787e-06  1.640258e-06  1.848521e-06
+    ## director_facebook_likes  2.658158e-06  3.061914e-06  3.515321e-06
+    ## duration                 7.066606e-04  8.174169e-04  9.430601e-04
+    ## budget                   6.499648e-12  7.491127e-12  8.605751e-12
+    ## title_year              -8.084642e-04 -9.436959e-04 -1.100118e-03
+    ## facenumber_in_poster    -1.436979e-03 -1.677621e-03 -1.955697e-03
+    ## num_critic_for_reviews   1.289051e-04  1.501348e-04  1.745951e-04
+    ## color                   -3.172880e-02 -3.683635e-02 -4.267302e-02
+    ## drama_genre              2.753393e-02  3.192485e-02  3.693224e-02
+    ## comedy_genre            -1.615889e-02 -1.866584e-02 -2.150064e-02
+    ## thriller_genre          -7.333718e-03 -8.591901e-03 -1.005558e-02
+    ## action_genre            -1.099031e-02 -1.285950e-02 -1.502961e-02
+    ## romance_genre            9.796249e-04  1.093095e-03  1.206577e-03
+    ## adventure_genre          2.198062e-04  2.532144e-04  2.898694e-04
+    ## crime_genre              4.693471e-03  5.442761e-03  6.299661e-03
+    ## scifi_genre             -8.284139e-03 -9.597000e-03 -1.109093e-02
+    ## fantasy_genre           -7.304608e-03 -8.416900e-03 -9.668288e-03
+    ## horror_genre            -2.711271e-02 -3.146143e-02 -3.642918e-02
+    ## family_genre            -9.071699e-03 -1.041049e-02 -1.190330e-02
+    ## mystery_genre            5.318137e-04  6.210705e-04  7.252176e-04
+    ## biography_genre          3.060979e-02  3.530670e-02  4.059726e-02
+    ## animation_genre          9.646770e-03  1.161492e-02  1.400685e-02
+    ## music_genre              1.420707e-03  1.652671e-03  1.914658e-03
+    ## war_genre                2.627521e-02  3.022954e-02  3.465603e-02
+    ## history_genre            2.564890e-02  2.938327e-02  3.351651e-02
+    ## sport_genre              5.899353e-03  6.760042e-03  7.713048e-03
+    ## musical_genre            5.004029e-03  5.819808e-03  6.749999e-03
+    ## documentary_genre        2.938689e-02  3.458904e-02  4.069932e-02
+    ## western_genre            1.147361e-02  1.317647e-02  1.507309e-02
+    ## filmnoir_genre           5.311632e-02  6.152563e-02  7.107931e-02
+    ## short_genre              3.335089e-02  3.972047e-02  4.734571e-02
+    ## news_genre               5.064465e-02  5.913939e-02  6.895968e-02
+    ## director_movies          2.185577e-03  2.521125e-03  2.899359e-03
+    ## actor_1_movies           6.579051e-04  7.563450e-04  8.664784e-04
+    ## actor_2_movies           1.048333e-03  1.190397e-03  1.344211e-03
+    ## actor_3_movies           9.937383e-04  1.116541e-03  1.244797e-03
     ##                                                                  
-    ## (Intercept)              8.874783e+00  9.275191e+00  9.735239e+00
-    ## actor_1_facebook_likes   3.727973e-07  4.269345e-07  4.870272e-07
-    ## actor_2_facebook_likes   1.497251e-06  1.701145e-06  1.922633e-06
-    ## actor_3_facebook_likes   2.242230e-06  2.520629e-06  2.812920e-06
-    ## director_facebook_likes  4.225193e-06  4.848889e-06  5.543822e-06
-    ## duration                 1.102604e-03  1.267013e-03  1.450938e-03
-    ## budget                   1.014740e-11  1.160935e-11  1.322339e-11
-    ## title_year              -1.283389e-03 -1.492145e-03 -1.731749e-03
-    ## facenumber_in_poster    -2.260786e-03 -2.623895e-03 -3.038195e-03
-    ## num_critic_for_reviews   2.061649e-04  2.393959e-04  2.774415e-04
-    ## color                   -4.910427e-02 -5.655197e-02 -6.491787e-02
-    ## drama_genre              4.265912e-02  4.908780e-02  5.630567e-02
-    ## comedy_genre            -2.478474e-02 -2.836453e-02 -3.233099e-02
-    ## thriller_genre          -1.146310e-02 -1.334066e-02 -1.549551e-02
-    ## action_genre            -1.720008e-02 -2.000020e-02 -2.321095e-02
-    ## romance_genre            1.231763e-03  1.302025e-03  1.341329e-03
-    ## adventure_genre          5.922034e-04  7.090587e-04  8.424360e-04
-    ## crime_genre              7.643885e-03  8.865533e-03  1.026316e-02
-    ## scifi_genre             -1.276808e-02 -1.467438e-02 -1.681072e-02
-    ## fantasy_genre           -1.089775e-02 -1.239670e-02 -1.403806e-02
-    ## horror_genre            -4.254231e-02 -4.907870e-02 -5.645522e-02
-    ## family_genre            -1.369031e-02 -1.554168e-02 -1.756089e-02
-    ## mystery_genre            1.046334e-03  1.248956e-03  1.491343e-03
-    ## biography_genre          4.664834e-02  5.325454e-02  6.052665e-02
-    ## animation_genre          1.661236e-02  2.005069e-02  2.421515e-02
-    ## music_genre              1.703001e-03  1.873117e-03  2.028128e-03
-    ## war_genre                3.962868e-02  4.505068e-02  5.095450e-02
-    ## history_genre            3.814570e-02  4.306936e-02  4.832092e-02
-    ## sport_genre              8.929716e-03  1.011574e-02  1.139283e-02
-    ## musical_genre            7.341923e-03  8.388633e-03  9.531413e-03
-    ## documentary_genre        4.668412e-02  5.472180e-02  6.408477e-02
-    ## western_genre            1.722706e-02  1.952606e-02  2.200429e-02
-    ## filmnoir_genre           8.108812e-02  9.293523e-02  1.060677e-01
-    ## short_genre              5.562990e-02  6.632700e-02  7.910786e-02
-    ## news_genre               7.888636e-02  9.146334e-02  1.057893e-01
+    ## (Intercept)              8.842495e+00  9.237581e+00  9.691339e+00
+    ## actor_1_facebook_likes   3.439110e-07  3.892377e-07  4.382878e-07
+    ## actor_2_facebook_likes   1.388374e-06  1.559894e-06  1.741097e-06
+    ## actor_3_facebook_likes   2.069011e-06  2.297799e-06  2.529212e-06
+    ## director_facebook_likes  4.020749e-06  4.579473e-06  5.191235e-06
+    ## duration                 1.084815e-03  1.243779e-03  1.420831e-03
+    ## budget                   9.849663e-12  1.122661e-11  1.273550e-11
+    ## title_year              -1.280572e-03 -1.488123e-03 -1.726058e-03
+    ## facenumber_in_poster    -2.275931e-03 -2.643248e-03 -3.062528e-03
+    ## num_critic_for_reviews   2.026958e-04  2.348777e-04  2.716043e-04
+    ## color                   -4.931159e-02 -5.682159e-02 -6.526579e-02
+    ## drama_genre              4.261619e-02  4.903474e-02  5.624158e-02
+    ## comedy_genre            -2.468693e-02 -2.824419e-02 -3.218563e-02
+    ## thriller_genre          -1.175380e-02 -1.371788e-02 -1.598078e-02
+    ## action_genre            -1.754226e-02 -2.044205e-02 -2.377623e-02
+    ## romance_genre            1.314021e-03  1.406819e-03  1.473355e-03
+    ## adventure_genre          3.290571e-04  3.695158e-04  4.084946e-04
+    ## crime_genre              7.276580e-03  8.386818e-03  9.644630e-03
+    ## scifi_genre             -1.278232e-02 -1.468651e-02 -1.681694e-02
+    ## fantasy_genre           -1.106709e-02 -1.261947e-02 -1.432912e-02
+    ## horror_genre            -4.207914e-02 -4.847359e-02 -5.567110e-02
+    ## family_genre            -1.355529e-02 -1.536842e-02 -1.734096e-02
+    ## mystery_genre            8.468821e-04  9.892213e-04  1.155978e-03
+    ## biography_genre          4.651564e-02  5.308483e-02  6.031207e-02
+    ## animation_genre          1.691405e-02  2.044497e-02  2.472634e-02
+    ## music_genre              2.206458e-03  2.525384e-03  2.865508e-03
+    ## war_genre                3.957140e-02  4.497966e-02  5.086803e-02
+    ## history_genre            3.804319e-02  4.293960e-02  4.815890e-02
+    ## sport_genre              8.757159e-03  9.886933e-03  1.109144e-02
+    ## musical_genre            7.802490e-03  8.981946e-03  1.028819e-02
+    ## documentary_genre        4.786717e-02  5.626138e-02  6.607082e-02
+    ## western_genre            1.716599e-02  1.945061e-02  2.191306e-02
+    ## filmnoir_genre           8.186800e-02  9.396607e-02  1.074221e-01
+    ## short_genre              5.647263e-02  6.738875e-02  8.042628e-02
+    ## news_genre               8.027398e-02  9.325721e-02  1.080856e-01
+    ## director_movies          3.322946e-03  3.793878e-03  4.313163e-03
+    ## actor_1_movies           9.887694e-04  1.123422e-03  1.270295e-03
+    ## actor_2_movies           1.508356e-03  1.680548e-03  1.857508e-03
+    ## actor_3_movies           1.375264e-03  1.503420e-03  1.623295e-03
     ##                                                                  
-    ## (Intercept)              1.026209e+01  1.086320e+01  1.154625e+01
-    ## actor_1_facebook_likes   5.532261e-07  6.254987e-07  7.036550e-07
-    ## actor_2_facebook_likes   2.160116e-06  2.410948e-06  2.671289e-06
-    ## actor_3_facebook_likes   3.112678e-06  3.411240e-06  3.697269e-06
-    ## director_facebook_likes  6.311726e-06  7.152408e-06  8.063178e-06
-    ## duration                 1.655221e-03  1.880335e-03  2.126267e-03
-    ## budget                   1.498505e-11  1.688408e-11  1.890100e-11
-    ## title_year              -2.005836e-03 -2.318166e-03 -2.672595e-03
-    ## facenumber_in_poster    -3.508232e-03 -4.038231e-03 -4.631538e-03
-    ## num_critic_for_reviews   3.208319e-04  3.701124e-04  4.258278e-04
-    ## color                   -7.424973e-02 -8.457732e-02 -9.590622e-02
-    ## drama_genre              6.435823e-02  7.327984e-02  8.309052e-02
-    ## comedy_genre            -3.668722e-02 -4.142555e-02 -4.652443e-02
-    ## thriller_genre          -1.795821e-02 -2.075879e-02 -2.392590e-02
-    ## action_genre            -2.687738e-02 -3.104416e-02 -3.575391e-02
-    ## romance_genre            1.334060e-03  1.260558e-03  1.096953e-03
-    ## adventure_genre          9.905908e-04  1.149083e-03  1.309701e-03
-    ## crime_genre              1.185695e-02  1.366792e-02  1.571767e-02
-    ## scifi_genre             -1.918998e-02 -2.182237e-02 -2.471473e-02
-    ## fantasy_genre           -1.581898e-02 -1.773272e-02 -1.976863e-02
-    ## horror_genre            -6.473090e-02 -7.395528e-02 -8.416442e-02
-    ## family_genre            -1.974308e-02 -2.207934e-02 -2.455737e-02
-    ## mystery_genre            1.780618e-03  2.124440e-03  2.530757e-03
-    ## biography_genre          6.845219e-02  7.699345e-02  8.608334e-02
-    ## animation_genre          2.924665e-02  3.530413e-02  4.256242e-02
-    ## music_genre              2.151583e-03  2.221215e-03  2.207847e-03
-    ## war_genre                5.730589e-02  6.404561e-02  7.108659e-02
-    ## history_genre            5.382565e-02  5.947635e-02  6.513082e-02
-    ## sport_genre              1.274728e-02  1.415825e-02  1.559706e-02
-    ## musical_genre            1.075888e-02  1.205070e-02  1.337543e-02
-    ## documentary_genre        7.496565e-02  8.757400e-02  1.021332e-01
-    ## western_genre            2.463533e-02  2.737839e-02  3.017635e-02
-    ## filmnoir_genre           1.204785e-01  1.361056e-01  1.528173e-01
-    ## short_genre              9.435229e-02  1.124887e-01  1.339897e-01
-    ## news_genre               1.220205e-01  1.402976e-01  1.607343e-01
+    ## (Intercept)              1.021062e+01  1.080257e+01  1.147444e+01
+    ## actor_1_facebook_likes   4.907710e-07  5.462724e-07  6.042456e-07
+    ## actor_2_facebook_likes   1.929190e-06  2.120472e-06  2.310327e-06
+    ## actor_3_facebook_likes   2.755821e-06  2.968260e-06  3.155302e-06
+    ## director_facebook_likes  5.853874e-06  6.562894e-06  7.311117e-06
+    ## duration                 1.616563e-03  1.831184e-03  2.064435e-03
+    ## budget                   1.437090e-11  1.612076e-11  1.796527e-11
+    ## title_year              -1.997816e-03 -2.306951e-03 -2.657057e-03
+    ## facenumber_in_poster    -3.538471e-03 -4.075227e-03 -4.676018e-03
+    ## num_critic_for_reviews   3.133621e-04  3.606501e-04  4.139716e-04
+    ## color                   -7.469461e-02 -8.514075e-02 -9.661258e-02
+    ## drama_genre              6.428278e-02  7.319387e-02  8.299667e-02
+    ## comedy_genre            -3.651619e-02 -4.123030e-02 -4.630983e-02
+    ## thriller_genre          -1.857631e-02 -2.153787e-02 -2.489694e-02
+    ## action_genre            -2.759278e-02 -3.193907e-02 -3.685946e-02
+    ## romance_genre            1.498230e-03  1.461851e-03  1.340040e-03
+    ## adventure_genre          4.420421e-04  4.639154e-04  4.649191e-04
+    ## crime_genre              1.106527e-02  1.266511e-02  1.446169e-02
+    ## scifi_genre             -1.918432e-02 -2.179584e-02 -2.465448e-02
+    ## fantasy_genre           -1.619629e-02 -1.821761e-02 -2.038597e-02
+    ## horror_genre            -6.372418e-02 -7.267582e-02 -8.255624e-02
+    ## family_genre            -1.946720e-02 -2.173773e-02 -2.414024e-02
+    ## mystery_genre            1.351557e-03  1.580995e-03  1.849842e-03
+    ## biography_genre          6.818444e-02  7.666415e-02  8.568480e-02
+    ## animation_genre          2.990369e-02  3.614068e-02  4.361672e-02
+    ## music_genre              3.215841e-03  3.559058e-03  3.869861e-03
+    ## war_genre                5.720283e-02  6.392582e-02  7.095146e-02
+    ## history_genre            5.362637e-02  5.923539e-02  6.484494e-02
+    ## sport_genre              1.235327e-02  1.364753e-02  1.494126e-02
+    ## musical_genre            1.171372e-02  1.324129e-02  1.484129e-02
+    ## documentary_genre        7.750257e-02  9.077980e-02  1.061369e-01
+    ## western_genre            2.452800e-02  2.725643e-02  3.004411e-02
+    ## filmnoir_genre           1.222462e-01  1.383967e-01  1.557643e-01
+    ## short_genre              9.596266e-02  1.144191e-01  1.362548e-01
+    ## news_genre               1.249277e-01  1.439335e-01  1.652215e-01
+    ## director_movies          4.880585e-03  5.494401e-03  6.151097e-03
+    ## actor_1_movies           1.428843e-03  1.598054e-03  1.776409e-03
+    ## actor_2_movies           2.034903e-03  2.207341e-03  2.368489e-03
+    ## actor_3_movies           1.727379e-03  1.806628e-03  1.850625e-03
     ##                                                                  
-    ## (Intercept)              1.231896e+01  1.318895e+01  1.416339e+01
-    ## actor_1_facebook_likes   7.873208e-07  8.759350e-07  9.687631e-07
-    ## actor_2_facebook_likes   2.936027e-06  3.198806e-06  3.452161e-06
-    ## actor_3_facebook_likes   3.956750e-06  4.173165e-06  4.327970e-06
-    ## director_facebook_likes  9.038369e-06  1.006894e-05  1.114224e-05
-    ## duration                 2.392425e-03  2.677563e-03  2.979733e-03
-    ## budget                   2.100599e-11  2.315778e-11  2.530314e-11
-    ## title_year              -3.072984e-03 -3.523093e-03 -4.026461e-03
-    ## facenumber_in_poster    -5.290227e-03 -6.014613e-03 -6.802755e-03
-    ## num_critic_for_reviews   4.885066e-04  5.586423e-04  6.366722e-04
-    ## color                   -1.082112e-01 -1.214297e-01 -1.354568e-01
-    ## drama_genre              9.379294e-02  1.053700e-01  1.177834e-01
-    ## comedy_genre            -5.194686e-02 -5.763933e-02 -6.353193e-02
-    ## thriller_genre          -2.748514e-02 -3.145738e-02 -3.585682e-02
-    ## action_genre            -4.104475e-02 -4.694739e-02 -5.348168e-02
-    ## romance_genre            8.151292e-04  3.830828e-04 -2.342744e-04
-    ## adventure_genre          1.459218e-03  1.578173e-03  1.639829e-03
-    ## crime_genre              1.802769e-02  2.061851e-02  2.350836e-02
-    ## scifi_genre             -2.787024e-02 -3.128832e-02 -3.496497e-02
-    ## fantasy_genre           -2.191265e-02 -2.414819e-02 -2.645751e-02
-    ## horror_genre            -9.537701e-02 -1.075906e-01 -1.207784e-01
-    ## family_genre            -2.716285e-02 -2.988151e-02 -3.270179e-02
-    ## mystery_genre            3.007241e-03  3.560527e-03  4.195231e-03
-    ## biography_genre          9.562275e-02  1.054798e-01  1.154919e-01
-    ## animation_genre          5.120833e-02  6.143444e-02  7.343063e-02
-    ## music_genre              2.074682e-03  1.777081e-03  1.263133e-03
-    ## war_genre                7.831289e-02  8.558101e-02  9.272416e-02
-    ## history_genre            7.061163e-02  7.570932e-02  8.018969e-02
-    ## sport_genre              1.702687e-02  1.840323e-02  1.967545e-02
-    ## musical_genre            1.468861e-02  1.593159e-02  1.703139e-02
-    ## documentary_genre        1.188754e-01  1.380333e-01  1.598303e-01
-    ## western_genre            3.295461e-02  3.562114e-02  3.806807e-02
-    ## filmnoir_genre           1.703961e-01  1.885260e-01  2.067823e-01
-    ## short_genre              1.593633e-01  1.891369e-01  2.238357e-01
-    ## news_genre               1.834032e-01  2.083209e-01  2.354317e-01
+    ## (Intercept)              1.223348e+01  1.308673e+01  1.404079e+01
+    ## actor_1_facebook_likes   6.640364e-07  7.249231e-07  7.861710e-07
+    ## actor_2_facebook_likes   2.493305e-06  2.663305e-06  2.813841e-06
+    ## actor_3_facebook_likes   3.304092e-06  3.400574e-06  3.430127e-06
+    ## director_facebook_likes  8.088453e-06  8.881822e-06  9.675319e-06
+    ## duration                 2.315525e-03  2.583074e-03  2.865097e-03
+    ## budget                   1.987584e-11  2.181427e-11  2.373244e-11
+    ## title_year              -3.051692e-03 -3.494275e-03 -3.987992e-03
+    ## facenumber_in_poster    -5.342683e-03 -6.075171e-03 -6.871051e-03
+    ## num_critic_for_reviews   4.738230e-04  5.406792e-04  6.149765e-04
+    ## color                   -1.090874e-01 -1.225050e-01 -1.367618e-01
+    ## drama_genre              9.369640e-02  1.052793e-01  1.177112e-01
+    ## comedy_genre            -5.172252e-02 -5.742088e-02 -6.334218e-02
+    ## thriller_genre          -2.868119e-02 -3.291246e-02 -3.760461e-02
+    ## action_genre            -4.239243e-02 -4.856729e-02 -5.540053e-02
+    ## romance_genre            1.103944e-03  7.203394e-04  1.524449e-04
+    ## adventure_genre          4.320315e-04  3.474967e-04  1.880119e-04
+    ## crime_genre              1.647368e-02  1.872055e-02  2.122196e-02
+    ## scifi_genre             -2.775861e-02 -3.110209e-02 -3.467479e-02
+    ## fantasy_genre           -2.269075e-02 -2.511845e-02 -2.765374e-02
+    ## horror_genre            -9.337962e-02 -1.051412e-01 -1.178152e-01
+    ## family_genre            -2.666108e-02 -2.928744e-02 -3.201007e-02
+    ## mystery_genre            2.163869e-03  2.528588e-03  2.948552e-03
+    ## biography_genre          9.514878e-02  1.049268e-01  1.148599e-01
+    ## animation_genre          5.252273e-02  6.305442e-02  7.540349e-02
+    ## music_genre              4.113610e-03  4.245480e-03  4.210512e-03
+    ## war_genre                7.816590e-02  8.542826e-02  9.257471e-02
+    ## history_genre            7.027954e-02  7.533246e-02  7.977294e-02
+    ## sport_genre              1.619349e-02  1.735611e-02  1.837579e-02
+    ## musical_genre            1.646936e-02  1.806475e-02  1.955003e-02
+    ## documentary_genre        1.238123e-01  1.440388e-01  1.670309e-01
+    ## western_genre            3.282055e-02  3.549934e-02  3.797976e-02
+    ## filmnoir_genre           1.741570e-01  1.932857e-01  2.127538e-01
+    ## short_genre              1.619568e-01  1.920242e-01  2.269457e-01
+    ## news_genre               1.888615e-01  2.148582e-01  2.431329e-01
+    ## director_movies          6.845222e-03  7.569319e-03  8.313992e-03
+    ## actor_1_movies           1.961879e-03  2.151956e-03  2.343715e-03
+    ## actor_2_movies           2.511313e-03  2.628460e-03  2.712761e-03
+    ## actor_3_movies           1.847920e-03  1.786565e-03  1.654835e-03
     ##                                                                  
-    ## (Intercept)              1.524881e+01  1.645074e+01  1.777331e+01
-    ## actor_1_facebook_likes   1.064928e-06  1.163454e-06  1.263329e-06
-    ## actor_2_facebook_likes   3.687789e-06  3.896957e-06  4.071012e-06
-    ## actor_3_facebook_likes   4.401392e-06  4.373548e-06  4.225827e-06
-    ## director_facebook_likes  1.224199e-05  1.334855e-05  1.443957e-05
-    ## duration                 3.296273e-03  3.623844e-03  3.958508e-03
-    ## budget                   2.737744e-11  2.930647e-11  3.100952e-11
-    ## title_year              -4.586261e-03 -5.205142e-03 -5.885047e-03
-    ## facenumber_in_poster    -7.649987e-03 -8.548564e-03 -9.487498e-03
-    ## num_critic_for_reviews   7.229528e-04  8.177335e-04  9.211292e-04
-    ## color                   -1.501408e-01 -1.652826e-01 -1.806375e-01
-    ## drama_genre              1.309732e-01  1.448591e-01  1.593424e-01
-    ## comedy_genre            -6.953967e-02 -7.556528e-02 -8.150340e-02
-    ## thriller_genre          -4.068914e-02 -4.594979e-02 -5.162252e-02
-    ## action_genre            -6.065308e-02 -6.844896e-02 -7.683541e-02
-    ## romance_genre           -1.073795e-03 -2.172257e-03 -3.564063e-03
-    ## adventure_genre          1.609596e-03  1.445135e-03  1.097405e-03
-    ## crime_genre              2.671149e-02  3.023612e-02  3.408200e-02
-    ## scifi_genre             -3.889340e-02 -4.306501e-02 -4.747048e-02
-    ## fantasy_genre           -2.882332e-02 -3.123044e-02 -3.366725e-02
-    ## horror_genre            -1.348877e-01 -1.498381e-01 -1.655235e-01
-    ## family_genre            -3.561772e-02 -3.863158e-02 -4.175574e-02
-    ## mystery_genre            4.912852e-03  5.710690e-03  6.581004e-03
-    ## biography_genre          1.254713e-01  1.352129e-01  1.445065e-01
-    ## animation_genre          8.737362e-02  1.034149e-01  1.216683e-01
-    ## music_genre              4.752795e-04 -6.468393e-04 -2.162321e-03
-    ## war_genre                9.955966e-02  1.058993e-01  1.115617e-01
-    ## history_genre            8.380551e-02  8.631228e-02  8.748697e-02
-    ## sport_genre              2.078910e-02  2.168952e-02  2.232616e-02
-    ## musical_genre            1.790223e-02  1.844886e-02  1.857204e-02
-    ## documentary_genre        1.844665e-01  2.121031e-01  2.428449e-01
-    ## western_genre            4.017518e-02  4.181532e-02  4.286160e-02
-    ## filmnoir_genre           2.246287e-01  2.414235e-01  2.564378e-01
-    ## short_genre              2.639525e-01  3.099116e-01  3.620278e-01
-    ## news_genre               2.645927e-01  2.955634e-01  3.279996e-01
+    ## (Intercept)              1.510159e+01  1.627413e+01  1.756220e+01
+    ## actor_1_facebook_likes   8.470952e-07  9.071249e-07  9.658574e-07
+    ## actor_2_facebook_likes   2.938381e-06  3.030735e-06  3.085447e-06
+    ## actor_3_facebook_likes   3.378368e-06  3.232067e-06  2.980107e-06
+    ## director_facebook_likes  1.045064e-05  1.118777e-05  1.186601e-05
+    ## duration                 3.159017e-03  3.461714e-03  3.769618e-03
+    ## budget                   2.557288e-11  2.727010e-11  2.875317e-11
+    ## title_year              -4.535673e-03 -5.139678e-03 -5.801754e-03
+    ## facenumber_in_poster    -7.725061e-03 -8.628814e-03 -9.570694e-03
+    ## num_critic_for_reviews   6.970919e-04  7.873184e-04  8.858371e-04
+    ## color                   -1.517072e-01 -1.671425e-01 -1.828224e-01
+    ## drama_genre              1.309369e-01  1.448811e-01  1.594498e-01
+    ## comedy_genre            -6.940934e-02 -7.553309e-02 -8.161530e-02
+    ## thriller_genre          -4.276154e-02 -4.837544e-02 -5.442555e-02
+    ## action_genre            -6.289220e-02 -7.102243e-02 -7.974864e-02
+    ## romance_genre           -6.387003e-04 -1.692273e-03 -3.045196e-03
+    ## adventure_genre         -7.580979e-05 -4.794878e-04 -1.064025e-03
+    ## crime_genre              2.399650e-02  2.705988e-02  3.042260e-02
+    ## scifi_genre             -3.846370e-02 -4.245449e-02 -4.663331e-02
+    ## fantasy_genre           -3.028072e-02 -3.298423e-02 -3.575097e-02
+    ## horror_genre            -1.313528e-01 -1.456827e-01 -1.607110e-01
+    ## family_genre            -3.482607e-02 -3.774144e-02 -4.077258e-02
+    ## mystery_genre            3.426494e-03  3.962415e-03  4.552788e-03
+    ## biography_genre          1.247647e-01  1.344414e-01  1.436851e-01
+    ## animation_genre          8.974664e-02  1.062332e-01  1.249725e-01
+    ## music_genre              3.944933e-03  3.378970e-03  2.441201e-03
+    ## war_genre                9.942565e-02  1.057956e-01  1.115053e-01
+    ## history_genre            8.335766e-02  8.584612e-02  8.701885e-02
+    ## sport_genre              1.919692e-02  1.976570e-02  2.003489e-02
+    ## musical_genre            2.083258e-02  2.180837e-02  2.236790e-02
+    ## documentary_genre        1.929703e-01  2.219890e-01  2.541528e-01
+    ## western_genre            4.015011e-02  4.189279e-02  4.309068e-02
+    ## filmnoir_genre           2.320525e-01  2.505654e-01  2.675836e-01
+    ## short_genre              2.671723e-01  3.130835e-01  3.649511e-01
+    ## news_genre               2.735087e-01  3.057004e-01  3.393119e-01
+    ## director_movies          9.068127e-03  9.819271e-03  1.055416e-02
+    ## actor_1_movies           2.533926e-03  2.719182e-03  2.896054e-03
+    ## actor_2_movies           2.757824e-03  2.758656e-03  2.712232e-03
+    ## actor_3_movies           1.442089e-03  1.139697e-03  7.419219e-04
     ##                                                                  
-    ## (Intercept)              1.921891e+01  2.078723e+01  2.247648e+01
-    ## actor_1_facebook_likes   1.363557e-06  1.462766e-06  1.560854e-06
-    ## actor_2_facebook_likes   4.201957e-06  4.282401e-06  4.308667e-06
-    ## actor_3_facebook_likes   3.942402e-06  3.512519e-06  2.929396e-06
-    ## director_facebook_likes  1.549088e-05  1.647855e-05  1.737813e-05
-    ## duration                 4.295859e-03  4.631400e-03  4.959980e-03
-    ## budget                   3.240397e-11  3.341217e-11  3.396289e-11
-    ## title_year              -6.627020e-03 -7.430770e-03 -8.295233e-03
-    ## facenumber_in_poster    -1.045265e-02 -1.142755e-02 -1.239278e-02
-    ## num_critic_for_reviews   1.033092e-03  1.153385e-03  1.281550e-03
-    ## color                   -1.959216e-01 -2.108276e-01 -2.250220e-01
-    ## drama_genre              1.743093e-01  1.896433e-01  2.052024e-01
-    ## comedy_genre            -8.724589e-02 -9.268698e-02 -9.772957e-02
-    ## thriller_genre          -5.767851e-02 -6.407356e-02 -7.075708e-02
-    ## action_genre            -8.575479e-02 -9.512836e-02 -1.048456e-01
-    ## romance_genre           -5.278604e-03 -7.336098e-03 -9.750266e-03
-    ## adventure_genre          5.127438e-04 -3.695809e-04 -1.592802e-03
-    ## crime_genre              3.823800e-02  4.268266e-02  4.737344e-02
-    ## scifi_genre             -5.210078e-02 -5.694657e-02 -6.200109e-02
-    ## fantasy_genre           -3.612663e-02 -3.860431e-02 -4.110155e-02
-    ## horror_genre            -1.818130e-01 -1.985562e-01 -2.155860e-01
-    ## family_genre            -4.501302e-02 -4.843024e-02 -5.205074e-02
-    ## mystery_genre            7.510643e-03  8.479852e-03  9.469405e-03
-    ## biography_genre          1.531493e-01  1.609557e-01  1.677833e-01
-    ## animation_genre          1.421975e-01  1.650076e-01  1.900288e-01
-    ## music_genre             -4.123950e-03 -6.572534e-03 -9.531963e-03
-    ## war_genre                1.163856e-01  1.202379e-01  1.230369e-01
-    ## history_genre            8.714775e-02  8.517010e-02  8.150979e-02
-    ## sport_genre              2.265747e-02  2.265441e-02  2.230800e-02
-    ## musical_genre            1.817559e-02  1.717366e-02  1.550119e-02
-    ## documentary_genre        2.767229e-01  3.136793e-01  3.535524e-01
-    ## western_genre            4.319580e-02  4.271789e-02  4.135323e-02
-    ## filmnoir_genre           2.688863e-01  2.779719e-01  2.829371e-01
-    ## short_genre              4.204637e-01  4.851941e-01  5.559564e-01
-    ## news_genre               3.614575e-01  3.954062e-01  4.292567e-01
+    ## (Intercept)              1.896806e+01  2.049136e+01  2.213103e+01
+    ## actor_1_facebook_likes   1.023095e-06  1.078386e-06  1.132882e-06
+    ## actor_2_facebook_likes   3.098153e-06  3.065883e-06  2.988153e-06
+    ## actor_3_facebook_likes   2.614390e-06  2.133038e-06  1.533085e-06
+    ## director_facebook_likes  1.246515e-05  1.296911e-05  1.335994e-05
+    ## duration                 4.078820e-03  4.385647e-03  4.685352e-03
+    ## budget                   2.994936e-11  3.079273e-11  3.121667e-11
+    ## title_year              -6.522885e-03 -7.302790e-03 -8.140778e-03
+    ## facenumber_in_poster    -1.053604e-02 -1.150742e-02 -1.246638e-02
+    ## num_critic_for_reviews   9.926869e-04  1.107758e-03  1.230664e-03
+    ## color                   -1.984615e-01 -2.137454e-01 -2.283432e-01
+    ## drama_genre              1.745335e-01  1.900176e-01  2.057607e-01
+    ## comedy_genre            -8.755331e-02 -9.324015e-02 -9.858539e-02
+    ## thriller_genre          -6.087750e-02 -6.767940e-02 -7.477459e-02
+    ## action_genre            -8.900380e-02 -9.869452e-02 -1.087092e-01
+    ## romance_genre           -4.729320e-03 -6.767736e-03 -9.174676e-03
+    ## adventure_genre         -1.874411e-03 -2.958866e-03 -4.360277e-03
+    ## crime_genre              3.408706e-02  3.805186e-02  4.228450e-02
+    ## scifi_genre             -5.098850e-02 -5.551230e-02 -6.019878e-02
+    ## fantasy_genre           -3.857023e-02 -4.143075e-02 -4.432932e-02
+    ## horror_genre            -1.763233e-01 -1.923930e-01 -2.087654e-01
+    ## family_genre            -4.394637e-02 -4.729487e-02 -5.086213e-02
+    ## mystery_genre            5.190114e-03  5.863747e-03  6.558490e-03
+    ## biography_genre          1.522978e-01  1.600985e-01  1.669452e-01
+    ## animation_genre          1.460211e-01  1.693742e-01  1.949523e-01
+    ## music_genre              1.064202e-03 -8.174502e-04 -3.230964e-03
+    ## war_genre                1.163941e-01  1.203272e-01  1.232211e-01
+    ## history_genre            8.669664e-02  8.475505e-02  8.115060e-02
+    ## sport_genre              1.996881e-02  1.955046e-02  1.877630e-02
+    ## musical_genre            2.240415e-02  2.181905e-02  2.054220e-02
+    ## documentary_genre        2.894454e-01  3.277452e-01  3.688559e-01
+    ## western_genre            4.363472e-02  4.343314e-02  4.241407e-02
+    ## filmnoir_genre           2.823336e-01  2.940067e-01  3.018490e-01
+    ## short_genre              4.229009e-01  4.868835e-01  5.566285e-01
+    ## news_genre               3.738442e-01  4.087041e-01  4.432737e-01
+    ## director_movies          1.125936e-02  1.192240e-02  1.253062e-02
+    ## actor_1_movies           3.061238e-03  3.211867e-03  3.344878e-03
+    ## actor_2_movies           2.617931e-03  2.477388e-03  2.295327e-03
+    ## actor_3_movies           2.466594e-04 -3.448429e-04 -1.025438e-03
     ##                                                                  
-    ## (Intercept)              2.428086e+01  2.619144e+01  2.819567e+01
-    ## actor_1_facebook_likes   1.656842e-06  1.750190e-06  1.840480e-06
-    ## actor_2_facebook_likes   4.277432e-06  4.188328e-06  4.043395e-06
-    ## actor_3_facebook_likes   2.193968e-06  1.313682e-06  3.025837e-07
-    ## director_facebook_likes  1.816886e-05  1.883367e-05  1.936073e-05
-    ## duration                 5.276983e-03  5.577958e-03  5.858958e-03
-    ## budget                   3.400397e-11  3.350362e-11  3.245498e-11
-    ## title_year              -9.217351e-03 -1.019250e-02 -1.121427e-02
-    ## facenumber_in_poster    -1.332873e-02 -1.421588e-02 -1.503632e-02
-    ## num_critic_for_reviews   1.416908e-03  1.558539e-03  1.705291e-03
-    ## color                   -2.381851e-01 -2.500186e-01 -2.602682e-01
-    ## drama_genre              2.208582e-01  2.364791e-01  2.519387e-01
-    ## comedy_genre            -1.022925e-01 -1.063135e-01 -1.097528e-01
-    ## thriller_genre          -7.766162e-02 -8.471200e-02 -9.182642e-02
-    ## action_genre            -1.147807e-01 -1.247901e-01 -1.347204e-01
-    ## romance_genre           -1.251928e-02 -1.562848e-02 -1.904902e-02
-    ## adventure_genre         -3.205663e-03 -5.241266e-03 -7.716918e-03
-    ## crime_genre              5.225865e-02  5.727146e-02  6.233439e-02
-    ## scifi_genre             -6.725677e-02 -7.270504e-02 -7.833412e-02
-    ## fantasy_genre           -4.362109e-02 -4.616615e-02 -4.873841e-02
-    ## horror_genre            -2.327270e-01 -2.498007e-01 -2.666319e-01
-    ## family_genre            -5.590980e-02 -6.003967e-02 -6.446091e-02
-    ## mystery_genre            1.045426e-02  1.141091e-02  1.231863e-02
-    ## biography_genre          1.735266e-01  1.781323e-01  1.815988e-01
-    ## animation_genre          2.171231e-01  2.460769e-01  2.766068e-01
-    ## music_genre             -1.300435e-02 -1.696765e-02 -2.137524e-02
-    ## war_genre                1.247414e-01  1.253619e-01  1.249545e-01
-    ## history_genre            7.619952e-02  6.935602e-02  6.117048e-02
-    ## sport_genre              2.162679e-02  2.063982e-02  1.939389e-02
-    ## musical_genre            1.311820e-02  1.001593e-02  6.218324e-03
-    ## documentary_genre        3.960738e-01  4.408681e-01  4.874629e-01
-    ## western_genre            3.906126e-02  3.583924e-02  3.172409e-02
-    ## filmnoir_genre           2.831266e-01  2.780430e-01  2.673970e-01
-    ## short_genre              6.322531e-01  7.133369e-01  7.982335e-01
-    ## news_genre               4.623908e-01  4.942049e-01  5.241512e-01
+    ## (Intercept)              2.388199e+01  2.573644e+01  2.768317e+01
+    ## actor_1_facebook_likes   1.186594e-06  1.240025e-06  1.293694e-06
+    ## actor_2_facebook_likes   2.864955e-06  2.698343e-06  2.491850e-06
+    ## actor_3_facebook_likes   8.202682e-07  3.561782e-09 -9.040788e-07
+    ## director_facebook_likes  1.362807e-05  1.376802e-05  1.378001e-05
+    ## duration                 4.974168e-03  5.248364e-03  5.504649e-03
+    ## budget                   3.117485e-11  3.063738e-11  2.959618e-11
+    ## title_year              -9.034223e-03 -9.979129e-03 -1.096981e-02
+    ## facenumber_in_poster    -1.339314e-02 -1.426867e-02 -1.507580e-02
+    ## num_critic_for_reviews   1.360854e-03  1.497519e-03  1.639605e-03
+    ## color                   -2.419272e-01 -2.541920e-01 -2.648751e-01
+    ## drama_genre              2.216323e-01  2.374965e-01  2.532204e-01
+    ## comedy_genre            -1.035008e-01 -1.079165e-01 -1.117818e-01
+    ## thriller_genre          -8.208881e-02 -8.954044e-02 -9.704172e-02
+    ## action_genre            -1.189121e-01 -1.291545e-01 -1.392802e-01
+    ## romance_genre           -1.194997e-02 -1.507953e-02 -1.853445e-02
+    ## adventure_genre         -6.118476e-03 -8.262807e-03 -1.080910e-02
+    ## crime_genre              4.675220e-02  5.140266e-02  5.617009e-02
+    ## scifi_genre             -6.504721e-02 -7.005787e-02 -7.523003e-02
+    ## fantasy_genre           -4.725842e-02 -5.021123e-02 -5.317892e-02
+    ## horror_genre            -2.252890e-01 -2.418039e-01 -2.581510e-01
+    ## family_genre            -5.468614e-02 -5.879982e-02 -6.322325e-02
+    ## mystery_genre            7.258599e-03  7.948079e-03  8.612846e-03
+    ## biography_genre          1.727332e-01  1.774075e-01  1.809627e-01
+    ## animation_genre          2.226043e-01  2.521039e-01  2.831551e-01
+    ## music_genre             -6.199491e-03 -9.714789e-03 -1.374139e-02
+    ## war_genre                1.250299e-01  1.257580e-01  1.254550e-01
+    ## history_genre            7.591284e-02  6.915425e-02  6.106053e-02
+    ## sport_genre              1.766918e-02  1.627083e-02  1.464026e-02
+    ## musical_genre            1.852443e-02  1.575156e-02  1.224415e-02
+    ## documentary_genre        4.124523e-01  4.581180e-01  5.053512e-01
+    ## western_genre            4.053785e-02  3.779748e-02  3.422102e-02
+    ## filmnoir_genre           3.051644e-01  3.034047e-01  2.962126e-01
+    ## short_genre              6.316463e-01  7.112171e-01  7.944099e-01
+    ## news_genre               4.768975e-01  5.089575e-01  5.389093e-01
+    ## director_movies          1.307451e-02  1.354647e-02  1.394166e-02
+    ## actor_1_movies           3.458268e-03  3.550428e-03  3.620395e-03
+    ## actor_2_movies           2.078519e-03  1.835550e-03  1.576088e-03
+    ## actor_3_movies          -1.785210e-03 -2.610399e-03 -3.484613e-03
     ##                                                                  
-    ## (Intercept)              3.027739e+01  3.241698e+01  3.459199e+01
-    ## actor_1_facebook_likes   1.927382e-06  2.010631e-06  2.089996e-06
-    ## actor_2_facebook_likes   3.846904e-06  3.605017e-06  3.325327e-06
-    ## actor_3_facebook_likes  -8.195091e-07 -2.028338e-06 -3.296867e-06
-    ## director_facebook_likes  1.974428e-05  1.998488e-05  2.008917e-05
-    ## duration                 6.116723e-03  6.348829e-03  6.553788e-03
-    ## budget                   3.087735e-11  2.881500e-11  2.633352e-11
-    ## title_year              -1.227441e-02 -1.336298e-02 -1.446861e-02
-    ## facenumber_in_poster    -1.577498e-02 -1.642069e-02 -1.696678e-02
-    ## num_critic_for_reviews   1.855803e-03  2.008536e-03  2.161833e-03
-    ## color                   -2.687422e-01 -2.753248e-01 -2.799835e-01
-    ## drama_genre              2.671182e-01  2.819081e-01  2.962100e-01
-    ## comedy_genre            -1.125941e-01 -1.148444e-01 -1.165310e-01
-    ## thriller_genre          -9.891984e-02 -1.059077e-01 -1.127096e-01
-    ## action_genre            -1.444175e-01 -1.537352e-01 -1.625440e-01
-    ## romance_genre           -2.273857e-02 -2.664318e-02 -3.070016e-02
-    ## adventure_genre         -1.063128e-02 -1.396299e-02 -1.767100e-02
-    ## crime_genre              6.736370e-02  7.227475e-02  7.698777e-02
-    ## scifi_genre             -8.412665e-02 -9.005747e-02 -9.609208e-02
-    ## fantasy_genre           -5.133621e-02 -5.395321e-02 -5.657772e-02
-    ## horror_genre            -2.830555e-01 -2.989213e-01 -3.140988e-01
-    ## family_genre            -6.917701e-02 -7.417085e-02 -7.940375e-02
-    ## mystery_genre            1.316149e-02  1.392954e-02  1.461913e-02
-    ## biography_genre          1.839729e-01  1.853422e-01  1.858252e-01
-    ## animation_genre          3.083687e-01  3.409703e-01  3.739879e-01
-    ## music_genre             -2.615794e-02 -3.122834e-02 -3.648674e-02
-    ## war_genre                1.236141e-01  1.214642e-01  1.186463e-01
-    ## history_genre            5.189336e-02  4.181407e-02  3.123824e-02
-    ## sport_genre              1.794928e-02  1.637401e-02  1.473757e-02
-    ## musical_genre            1.780567e-03 -3.215158e-03 -8.666048e-03
-    ## documentary_genre        5.353071e-01  5.837955e-01  6.322990e-01
-    ## western_genre            2.679075e-02  2.114733e-02  1.492786e-02
-    ## filmnoir_genre           2.511408e-01  2.294808e-01  2.028678e-01
-    ## short_genre              8.857824e-01  9.746967e-01  1.063636e+00
-    ## news_genre               5.517743e-01  5.767393e-01  5.988460e-01
+    ## (Intercept)              2.970747e+01  3.179117e+01  3.391108e+01
+    ## actor_1_facebook_likes   1.348047e-06  1.403393e-06  1.459230e-06
+    ## actor_2_facebook_likes   2.250271e-06  1.979396e-06  1.686537e-06
+    ## actor_3_facebook_likes  -1.886391e-06 -2.924705e-06 -3.994174e-06
+    ## director_facebook_likes  1.366990e-05  1.344873e-05  1.313667e-05
+    ## duration                 5.740319e-03  5.953371e-03  6.143425e-03
+    ## budget                   2.806667e-11  2.608715e-11  2.372220e-11
+    ## title_year              -1.199883e-02 -1.305704e-02 -1.413281e-02
+    ## facenumber_in_poster    -1.580032e-02 -1.643194e-02 -1.696492e-02
+    ## num_critic_for_reviews   1.785833e-03  1.934731e-03  2.084667e-03
+    ## color                   -2.737753e-01 -2.807668e-01 -2.858182e-01
+    ## drama_genre              2.686770e-01  2.837480e-01  2.983380e-01
+    ## comedy_genre            -1.150676e-01 -1.177667e-01 -1.198723e-01
+    ## thriller_genre          -1.045022e-01 -1.118325e-01 -1.189318e-01
+    ## action_genre            -1.491343e-01 -1.585715e-01 -1.674757e-01
+    ## romance_genre           -2.227180e-02 -2.623647e-02 -3.036317e-02
+    ## adventure_genre         -1.375680e-02 -1.708737e-02 -2.077421e-02
+    ## crime_genre              6.097862e-02  6.574724e-02  7.040973e-02
+    ## scifi_genre             -8.055881e-02 -8.603192e-02 -9.161658e-02
+    ## fantasy_genre           -5.614956e-02 -5.910763e-02 -6.201491e-02
+    ## horror_genre            -2.741767e-01 -2.897380e-01 -3.047130e-01
+    ## family_genre            -6.795841e-02 -7.298587e-02 -7.824325e-02
+    ## mystery_genre            9.242234e-03  9.829890e-03  1.037329e-02
+    ## biography_genre          1.834406e-01  1.849231e-01  1.855029e-01
+    ## animation_genre          3.154023e-01  3.484442e-01  3.818487e-01
+    ## music_genre             -1.821804e-02 -2.306164e-02 -2.818407e-02
+    ## war_genre                1.242090e-01  1.221375e-01  1.193588e-01
+    ## history_genre            5.187602e-02  4.188403e-02  3.138493e-02
+    ## sport_genre              1.284856e-02  1.097236e-02  9.093185e-03
+    ## musical_genre            8.055965e-03  3.269411e-03 -2.015890e-03
+    ## documentary_genre        5.535851e-01  6.022138e-01  6.506141e-01
+    ## western_genre            2.987051e-02  2.483838e-02  1.925050e-02
+    ## filmnoir_genre           2.834594e-01  2.652636e-01  2.419798e-01
+    ## short_genre              8.801197e-01  9.671228e-01  1.054167e+00
+    ## news_genre               5.663174e-01  5.908797e-01  6.124201e-01
+    ## director_movies          1.425809e-02  1.449660e-02  1.466086e-02
+    ## actor_1_movies           3.667877e-03  3.693274e-03  3.697859e-03
+    ## actor_2_movies           1.310087e-03  1.047010e-03  7.935815e-04
+    ## actor_3_movies          -4.389893e-03 -5.307851e-03 -6.222871e-03
     ##                                                                  
-    ## (Intercept)              3.677624e+01  3.894728e+01  4.107840e+01
-    ## actor_1_facebook_likes   2.164685e-06  2.235551e-06  2.301970e-06
-    ## actor_2_facebook_likes   3.016150e-06  2.687145e-06  2.346551e-06
-    ## actor_3_facebook_likes  -4.594315e-06 -5.898179e-06 -7.181580e-06
-    ## director_facebook_likes  2.007243e-05  1.994485e-05  1.972737e-05
-    ## duration                 6.731488e-03  6.881406e-03  7.005228e-03
-    ## budget                   2.351674e-11  2.045075e-11  1.723092e-11
-    ## title_year              -1.557811e-02 -1.668011e-02 -1.776118e-02
-    ## facenumber_in_poster    -1.741275e-02 -1.775836e-02 -1.801115e-02
-    ## num_critic_for_reviews   2.313917e-03  2.463199e-03  2.608042e-03
-    ## color                   -2.827895e-01 -2.838304e-01 -2.833106e-01
-    ## drama_genre              3.099531e-01  3.230288e-01  3.353904e-01
-    ## comedy_genre            -1.176827e-01 -1.183831e-01 -1.186873e-01
-    ## thriller_genre          -1.192379e-01 -1.254573e-01 -1.313072e-01
-    ## action_genre            -1.707650e-01 -1.782760e-01 -1.850499e-01
-    ## romance_genre           -3.484153e-02 -3.900100e-02 -4.311053e-02
-    ## adventure_genre         -2.170726e-02 -2.597331e-02 -3.040000e-02
-    ## crime_genre              8.144018e-02  8.556184e-02  8.932081e-02
-    ## scifi_genre             -1.021657e-01 -1.082591e-01 -1.142995e-01
-    ## fantasy_genre           -5.916353e-02 -6.173530e-02 -6.425230e-02
-    ## horror_genre            -3.284854e-01 -3.419926e-01 -3.545644e-01
-    ## family_genre            -8.478683e-02 -9.030453e-02 -9.584957e-02
-    ## mystery_genre            1.522878e-02  1.577392e-02  1.625890e-02
-    ## biography_genre          1.855349e-01  1.846633e-01  1.833355e-01
-    ## animation_genre          4.069713e-01  4.395070e-01  4.711877e-01
-    ## music_genre             -4.182409e-02 -4.714339e-02 -5.234622e-02
-    ## war_genre                1.152910e-01  1.115803e-01  1.076379e-01
-    ## history_genre            2.047327e-02  9.786452e-03 -5.846899e-04
-    ## sport_genre              1.310403e-02  1.153265e-02  1.006503e-02
-    ## musical_genre           -1.446671e-02 -2.047770e-02 -2.658635e-02
-    ## documentary_genre        6.802047e-01  7.269060e-01  7.718872e-01
-    ## western_genre            8.292420e-03  1.383858e-03 -5.636478e-03
-    ## filmnoir_genre           1.719713e-01  1.375988e-01  1.006819e-01
-    ## short_genre              1.151288e+00  1.236413e+00  1.317957e+00
-    ## news_genre               6.180179e-01  6.343312e-01  6.479371e-01
+    ## (Intercept)              3.604726e+01  3.817356e+01  4.026520e+01
+    ## actor_1_facebook_likes   1.516778e-06  1.575113e-06  1.633760e-06
+    ## actor_2_facebook_likes   1.377896e-06  1.060163e-06  7.397712e-07
+    ## actor_3_facebook_likes  -5.082495e-06 -6.167048e-06 -7.230126e-06
+    ## director_facebook_likes  1.274340e-05  1.229162e-05  1.180070e-05
+    ## duration                 6.308400e-03  6.449345e-03  6.567298e-03
+    ## budget                   2.103523e-11  1.811336e-11  1.504272e-11
+    ## title_year              -1.521601e-02 -1.629354e-02 -1.735295e-02
+    ## facenumber_in_poster    -1.739774e-02 -1.773336e-02 -1.797832e-02
+    ## num_critic_for_reviews   2.233951e-03  2.380898e-03  2.523892e-03
+    ## color                   -2.889525e-01 -2.902967e-01 -2.900340e-01
+    ## drama_genre              3.123263e-01  3.256429e-01  3.382211e-01
+    ## comedy_genre            -1.214517e-01 -1.225377e-01 -1.231888e-01
+    ## thriller_genre          -1.257500e-01 -1.322132e-01 -1.382713e-01
+    ## action_genre            -1.757295e-01 -1.832660e-01 -1.900433e-01
+    ## romance_genre           -3.458499e-02 -3.882950e-02 -4.302809e-02
+    ## adventure_genre         -2.474338e-02 -2.893686e-02 -3.327861e-02
+    ## crime_genre              7.486449e-02  7.905951e-02  8.294565e-02
+    ## scifi_genre             -9.729398e-02 -1.030141e-01 -1.087234e-01
+    ## fantasy_genre           -6.487695e-02 -6.765990e-02 -7.034090e-02
+    ## horror_genre            -3.189812e-01 -3.324580e-01 -3.450757e-01
+    ## family_genre            -8.370624e-02 -8.928378e-02 -9.489095e-02
+    ## mystery_genre            1.087662e-02  1.134327e-02  1.177901e-02
+    ## biography_genre          1.853467e-01  1.845831e-01  1.833538e-01
+    ## animation_genre          4.151717e-01  4.479856e-01  4.798902e-01
+    ## music_genre             -3.345535e-02 -3.877537e-02 -4.403995e-02
+    ## war_genre                1.160520e-01  1.123497e-01  1.083913e-01
+    ## history_genre            2.068012e-02  1.003863e-02 -3.051930e-04
+    ## sport_genre              7.269218e-03  5.559864e-03  4.005583e-03
+    ## musical_genre           -7.672123e-03 -1.357887e-02 -1.961248e-02
+    ## documentary_genre        6.982011e-01  7.444142e-01  7.887664e-01
+    ## western_genre            1.322702e-02  6.915772e-03  4.592039e-04
+    ## filmnoir_genre           2.142103e-01  1.827044e-01  1.483404e-01
+    ## short_genre              1.139945e+00  1.223306e+00  1.303225e+00
+    ## news_genre               6.309470e-01  6.465480e-01  6.594201e-01
+    ## director_movies          1.475597e-02  1.478974e-02  1.477086e-02
+    ## actor_1_movies           3.682736e-03  3.650449e-03  3.603629e-03
+    ## actor_2_movies           5.588521e-04  3.468235e-04  1.604193e-04
+    ## actor_3_movies          -7.114978e-03 -7.971897e-03 -8.782538e-03
     ##                                                                  
-    ## (Intercept)              4.314570e+01  4.512780e+01  4.700671e+01
-    ## actor_1_facebook_likes   2.363815e-06  2.421005e-06  2.473517e-06
-    ## actor_2_facebook_likes   2.002513e-06  1.662278e-06  1.331976e-06
-    ## actor_3_facebook_likes  -8.423032e-06 -9.605144e-06 -1.071490e-05
-    ## director_facebook_likes  1.943969e-05  1.910131e-05  1.873045e-05
-    ## duration                 7.104892e-03  7.182850e-03  7.241857e-03
-    ## budget                   1.394656e-11  1.067826e-11  7.494449e-12
-    ## title_year              -1.880929e-02 -1.981372e-02 -2.076545e-02
-    ## facenumber_in_poster    -1.818042e-02 -1.827744e-02 -1.831441e-02
-    ## num_critic_for_reviews   2.747015e-03  2.878904e-03  3.002755e-03
-    ## color                   -2.814615e-01 -2.785390e-01 -2.748043e-01
-    ## drama_genre              3.469895e-01  3.577918e-01  3.677773e-01
-    ## comedy_genre            -1.186645e-01 -1.183830e-01 -1.179071e-01
-    ## thriller_genre          -1.367523e-01 -1.417706e-01 -1.463534e-01
-    ## action_genre            -1.910708e-01 -1.963504e-01 -2.009231e-01
-    ## romance_genre           -4.710966e-02 -5.094644e-02 -5.457910e-02
-    ## adventure_genre         -3.490194e-02 -3.939554e-02 -4.380358e-02
-    ## crime_genre              9.269606e-02  9.568323e-02  9.829230e-02
-    ## scifi_genre             -1.202248e-01 -1.259733e-01 -1.314878e-01
-    ## fantasy_genre           -6.669125e-02 -6.902993e-02 -7.124865e-02
-    ## horror_genre            -3.661671e-01 -3.767900e-01 -3.864422e-01
-    ## family_genre            -1.013371e-01 -1.066857e-01 -1.118233e-01
-    ## mystery_genre            1.669338e-02  1.708644e-02  1.744570e-02
-    ## biography_genre          1.816864e-01  1.798354e-01  1.778831e-01
-    ## animation_genre          5.016553e-01  5.306089e-01  5.578131e-01
-    ## music_genre             -5.734987e-02 -6.208770e-02 -6.651064e-02
-    ## war_genre                1.035884e-01  9.953893e-02  9.557790e-02
-    ## history_genre           -1.045261e-02 -1.968042e-02 -2.817993e-02
-    ## sport_genre              8.730978e-03  7.547142e-03  6.518737e-03
-    ## musical_genre           -3.267980e-02 -3.865707e-02 -4.443203e-02
-    ## documentary_genre        8.147049e-01  8.550100e-01  8.925518e-01
-    ## western_genre           -1.262409e-02 -1.945152e-02 -2.601258e-02
-    ## filmnoir_genre           6.218109e-02  2.303243e-02 -1.590384e-02
-    ## short_genre              1.395054e+00  1.467060e+00  1.533558e+00
-    ## news_genre               6.590690e-01  6.680061e-01  6.750481e-01
+    ## (Intercept)              4.229846e+01  4.425190e+01  4.610726e+01
+    ## actor_1_facebook_likes   1.692121e-06  1.749527e-06  1.805305e-06
+    ## actor_2_facebook_likes   4.226073e-07  1.138194e-07 -1.823130e-07
+    ## actor_3_facebook_likes  -8.256376e-06 -9.233252e-06 -1.015122e-05
+    ## director_facebook_likes  1.128886e-05  1.077229e-05  1.026454e-05
+    ## duration                 6.663886e-03  6.741173e-03  6.801487e-03
+    ## budget                   1.190682e-11  8.781699e-12  5.732587e-12
+    ## title_year              -1.838232e-02 -1.937089e-02 -2.030950e-02
+    ## facenumber_in_poster    -1.814195e-02 -1.823538e-02 -1.827057e-02
+    ## num_critic_for_reviews   2.661464e-03  2.792357e-03  2.915560e-03
+    ## color                   -2.883944e-01 -2.856346e-01 -2.820189e-01
+    ## drama_genre              3.500099e-01  3.609743e-01  3.710951e-01
+    ## comedy_genre            -1.234695e-01 -1.234467e-01 -1.231856e-01
+    ## thriller_genre          -1.438891e-01 -1.490461e-01 -1.537358e-01
+    ## action_genre            -1.960503e-01 -2.013026e-01 -2.058385e-01
+    ## romance_genre           -4.711808e-02 -5.104548e-02 -5.476674e-02
+    ## adventure_genre         -3.768861e-02 -4.208782e-02 -4.640274e-02
+    ## crime_genre              8.649024e-02  8.967708e-02  9.250500e-02
+    ## scifi_genre             -1.143625e-01 -1.198702e-01 -1.251872e-01
+    ## fantasy_genre           -7.289871e-02 -7.531494e-02 -7.757506e-02
+    ## horror_genre            -3.567887e-01 -3.675732e-01 -3.774255e-01
+    ## family_genre            -1.004404e-01 -1.058487e-01 -1.110422e-01
+    ## mystery_genre            1.218949e-02  1.257934e-02  1.295166e-02
+    ## biography_genre          1.817916e-01  1.800150e-01  1.781246e-01
+    ## animation_genre          5.105309e-01  5.396123e-01  5.669053e-01
+    ## music_genre             -4.915618e-02 -5.404652e-02 -5.865098e-02
+    ## war_genre                1.043034e-01  1.001963e-01  9.616218e-02
+    ## history_genre           -1.016343e-02 -1.939767e-02 -2.791739e-02
+    ## sport_genre              2.631170e-03  1.446872e-03  4.507454e-04
+    ## musical_genre           -2.565645e-02 -3.160606e-02 -3.737148e-02
+    ## documentary_genre        8.308534e-01  8.703636e-01  9.070800e-01
+    ## western_genre           -6.007599e-03 -1.236312e-02 -1.850384e-02
+    ## filmnoir_genre           1.120536e-01  7.477423e-02  3.737428e-02
+    ## short_genre              1.378860e+00  1.449583e+00  1.514974e+00
+    ## news_genre               6.698274e-01  6.780722e-01  6.844701e-01
+    ## director_movies          1.470861e-02  1.461238e-02  1.449115e-02
+    ## actor_1_movies           3.545156e-03  3.477996e-03  3.405037e-03
+    ## actor_2_movies           7.525464e-07 -1.325997e-04 -2.412406e-04
+    ## actor_3_movies          -9.538793e-03 -1.023548e-02 -1.087006e-02
     ##                                                                  
-    ## (Intercept)              4.876847e+01  5.040338e+01  5.190591e+01
-    ## actor_1_facebook_likes   2.521396e-06  2.564747e-06  2.603739e-06
-    ## actor_2_facebook_likes   1.016511e-06  7.195444e-07  4.435586e-07
-    ## actor_3_facebook_likes  -1.174355e-05 -1.268628e-05 -1.354159e-05
-    ## director_facebook_likes  1.834323e-05  1.795322e-05  1.757126e-05
-    ## duration                 7.284783e-03  7.314442e-03  7.333466e-03
-    ## budget                   4.449669e-12  1.584238e-12 -1.074950e-12
-    ## title_year              -2.165750e-02 -2.248504e-02 -2.324536e-02
-    ## facenumber_in_poster    -1.830357e-02 -1.825650e-02 -1.818357e-02
-    ## num_critic_for_reviews   3.117891e-03  3.223908e-03  3.320665e-03
-    ## color                   -2.705073e-01 -2.658745e-01 -2.611009e-01
-    ## drama_genre              3.769403e-01  3.852887e-01  3.928427e-01
-    ## comedy_genre            -1.172948e-01 -1.165960e-01 -1.158524e-01
-    ## thriller_genre          -1.505031e-01 -1.542317e-01 -1.575586e-01
-    ## action_genre            -2.048398e-01 -2.081624e-01 -2.109580e-01
-    ## romance_genre           -5.797672e-02 -6.111913e-02 -6.399602e-02
-    ## adventure_genre         -4.805890e-02 -5.210670e-02 -5.590567e-02
-    ## crime_genre              1.005445e-01  1.024689e-01  1.040989e-01
-    ## scifi_genre             -1.367191e-01 -1.416275e-01 -1.461851e-01
-    ## fantasy_genre           -7.333142e-02 -7.526666e-02 -7.704740e-02
-    ## horror_genre            -3.951506e-01 -4.029558e-01 -4.099090e-01
-    ## family_genre            -1.166902e-01 -1.212419e-01 -1.254489e-01
-    ## mystery_genre            1.777692e-02  1.808409e-02  1.836962e-02
-    ## biography_genre          1.759104e-01  1.739796e-01  1.721354e-01
-    ## animation_genre          5.831015e-01  6.063754e-01  6.275986e-01
-    ## music_genre             -7.058699e-02 -7.430101e-02 -7.765061e-02
-    ## war_genre                9.177473e-02  8.818082e-02  8.483121e-02
-    ## history_genre           -3.590629e-02 -4.285061e-02 -4.903181e-02
-    ## sport_genre              5.641939e-03  4.906522e-03  4.298318e-03
-    ## musical_genre           -4.993504e-02 -5.511337e-02 -5.993069e-02
-    ## documentary_genre        9.271767e-01  9.588206e-01  9.874977e-01
-    ## western_genre           -3.222444e-02 -3.802768e-02 -4.338487e-02
-    ## filmnoir_genre          -5.388097e-02 -9.028862e-02 -1.246616e-01
-    ## short_genre              1.594338e+00  1.649376e+00  1.698798e+00
-    ## news_genre               6.804939e-01  6.846254e-01  6.876974e-01
+    ## (Intercept)              4.785011e+01  4.947020e+01  5.096142e+01
+    ## actor_1_facebook_likes   1.858831e-06  1.909570e-06  1.957106e-06
+    ## actor_2_facebook_likes  -4.624432e-07 -7.241587e-07 -9.659288e-07
+    ## actor_3_facebook_likes  -1.100373e-05 -1.178705e-05 -1.249985e-05
+    ## director_facebook_likes  9.776302e-06  9.315397e-06  8.887044e-06
+    ## duration                 6.847265e-03  6.880909e-03  6.904677e-03
+    ## budget                   2.811981e-12  5.914427e-14 -2.499320e-12
+    ## title_year              -2.119094e-02 -2.201010e-02 -2.276392e-02
+    ## facenumber_in_poster    -1.825946e-02 -1.821329e-02 -1.814212e-02
+    ## num_critic_for_reviews   3.030338e-03  3.136232e-03  3.233044e-03
+    ## color                   -2.778018e-01 -2.732156e-01 -2.684610e-01
+    ## drama_genre              3.803684e-01  3.888048e-01  3.964274e-01
+    ## comedy_genre            -1.227469e-01 -1.221849e-01 -1.215460e-01
+    ## thriller_genre          -1.579637e-01 -1.617458e-01 -1.651053e-01
+    ## action_genre            -2.097122e-01 -2.129883e-01 -2.157361e-01
+    ## romance_genre           -5.824945e-02 -6.147230e-02 -6.442417e-02
+    ## adventure_genre         -5.056893e-02 -5.453349e-02 -5.825622e-02
+    ## crime_genre              9.498528e-02  9.713863e-02  9.899202e-02
+    ## scifi_genre             -1.302606e-01 -1.350463e-01 -1.395113e-01
+    ## fantasy_genre           -7.966899e-02 -8.159122e-02 -8.334067e-02
+    ## horror_genre            -3.863599e-01 -3.944059e-01 -4.016052e-01
+    ## family_genre            -1.159605e-01 -1.205584e-01 -1.248063e-01
+    ## mystery_genre            1.330799e-02  1.364849e-02  1.397239e-02
+    ## biography_genre          1.762022e-01  1.743112e-01  1.724977e-01
+    ## animation_genre          5.922501e-01  6.155544e-01  6.367878e-01
+    ## music_genre             -6.292761e-02 -6.685155e-02 -7.041302e-02
+    ## war_genre                9.227470e-02  8.858926e-02  8.514460e-02
+    ## history_genre           -3.567496e-02 -4.265859e-02 -4.888442e-02
+    ## sport_genre             -3.683399e-04 -1.027587e-03 -1.547453e-03
+    ## musical_genre           -4.287957e-02 -4.807431e-02 -5.291640e-02
+    ## documentary_genre        9.408773e-01  9.717144e-01  9.996223e-01
+    ## western_genre           -2.434686e-02 -2.983057e-02 -3.491391e-02
+    ## filmnoir_genre           6.254184e-04 -3.482826e-02 -6.848324e-02
+    ## short_genre              1.574819e+00  1.629080e+00  1.677866e+00
+    ## news_genre               6.893288e-01  6.929342e-01  6.955412e-01
+    ## director_movies          1.435315e-02  1.420560e-02  1.405456e-02
+    ## actor_1_movies           3.328957e-03  3.252114e-03  3.176480e-03
+    ## actor_2_movies          -3.275754e-04 -3.944578e-04 -4.448919e-04
+    ## actor_3_movies          -1.144231e-02 -1.195379e-02 -1.240743e-02
     ##                                                                  
-    ## (Intercept)              5.327443e+01  5.451065e+01  5.561899e+01
-    ## actor_1_facebook_likes   2.638590e-06  2.669559e-06  2.696931e-06
-    ## actor_2_facebook_likes   1.899790e-07 -4.067100e-08 -2.485985e-07
-    ## actor_3_facebook_likes  -1.431072e-05 -1.499698e-05 -1.560512e-05
-    ## director_facebook_likes  1.720551e-05  1.686170e-05  1.654342e-05
-    ## duration                 7.344218e-03  7.348737e-03  7.348734e-03
-    ## budget                  -3.512863e-12 -5.724366e-12 -7.712125e-12
-    ## title_year              -2.393768e-02 -2.456293e-02 -2.512340e-02
-    ## facenumber_in_poster    -1.809367e-02 -1.799413e-02 -1.789070e-02
-    ## num_critic_for_reviews   3.408246e-03  3.486926e-03  3.557127e-03
-    ## color                   -2.563457e-01 -2.517323e-01 -2.473506e-01
-    ## drama_genre              3.996331e-01  4.056998e-01  4.110889e-01
-    ## comedy_genre            -1.150969e-01 -1.143549e-01 -1.136444e-01
-    ## thriller_genre          -1.605085e-01 -1.631096e-01 -1.653919e-01
-    ## action_genre            -2.132945e-01 -2.152370e-01 -2.168457e-01
-    ## romance_genre           -6.660567e-02 -6.895340e-02 -7.104994e-02
-    ## adventure_genre         -5.942792e-02 -6.265795e-02 -6.559104e-02
-    ## crime_genre              1.054698e-01  1.066164e-01  1.075713e-01
-    ## scifi_genre             -1.503754e-01 -1.541929e-01 -1.576417e-01
-    ## fantasy_genre           -7.867113e-02 -8.013933e-02 -8.145677e-02
-    ## horror_genre            -4.160689e-01 -4.214984e-01 -4.262624e-01
-    ## family_genre            -1.292960e-01 -1.327806e-01 -1.359101e-01
-    ## mystery_genre            1.863484e-02  1.888038e-02  1.910650e-02
-    ## biography_genre          1.704079e-01  1.688152e-01  1.673656e-01
-    ## animation_genre          6.467887e-01  6.640080e-01  6.793525e-01
-    ## music_genre             -8.064466e-02 -8.330013e-02 -8.563954e-02
-    ## war_genre                8.174667e-02  7.893603e-02  7.639855e-02
-    ## history_genre           -5.448872e-02 -5.927305e-02 -6.344366e-02
-    ## sport_genre              3.801299e-03  3.399152e-03  3.076368e-03
-    ## musical_genre           -6.436568e-02 -6.841025e-02 -7.206736e-02
-    ## documentary_genre        1.013287e+00  1.036320e+00  1.056760e+00
-    ## western_genre           -4.827802e-02 -5.270537e-02 -5.667800e-02
-    ## filmnoir_genre          -1.566766e-01 -1.861399e-01 -2.129696e-01
-    ## short_genre              1.742850e+00  1.781857e+00  1.816198e+00
-    ## news_genre               6.899324e-01  6.915185e-01  6.926109e-01
+    ## (Intercept)              5.232154e+01  5.355170e+01  5.465586e+01
+    ## actor_1_facebook_likes   2.001153e-06  2.041551e-06  2.078258e-06
+    ## actor_2_facebook_likes  -1.187012e-06 -1.387337e-06 -1.567372e-06
+    ## actor_3_facebook_likes  -1.314291e-05 -1.371856e-05 -1.423035e-05
+    ## director_facebook_likes  8.494196e-06  8.137964e-06  7.818039e-06
+    ## duration                 6.920611e-03  6.930490e-03  6.935818e-03
+    ## budget                  -4.848114e-12 -6.981463e-12 -8.901171e-12
+    ## title_year              -2.345134e-02 -2.407299e-02 -2.463088e-02
+    ## facenumber_in_poster    -1.805459e-02 -1.795776e-02 -1.785722e-02
+    ## num_critic_for_reviews   3.320813e-03  3.399772e-03  3.470309e-03
+    ## color                   -2.637032e-01 -2.590712e-01 -2.546596e-01
+    ## drama_genre              4.032703e-01  4.093761e-01  4.147938e-01
+    ## comedy_genre            -1.208683e-01 -1.201821e-01 -1.195099e-01
+    ## thriller_genre          -1.680710e-01 -1.706749e-01 -1.729502e-01
+    ## action_genre            -2.180252e-01 -2.199220e-01 -2.214874e-01
+    ## romance_genre           -6.710285e-02 -6.951343e-02 -7.166668e-02
+    ## adventure_genre         -6.170974e-02 -6.487859e-02 -6.775778e-02
+    ## crime_genre              1.005758e-01  1.019215e-01  1.030598e-01
+    ## scifi_genre             -1.436341e-01 -1.474044e-01 -1.508217e-01
+    ## fantasy_genre           -8.492017e-02 -8.633581e-02 -8.759616e-02
+    ## horror_genre            -4.080087e-01 -4.136735e-01 -4.186601e-01
+    ## family_genre            -1.286893e-01 -1.322048e-01 -1.353609e-01
+    ## mystery_genre            1.427843e-02  1.456522e-02  1.483161e-02
+    ## biography_genre          1.707934e-01  1.692177e-01  1.677802e-01
+    ## animation_genre          6.559734e-01  6.731777e-01  6.885003e-01
+    ## music_genre             -7.361472e-02 -7.646902e-02 -7.899522e-02
+    ## war_genre                8.196466e-02  7.906082e-02  7.643430e-02
+    ## history_genre           -5.438885e-02 -5.922155e-02 -6.343976e-02
+    ## sport_genre             -1.949363e-03 -2.254040e-03 -2.480425e-03
+    ## musical_genre           -5.738193e-02 -6.146060e-02 -6.515353e-02
+    ## documentary_genre        1.024692e+00  1.047061e+00  1.066898e+00
+    ## western_genre           -3.957441e-02 -4.380547e-02 -4.761336e-02
+    ## filmnoir_genre          -9.997690e-02 -1.290780e-01 -1.556704e-01
+    ## short_genre              1.721402e+00  1.759997e+00  1.794013e+00
+    ## news_genre               6.973694e-01  6.986026e-01  6.993909e-01
+    ## director_movies          1.390490e-02  1.376030e-02  1.362343e-02
+    ## actor_1_movies           3.103620e-03  3.034689e-03  2.970472e-03
+    ## actor_2_movies          -4.818050e-04 -5.078932e-04 -5.255323e-04
+    ## actor_3_movies          -1.280710e-02 -1.315720e-02 -1.346238e-02
     ##                                                                  
-    ## (Intercept)              5.660599e+01  5.747962e+01  5.824692e+01
-    ## actor_1_facebook_likes   2.721005e-06  2.742085e-06  2.760971e-06
-    ## actor_2_facebook_likes  -4.345713e-07 -5.997597e-07 -7.478216e-07
-    ## actor_3_facebook_likes  -1.614086e-05 -1.661038e-05 -1.702400e-05
-    ## director_facebook_likes  1.625257e-05  1.598964e-05  1.575035e-05
-    ## duration                 7.345595e-03  7.340411e-03  7.335684e-03
-    ## budget                  -9.484602e-12 -1.105427e-11 -1.244339e-11
-    ## title_year              -2.562242e-02 -2.606405e-02 -2.645198e-02
-    ## facenumber_in_poster    -1.778773e-02 -1.768832e-02 -1.759442e-02
-    ## num_critic_for_reviews   3.619378e-03  3.674274e-03  3.722505e-03
-    ## color                   -2.432605e-01 -2.394976e-01 -2.360888e-01
-    ## drama_genre              4.158509e-01  4.200386e-01  4.237184e-01
-    ## comedy_genre            -1.129776e-01 -1.123620e-01 -1.118056e-01
-    ## thriller_genre          -1.673857e-01 -1.691210e-01 -1.706232e-01
-    ## action_genre            -2.181742e-01 -2.192698e-01 -2.201412e-01
-    ## romance_genre           -7.290994e-02 -7.455057e-02 -7.597400e-02
-    ## adventure_genre         -6.823134e-02 -7.058977e-02 -7.272213e-02
-    ## crime_genre              1.083643e-01  1.090217e-01  1.095732e-01
-    ## scifi_genre             -1.607337e-01 -1.634868e-01 -1.659446e-01
-    ## fantasy_genre           -8.263081e-02 -8.367061e-02 -8.464718e-02
-    ## horror_genre            -4.304252e-01 -4.340496e-01 -4.371463e-01
-    ## family_genre            -1.386996e-01 -1.411697e-01 -1.433112e-01
-    ## mystery_genre            1.931345e-02  1.950156e-02  1.964746e-02
-    ## biography_genre          1.660603e-01  1.648956e-01  1.638681e-01
-    ## animation_genre          6.929420e-01  7.049115e-01  7.154655e-01
-    ## music_genre             -8.768869e-02 -8.947483e-02 -9.104620e-02
-    ## war_genre                7.412620e-02  7.210571e-02  7.031670e-02
-    ## history_genre           -6.706201e-02 -7.018902e-02 -7.293440e-02
-    ## sport_genre              2.818894e-03  2.614450e-03  2.437858e-03
-    ## musical_genre           -7.534878e-02 -7.827286e-02 -8.084352e-02
-    ## documentary_genre        1.074800e+00  1.090642e+00  1.104526e+00
-    ## western_genre           -6.021653e-02 -6.334819e-02 -6.611292e-02
-    ## filmnoir_genre          -2.371747e-01 -2.588345e-01 -2.780085e-01
-    ## short_genre              1.846281e+00  1.872519e+00  1.895416e+00
-    ## news_genre               6.933345e-01  6.937878e-01  6.940535e-01
+    ## (Intercept)              5.564011e+01  5.651208e+01  5.728033e+01
+    ## actor_1_facebook_likes   2.111330e-06  2.140901e-06  2.167164e-06
+    ## actor_2_facebook_likes  -1.728000e-06 -1.870389e-06 -1.995893e-06
+    ## actor_3_facebook_likes  -1.468260e-05 -1.508013e-05 -1.542791e-05
+    ## director_facebook_likes  7.533076e-06  7.281029e-06  7.059425e-06
+    ## duration                 6.937832e-03  6.937517e-03  6.935643e-03
+    ## budget                  -1.061473e-11 -1.213361e-11 -1.347182e-11
+    ## title_year              -2.512812e-02 -2.556859e-02 -2.595664e-02
+    ## facenumber_in_poster    -1.775716e-02 -1.766060e-02 -1.756954e-02
+    ## num_critic_for_reviews   3.532925e-03  3.588196e-03  3.636741e-03
+    ## color                   -2.505324e-01 -2.467283e-01 -2.432653e-01
+    ## drama_genre              4.195762e-01  4.237780e-01  4.274541e-01
+    ## comedy_genre            -1.188679e-01 -1.182669e-01 -1.177131e-01
+    ## thriller_genre          -1.749303e-01 -1.766475e-01 -1.781321e-01
+    ## action_genre            -2.227758e-01 -2.238346e-01 -2.247042e-01
+    ## romance_genre           -7.357741e-02 -7.526308e-02 -7.674261e-02
+    ## adventure_genre         -7.035098e-02 -7.266853e-02 -7.472561e-02
+    ## crime_genre              1.040196e-01  1.048269e-01  1.055051e-01
+    ## scifi_genre             -1.538944e-01 -1.566373e-01 -1.590699e-01
+    ## fantasy_genre           -8.871158e-02 -8.969348e-02 -9.055377e-02
+    ## horror_genre            -4.230302e-01 -4.268448e-01 -4.301628e-01
+    ## family_genre            -1.381730e-01 -1.406623e-01 -1.428533e-01
+    ## mystery_genre            1.507681e-02  1.530054e-02  1.550298e-02
+    ## biography_genre          1.664834e-01  1.653243e-01  1.642962e-01
+    ## animation_genre          7.020639e-01  7.140055e-01  7.244689e-01
+    ## music_genre             -8.121710e-02 -8.316088e-02 -8.485363e-02
+    ## war_genre                7.407840e-02  7.198068e-02  7.012479e-02
+    ## history_genre           -6.710377e-02 -7.027367e-02 -7.300711e-02
+    ## sport_genre             -2.645099e-03 -2.762079e-03 -2.842886e-03
+    ## musical_genre           -6.847106e-02 -7.143043e-02 -7.405382e-02
+    ## documentary_genre        1.084394e+00  1.099750e+00  1.113171e+00
+    ## western_genre           -5.101418e-02 -5.403099e-02 -5.669137e-02
+    ## filmnoir_genre          -1.797339e-01 -2.013227e-01 -2.205469e-01
+    ## short_genre              1.823839e+00  1.849877e+00  1.872518e+00
+    ## news_genre               6.998536e-01  7.000842e-01  7.001537e-01
+    ## director_movies          1.349601e-02  1.337904e-02  1.327291e-02
+    ## actor_1_movies           2.911429e-03  2.857753e-03  2.809427e-03
+    ## actor_2_movies          -5.367401e-04 -5.431781e-04 -5.461771e-04
+    ## actor_3_movies          -1.372730e-02 -1.395647e-02 -1.415414e-02
     ##                                                                  
-    ## (Intercept)              5.892088e+01  5.950899e+01  6.002029e+01
-    ## actor_1_facebook_likes   2.776896e-06  2.790692e-06  2.802611e-06
-    ## actor_2_facebook_likes  -8.756819e-07 -9.874373e-07 -1.084721e-06
-    ## actor_3_facebook_likes  -1.737962e-05 -1.768768e-05 -1.795376e-05
-    ## director_facebook_likes  1.554154e-05  1.535719e-05  1.519537e-05
-    ## duration                 7.328559e-03  7.321294e-03  7.314182e-03
-    ## budget                  -1.365311e-11 -1.470782e-11 -1.562398e-11
-    ## title_year              -2.679259e-02 -2.708978e-02 -2.734814e-02
-    ## facenumber_in_poster    -1.750770e-02 -1.742853e-02 -1.735711e-02
-    ## num_critic_for_reviews   3.764588e-03  3.801218e-03  3.832997e-03
-    ## color                   -2.330110e-01 -2.302652e-01 -2.278331e-01
-    ## drama_genre              4.269159e-01  4.296948e-01  4.321027e-01
-    ## comedy_genre            -1.112990e-01 -1.108465e-01 -1.104455e-01
-    ## thriller_genre          -1.719249e-01 -1.730477e-01 -1.740146e-01
-    ## action_genre            -2.208900e-01 -2.215076e-01 -2.220181e-01
-    ## romance_genre           -7.723329e-02 -7.832950e-02 -7.928047e-02
-    ## adventure_genre         -7.456340e-02 -7.617901e-02 -7.758968e-02
-    ## crime_genre              1.100237e-01  1.103969e-01  1.107063e-01
-    ## scifi_genre             -1.680860e-01 -1.699620e-01 -1.715984e-01
-    ## fantasy_genre           -8.544286e-02 -8.613735e-02 -8.674091e-02
-    ## horror_genre            -4.398728e-01 -4.422267e-01 -4.442546e-01
-    ## family_genre            -1.452179e-01 -1.468815e-01 -1.483277e-01
-    ## mystery_genre            1.980166e-02  1.993917e-02  2.006121e-02
-    ## biography_genre          1.629591e-01  1.621635e-01  1.614703e-01
-    ## animation_genre          7.246154e-01  7.325720e-01  7.394679e-01
-    ## music_genre             -9.238648e-02 -9.354163e-02 -9.453526e-02
-    ## war_genre                6.874760e-02  6.737499e-02  6.617933e-02
-    ## history_genre           -7.524410e-02 -7.722401e-02 -7.891827e-02
-    ## sport_genre              2.311143e-03  2.211347e-03  2.132688e-03
-    ## musical_genre           -8.312568e-02 -8.512689e-02 -8.687391e-02
-    ## documentary_genre        1.116585e+00  1.127052e+00  1.136110e+00
-    ## western_genre           -6.852511e-02 -7.062861e-02 -7.245619e-02
-    ## filmnoir_genre          -2.950050e-01 -3.099328e-01 -3.229824e-01
-    ## short_genre              1.915152e+00  1.932196e+00  1.946880e+00
-    ## news_genre               6.941755e-01  6.942055e-01  6.941751e-01
+    ## (Intercept)              5.795284e+01  5.854092e+01  5.905246e+01
+    ## actor_1_facebook_likes   2.190196e-06  2.210570e-06  2.228385e-06
+    ## actor_2_facebook_likes  -2.109829e-06 -2.205471e-06 -2.288672e-06
+    ## actor_3_facebook_likes  -1.573591e-05 -1.599838e-05 -1.622556e-05
+    ## director_facebook_likes  6.863517e-06  6.695047e-06  6.548848e-06
+    ## duration                 6.934595e-03  6.931031e-03  6.927247e-03
+    ## budget                  -1.465581e-11 -1.567806e-11 -1.656642e-11
+    ## title_year              -2.629640e-02 -2.659339e-02 -2.685171e-02
+    ## facenumber_in_poster    -1.748572e-02 -1.740877e-02 -1.733934e-02
+    ## num_critic_for_reviews   3.679278e-03  3.716234e-03  3.748314e-03
+    ## color                   -2.401603e-01 -2.373732e-01 -2.349027e-01
+    ## drama_genre              4.306743e-01  4.334562e-01  4.358651e-01
+    ## comedy_genre            -1.172046e-01 -1.167514e-01 -1.163473e-01
+    ## thriller_genre          -1.794142e-01 -1.805150e-01 -1.814603e-01
+    ## action_genre            -2.253905e-01 -2.259819e-01 -2.264689e-01
+    ## romance_genre           -7.802335e-02 -7.914967e-02 -8.012685e-02
+    ## adventure_genre         -7.657236e-02 -7.816178e-02 -7.955068e-02
+    ## crime_genre              1.060796e-01  1.065572e-01  1.069578e-01
+    ## scifi_genre             -1.612362e-01 -1.631154e-01 -1.647571e-01
+    ## fantasy_genre           -9.135415e-02 -9.200049e-02 -9.256064e-02
+    ## horror_genre            -4.329964e-01 -4.354885e-01 -4.376385e-01
+    ## family_genre            -1.447370e-01 -1.464128e-01 -1.478690e-01
+    ## mystery_genre            1.566362e-02  1.582774e-02  1.597316e-02
+    ## biography_genre          1.633905e-01  1.625961e-01  1.619034e-01
+    ## animation_genre          7.336437e-01  7.415749e-01  7.484478e-01
+    ## music_genre             -8.634682e-02 -8.761497e-02 -8.870776e-02
+    ## war_genre                6.848092e-02  6.705231e-02  6.580681e-02
+    ## history_genre           -7.540837e-02 -7.742022e-02 -7.914320e-02
+    ## sport_genre             -2.915069e-03 -2.947285e-03 -2.965537e-03
+    ## musical_genre           -7.635418e-02 -7.838335e-02 -8.015619e-02
+    ## documentary_genre        1.124887e+00  1.135023e+00  1.143792e+00
+    ## western_genre           -5.903886e-02 -6.107537e-02 -6.284714e-02
+    ## filmnoir_genre          -2.375085e-01 -2.524719e-01 -2.655706e-01
+    ## short_genre              1.892244e+00  1.909194e+00  1.923805e+00
+    ## news_genre               7.001180e-01  7.000108e-01  6.998642e-01
+    ## director_movies          1.317617e-02  1.309133e-02  1.301627e-02
+    ## actor_1_movies           2.766628e-03  2.728342e-03  2.694606e-03
+    ## actor_2_movies          -5.445925e-04 -5.438667e-04 -5.420873e-04
+    ## actor_3_movies          -1.432523e-02 -1.447122e-02 -1.459635e-02
     ##                                                                  
-    ## (Intercept)              6.046340e+01  6.084635e+01  6.117055e+01
-    ## actor_1_facebook_likes   2.812886e-06  2.821726e-06  2.829515e-06
-    ## actor_2_facebook_likes  -1.169116e-06 -1.242112e-06 -1.309159e-06
-    ## actor_3_facebook_likes  -1.818305e-05 -1.838021e-05 -1.855268e-05
-    ## director_facebook_likes  1.505402e-05  1.493105e-05  1.482331e-05
-    ## duration                 7.307426e-03  7.301148e-03  7.298226e-03
-    ## budget                  -1.641721e-11 -1.710212e-11 -1.770492e-11
-    ## title_year              -2.757202e-02 -2.776549e-02 -2.792944e-02
-    ## facenumber_in_poster    -1.729330e-02 -1.723673e-02 -1.718940e-02
-    ## num_critic_for_reviews   3.860487e-03  3.884207e-03  3.904572e-03
-    ## color                   -2.256923e-01 -2.238178e-01 -2.222342e-01
-    ## drama_genre              4.341836e-01  4.359778e-01  4.375508e-01
-    ## comedy_genre            -1.100925e-01 -1.097834e-01 -1.095029e-01
-    ## thriller_genre          -1.748456e-01 -1.755586e-01 -1.761510e-01
-    ## action_genre            -2.224407e-01 -2.227912e-01 -2.230880e-01
-    ## romance_genre           -8.010301e-02 -8.081267e-02 -8.140382e-02
-    ## adventure_genre         -7.881665e-02 -7.988028e-02 -8.084323e-02
-    ## crime_genre              1.109634e-01  1.111772e-01  1.113749e-01
-    ## scifi_genre             -1.730207e-01 -1.742529e-01 -1.753096e-01
-    ## fantasy_genre           -8.726380e-02 -8.771556e-02 -8.814031e-02
-    ## horror_genre            -4.459983e-01 -4.474952e-01 -4.487239e-01
-    ## family_genre            -1.495808e-01 -1.506635e-01 -1.515101e-01
-    ## mystery_genre            2.016893e-02  2.026352e-02  2.030773e-02
-    ## biography_genre          1.608687e-01  1.603481e-01  1.598694e-01
-    ## animation_genre          7.454279e-01  7.505665e-01  7.550195e-01
-    ## music_genre             -9.538822e-02 -9.611920e-02 -9.677431e-02
-    ## war_genre                6.514147e-02  6.424335e-02  6.344598e-02
-    ## history_genre           -8.036616e-02 -8.160218e-02 -8.271154e-02
-    ## sport_genre              2.070593e-03  2.021456e-03  1.961680e-03
-    ## musical_genre           -8.839339e-02 -8.971067e-02 -9.083140e-02
-    ## documentary_genre        1.143927e+00  1.150660e+00  1.156500e+00
-    ## western_genre           -7.403901e-02 -7.540608e-02 -7.657704e-02
-    ## filmnoir_genre          -3.343441e-01 -3.442015e-01 -3.525786e-01
-    ## short_genre              1.959506e+00  1.970341e+00  1.979775e+00
-    ## news_genre               6.941074e-01  6.940184e-01  6.938950e-01
+    ## (Intercept)              5.949598e+01  5.987942e+01  6.020419e+01
+    ## actor_1_facebook_likes   2.243899e-06  2.257363e-06  2.268422e-06
+    ## actor_2_facebook_likes  -2.360789e-06 -2.423121e-06 -2.480521e-06
+    ## actor_3_facebook_likes  -1.642167e-05 -1.659057e-05 -1.673808e-05
+    ## director_facebook_likes  6.422368e-06  6.313240e-06  6.222482e-06
+    ## duration                 6.923444e-03  6.919768e-03  6.919591e-03
+    ## budget                  -1.733596e-11 -1.800068e-11 -1.858548e-11
+    ## title_year              -2.707566e-02 -2.726927e-02 -2.743344e-02
+    ## facenumber_in_poster    -1.727732e-02 -1.722234e-02 -1.717611e-02
+    ## num_critic_for_reviews   3.776076e-03  3.800040e-03  3.820660e-03
+    ## color                   -2.327263e-01 -2.308195e-01 -2.292050e-01
+    ## drama_genre              4.379460e-01  4.397395e-01  4.413060e-01
+    ## comedy_genre            -1.159897e-01 -1.156754e-01 -1.153761e-01
+    ## thriller_genre          -1.822709e-01 -1.829651e-01 -1.835387e-01
+    ## action_genre            -2.268709e-01 -2.272035e-01 -2.274801e-01
+    ## romance_genre           -8.097211e-02 -8.170141e-02 -8.231029e-02
+    ## adventure_genre         -8.075909e-02 -8.180690e-02 -8.275319e-02
+    ## crime_genre              1.072942e-01  1.075769e-01  1.078385e-01
+    ## scifi_genre             -1.661856e-01 -1.674244e-01 -1.684924e-01
+    ## fantasy_genre           -9.304447e-02 -9.346141e-02 -9.385072e-02
+    ## horror_genre            -4.394895e-01 -4.410803e-01 -4.423932e-01
+    ## family_genre            -1.491305e-01 -1.502203e-01 -1.510748e-01
+    ## mystery_genre            1.610148e-02  1.621413e-02  1.627723e-02
+    ## biography_genre          1.613016e-01  1.607808e-01  1.602970e-01
+    ## animation_genre          7.543868e-01  7.595064e-01  7.639348e-01
+    ## music_genre             -8.964759e-02 -9.045430e-02 -9.118636e-02
+    ## war_genre                6.472507e-02  6.378850e-02  6.294903e-02
+    ## history_genre           -8.061653e-02 -8.187495e-02 -8.300310e-02
+    ## sport_genre             -2.974015e-03 -2.975879e-03 -2.990535e-03
+    ## musical_genre           -8.169896e-02 -8.303708e-02 -8.417686e-02
+    ## documentary_genre        1.151359e+00  1.157875e+00  1.163516e+00
+    ## western_genre           -6.438338e-02 -6.571153e-02 -6.685241e-02
+    ## filmnoir_genre          -2.769885e-01 -2.869050e-01 -2.953722e-01
+    ## short_genre              1.936373e+00  1.947165e+00  1.956583e+00
+    ## news_genre               6.996979e-01  6.995254e-01  6.993253e-01
+    ## director_movies          1.295027e-02  1.289254e-02  1.283998e-02
+    ## actor_1_movies           2.665039e-03  2.639242e-03  2.617411e-03
+    ## actor_2_movies          -5.396964e-04 -5.370002e-04 -5.335425e-04
+    ## actor_3_movies          -1.470344e-02 -1.479499e-02 -1.487661e-02
     ##                                                                  
-    ## (Intercept)              6.145543e+01  6.170004e+01  6.190981e+01
-    ## actor_1_facebook_likes   2.835998e-06  2.841545e-06  2.846291e-06
-    ## actor_2_facebook_likes  -1.362804e-06 -1.408897e-06 -1.448430e-06
-    ## actor_3_facebook_likes  -1.869730e-05 -1.882107e-05 -1.892690e-05
-    ## director_facebook_likes  1.473127e-05  1.465200e-05  1.458379e-05
-    ## duration                 7.292664e-03  7.287720e-03  7.283344e-03
-    ## budget                  -1.821073e-11 -1.864445e-11 -1.901609e-11
-    ## title_year              -2.807334e-02 -2.819688e-02 -2.830282e-02
-    ## facenumber_in_poster    -1.714548e-02 -1.710720e-02 -1.707395e-02
-    ## num_critic_for_reviews   3.922129e-03  3.937191e-03  3.950096e-03
-    ## color                   -2.208082e-01 -2.195743e-01 -2.185091e-01
-    ## drama_genre              4.388738e-01  4.400072e-01  4.409779e-01
-    ## comedy_genre            -1.092696e-01 -1.090684e-01 -1.088948e-01
-    ## thriller_genre          -1.766782e-01 -1.771270e-01 -1.775104e-01
-    ## action_genre            -2.233285e-01 -2.235309e-01 -2.236999e-01
-    ## romance_genre           -8.193175e-02 -8.238435e-02 -8.277215e-02
-    ## adventure_genre         -8.162812e-02 -8.230519e-02 -8.288662e-02
-    ## crime_genre              1.115209e-01  1.116430e-01  1.117453e-01
-    ## scifi_genre             -1.762288e-01 -1.770186e-01 -1.776969e-01
-    ## fantasy_genre           -8.847067e-02 -8.875376e-02 -8.899650e-02
-    ## horror_genre            -4.498290e-01 -4.507749e-01 -4.515833e-01
-    ## family_genre            -1.523267e-01 -1.530255e-01 -1.536249e-01
-    ## mystery_genre            2.038619e-02  2.045297e-02  2.051084e-02
-    ## biography_genre          1.594876e-01  1.591587e-01  1.588767e-01
-    ## animation_genre          7.588125e-01  7.620642e-01  7.648490e-01
-    ## music_genre             -9.730663e-02 -9.775986e-02 -9.814640e-02
-    ## war_genre                6.278173e-02  6.221059e-02  6.172055e-02
-    ## history_genre           -8.360359e-02 -8.436244e-02 -8.500847e-02
-    ## sport_genre              1.933123e-03  1.910732e-03  1.892922e-03
-    ## musical_genre           -9.181414e-02 -9.266138e-02 -9.338931e-02
-    ## documentary_genre        1.161460e+00  1.165709e+00  1.169346e+00
-    ## western_genre           -7.759157e-02 -7.846165e-02 -7.920750e-02
-    ## filmnoir_genre          -3.599546e-01 -3.663042e-01 -3.717605e-01
-    ## short_genre              1.987705e+00  1.994484e+00  2.000273e+00
-    ## news_genre               6.937970e-01  6.937009e-01  6.936100e-01
+    ## (Intercept)              6.048964e+01  6.073475e+01  6.094501e+01
+    ## actor_1_facebook_likes   2.278584e-06  2.287305e-06  2.294802e-06
+    ## actor_2_facebook_likes  -2.526196e-06 -2.565471e-06 -2.599147e-06
+    ## actor_3_facebook_likes  -1.686241e-05 -1.696886e-05 -1.705996e-05
+    ## director_facebook_likes  6.141347e-06  6.071772e-06  6.012161e-06
+    ## duration                 6.915945e-03  6.912674e-03  6.909748e-03
+    ## budget                  -1.907669e-11 -1.949805e-11 -1.985918e-11
+    ## title_year              -2.757754e-02 -2.770127e-02 -2.780740e-02
+    ## facenumber_in_poster    -1.713343e-02 -1.709624e-02 -1.706395e-02
+    ## num_critic_for_reviews   3.838405e-03  3.853631e-03  3.866679e-03
+    ## color                   -2.277529e-01 -2.264965e-01 -2.254114e-01
+    ## drama_genre              4.426283e-01  4.437608e-01  4.447305e-01
+    ## comedy_genre            -1.151394e-01 -1.149345e-01 -1.147573e-01
+    ## thriller_genre          -1.840505e-01 -1.844858e-01 -1.848573e-01
+    ## action_genre            -2.277076e-01 -2.278987e-01 -2.280582e-01
+    ## romance_genre           -8.285256e-02 -8.331756e-02 -8.371599e-02
+    ## adventure_genre         -8.352722e-02 -8.419495e-02 -8.476845e-02
+    ## crime_genre              1.080352e-01  1.082011e-01  1.083408e-01
+    ## scifi_genre             -1.694175e-01 -1.702128e-01 -1.708961e-01
+    ## fantasy_genre           -9.415478e-02 -9.441475e-02 -9.463733e-02
+    ## horror_genre            -4.435691e-01 -4.445761e-01 -4.454371e-01
+    ## family_genre            -1.518955e-01 -1.525985e-01 -1.532013e-01
+    ## mystery_genre            1.636881e-02  1.644706e-02  1.651482e-02
+    ## biography_genre          1.599154e-01  1.595863e-01  1.593041e-01
+    ## animation_genre          7.677137e-01  7.709533e-01  7.737274e-01
+    ## music_genre             -9.177396e-02 -9.227499e-02 -9.270271e-02
+    ## war_genre                6.225707e-02  6.166170e-02  6.115076e-02
+    ## history_genre           -8.391220e-02 -8.468596e-02 -8.534489e-02
+    ## sport_genre             -2.983299e-03 -2.974710e-03 -2.965692e-03
+    ## musical_genre           -8.517606e-02 -8.603743e-02 -8.677769e-02
+    ## documentary_genre        1.168316e+00  1.172429e+00  1.175949e+00
+    ## western_genre           -6.783930e-02 -6.868618e-02 -6.941253e-02
+    ## filmnoir_genre          -3.028009e-01 -3.091988e-01 -3.146995e-01
+    ## short_genre              1.964482e+00  1.971237e+00  1.977008e+00
+    ## news_genre               6.991682e-01  6.990218e-01  6.988884e-01
+    ## director_movies          1.279665e-02  1.275916e-02  1.272682e-02
+    ## actor_1_movies           2.597872e-03  2.581032e-03  2.566520e-03
+    ## actor_2_movies          -5.309109e-04 -5.283892e-04 -5.260408e-04
+    ## actor_3_movies          -1.494284e-02 -1.499933e-02 -1.504747e-02
     ##                                      
-    ## (Intercept)              6.208947e+01
-    ## actor_1_facebook_likes   2.850347e-06
-    ## actor_2_facebook_likes  -1.482288e-06
-    ## actor_3_facebook_likes  -1.901731e-05
-    ## director_facebook_likes  1.452521e-05
-    ## duration                 7.279498e-03
-    ## budget                  -1.933413e-11
-    ## title_year              -2.839356e-02
-    ## facenumber_in_poster    -1.704518e-02
-    ## num_critic_for_reviews   3.961139e-03
-    ## color                   -2.175916e-01
-    ## drama_genre              4.418082e-01
-    ## comedy_genre            -1.087453e-01
-    ## thriller_genre          -1.778377e-01
-    ## action_genre            -2.238414e-01
-    ## romance_genre           -8.310399e-02
-    ## adventure_genre         -8.338513e-02
-    ## crime_genre              1.118311e-01
-    ## scifi_genre             -1.782785e-01
-    ## fantasy_genre           -8.920432e-02
-    ## horror_genre            -4.522735e-01
-    ## family_genre            -1.541384e-01
-    ## mystery_genre            2.056085e-02
-    ## biography_genre          1.586351e-01
-    ## animation_genre          7.672310e-01
-    ## music_genre             -9.847592e-02
-    ## war_genre                6.130072e-02
-    ## history_genre           -8.555823e-02
-    ## sport_genre              1.878693e-03
-    ## musical_genre           -9.401370e-02
-    ## documentary_genre        1.172455e+00
-    ## western_genre           -7.984603e-02
-    ## filmnoir_genre          -3.764413e-01
-    ## short_genre              2.005215e+00
-    ## news_genre               6.935260e-01
+    ## (Intercept)              6.112511e+01
+    ## actor_1_facebook_likes   2.301234e-06
+    ## actor_2_facebook_likes  -2.627983e-06
+    ## actor_3_facebook_likes  -1.713785e-05
+    ## director_facebook_likes  5.961150e-06
+    ## duration                 6.907152e-03
+    ## budget                  -2.016830e-11
+    ## title_year              -2.789831e-02
+    ## facenumber_in_poster    -1.703600e-02
+    ## num_critic_for_reviews   3.877848e-03
+    ## color                   -2.244766e-01
+    ## drama_genre              4.455600e-01
+    ## comedy_genre            -1.146045e-01
+    ## thriller_genre          -1.851742e-01
+    ## action_genre            -2.281914e-01
+    ## romance_genre           -8.405694e-02
+    ## adventure_genre         -8.526023e-02
+    ## crime_genre              1.084587e-01
+    ## scifi_genre             -1.714823e-01
+    ## fantasy_genre           -9.482768e-02
+    ## horror_genre            -4.461727e-01
+    ## family_genre            -1.537176e-01
+    ## mystery_genre            1.657334e-02
+    ## biography_genre          1.590624e-01
+    ## animation_genre          7.761002e-01
+    ## music_genre             -9.306760e-02
+    ## war_genre                6.071293e-02
+    ## history_genre           -8.590580e-02
+    ## sport_genre             -2.956756e-03
+    ## musical_genre           -8.741282e-02
+    ## documentary_genre        1.178958e+00
+    ## western_genre           -7.003464e-02
+    ## filmnoir_genre          -3.194206e-01
+    ## short_genre              1.981935e+00
+    ## news_genre               6.987683e-01
+    ## director_movies          1.269898e-02
+    ## actor_1_movies           2.554041e-03
+    ## actor_2_movies          -5.238937e-04
+    ## actor_3_movies          -1.508847e-02
 
 ``` r
-# Visualizing the ridge regression shrinkage.
-plot(ridge.models, xvar = "lambda", label = TRUE, main = "Ridge Regression")
+# Visualizar los resultados
+plot(ridge.models, xvar = "lambda", label = TRUE)
 ```
 
 ![](model_supervised_files/figure-markdown_github/unnamed-chunk-6-1.png)
 
 ``` r
-# Creating training and testing sets. Here we decide to use a 70-30 split with approximately 70% of our data in the training 
-# set and 30% of our data in the test set.
+# Training dataset del 70%
 set.seed(0)
 train = sample(1:nrow(x), 7*nrow(x)/10)
 test = (-train)
@@ -1535,14 +1674,10 @@ length(y.test)/nrow(x)
     ## [1] 0.3002006
 
 ``` r
-#Instead of arbitrarily choosing random lambda values and calculating the MSE
-#manually, it's a better idea to perform cross-validation in order to choose
-#the best lambda over a slew of values.
-
-#Running 10-fold cross validation.
+# Optimización de los parámetros del modelo
 set.seed(0)
 cv.ridge.out = cv.glmnet(x[train, ], y[train], lambda = grid, alpha = 0, nfolds = 10)
-plot(cv.ridge.out, main = "Ridge Regression\n")
+plot(cv.ridge.out)
 ```
 
 ![](model_supervised_files/figure-markdown_github/unnamed-chunk-6-2.png)
@@ -1561,81 +1696,83 @@ log(bestlambda.ridge)
     ## [1] -3.302698
 
 ``` r
-#What is the test MSE associated with this best value of lambda?
+# Error de cada uno de los parámetros
 ridge.bestlambdatrain = predict(ridge.models, s = bestlambda.ridge, newx = x[test, ])
 mean((ridge.bestlambdatrain - y.test)^2)
 ```
 
-    ## [1] 0.6860364
+    ## [1] 0.6815045
 
 ``` r
-#Refit the ridge regression on the overall dataset using the best lambda value
-#from cross validation; inspect the coefficient estimates.
+# Utilizar el mejor parámetro encontrado
 ridge.out = glmnet(x, y, alpha = 0)
 predict(ridge.out, type = "coefficients", s = bestlambda.ridge)
 ```
 
-    ## 35 x 1 sparse Matrix of class "dgCMatrix"
+    ## 39 x 1 sparse Matrix of class "dgCMatrix"
     ##                                     1
-    ## (Intercept)              5.922907e+01
-    ## actor_1_facebook_likes   2.784252e-06
-    ## actor_2_facebook_likes  -9.383755e-07
-    ## actor_3_facebook_likes  -1.754537e-05
-    ## director_facebook_likes  1.544439e-05
-    ## duration                 7.326795e-03
-    ## budget                  -1.422333e-11
-    ## title_year              -2.694845e-02
-    ## facenumber_in_poster    -1.746854e-02
-    ## num_critic_for_reviews   3.784033e-03
-    ## color                   -2.316003e-01
-    ## drama_genre              4.284213e-01
-    ## comedy_genre            -1.110489e-01
-    ## thriller_genre          -1.725038e-01
-    ## action_genre            -2.212487e-01
-    ## romance_genre           -7.780481e-02
-    ## adventure_genre         -7.545191e-02
-    ## crime_genre              1.102422e-01
-    ## scifi_genre             -1.690641e-01
-    ## fantasy_genre           -8.581708e-02
-    ## horror_genre            -4.411022e-01
-    ## family_genre            -1.460283e-01
-    ## mystery_genre            1.984467e-02
-    ## biography_genre          1.625003e-01
-    ## animation_genre          7.288569e-01
-    ## music_genre             -9.301724e-02
-    ## war_genre                6.799477e-02
-    ## history_genre           -7.632971e-02
-    ## sport_genre              2.243782e-03
-    ## musical_genre           -8.418835e-02
-    ## documentary_genre        1.122202e+00
-    ## western_genre           -6.963314e-02
-    ## filmnoir_genre          -3.028363e-01
-    ## short_genre              1.924344e+00
-    ## news_genre               6.941722e-01
+    ## (Intercept)              5.826048e+01
+    ## actor_1_facebook_likes   2.200359e-06
+    ## actor_2_facebook_likes  -2.162643e-06
+    ## actor_3_facebook_likes  -1.587525e-05
+    ## director_facebook_likes  6.778174e-06
+    ## duration                 6.935188e-03
+    ## budget                  -1.520542e-11
+    ## title_year              -2.645190e-02
+    ## facenumber_in_poster    -1.744706e-02
+    ## num_critic_for_reviews   3.698905e-03
+    ## color                   -2.387257e-01
+    ## drama_genre              4.321723e-01
+    ## comedy_genre            -1.169439e-01
+    ## thriller_genre          -1.799757e-01
+    ## action_genre            -2.257323e-01
+    ## romance_genre           -7.861040e-02
+    ## adventure_genre         -7.744754e-02
+    ## crime_genre              1.063593e-01
+    ## scifi_genre             -1.622179e-01
+    ## fantasy_genre           -9.169953e-02
+    ## horror_genre            -4.343016e-01
+    ## family_genre            -1.455577e-01
+    ## mystery_genre            1.572302e-02
+    ## biography_genre          1.629279e-01
+    ## animation_genre          7.378711e-01
+    ## music_genre             -8.704626e-02
+    ## war_genre                6.769239e-02
+    ## history_genre           -7.650762e-02
+    ## sport_genre             -2.939551e-03
+    ## musical_genre           -7.742988e-02
+    ## documentary_genre        1.130312e+00
+    ## western_genre           -6.010869e-02
+    ## filmnoir_genre          -2.453751e-01
+    ## short_genre              1.901400e+00
+    ## news_genre               7.000360e-01
+    ## director_movies          1.312981e-02
+    ## actor_1_movies           2.746905e-03
+    ## actor_2_movies          -5.449111e-04
+    ## actor_3_movies          -1.440641e-02
 
 ``` r
-#Let's also inspect the MSE of our final ridge model on all our data.
+# MSE del modelo creado finalmente
 ridge.bestlambda = predict(ridge.out, s = bestlambda.ridge, newx = x)
 mean((ridge.bestlambda - y)^2)
 ```
 
-    ## [1] 0.7103927
+    ## [1] 0.707641
 
 ``` r
-#Fitting the lasso regression. Alpha = 1 for lasso regression.
+# Utilizar el modelo de regresión Lasso
 lasso.models = glmnet(x, y, alpha = 1, lambda = grid)
 
-dim(coef(lasso.models)) #20 different coefficients, estimated 100 times --
+dim(coef(lasso.models)) 
 ```
 
-    ## [1]  35 100
+    ## [1]  39 100
 
 ``` r
-#once each per lambda value.
-coef(lasso.models) #Inspecting the various coefficient estimates.
+coef(lasso.models) 
 ```
 
-    ## 35 x 100 sparse Matrix of class "dgCMatrix"
+    ## 39 x 100 sparse Matrix of class "dgCMatrix"
 
     ##    [[ suppressing 100 column names 's0', 's1', 's2' ... ]]
 
@@ -1675,6 +1812,10 @@ coef(lasso.models) #Inspecting the various coefficient estimates.
     ## filmnoir_genre          .        .        .        .        .       
     ## short_genre             .        .        .        .        .       
     ## news_genre              .        .        .        .        .       
+    ## director_movies         .        .        .        .        .       
+    ## actor_1_movies          .        .        .        .        .       
+    ## actor_2_movies          .        .        .        .        .       
+    ## actor_3_movies          .        .        .        .        .       
     ##                                                                     
     ## (Intercept)             6.422398 6.422398 6.422398 6.422398 6.422398
     ## actor_1_facebook_likes  .        .        .        .        .       
@@ -1711,6 +1852,10 @@ coef(lasso.models) #Inspecting the various coefficient estimates.
     ## filmnoir_genre          .        .        .        .        .       
     ## short_genre             .        .        .        .        .       
     ## news_genre              .        .        .        .        .       
+    ## director_movies         .        .        .        .        .       
+    ## actor_1_movies          .        .        .        .        .       
+    ## actor_2_movies          .        .        .        .        .       
+    ## actor_3_movies          .        .        .        .        .       
     ##                                                                     
     ## (Intercept)             6.422398 6.422398 6.422398 6.422398 6.422398
     ## actor_1_facebook_likes  .        .        .        .        .       
@@ -1747,6 +1892,10 @@ coef(lasso.models) #Inspecting the various coefficient estimates.
     ## filmnoir_genre          .        .        .        .        .       
     ## short_genre             .        .        .        .        .       
     ## news_genre              .        .        .        .        .       
+    ## director_movies         .        .        .        .        .       
+    ## actor_1_movies          .        .        .        .        .       
+    ## actor_2_movies          .        .        .        .        .       
+    ## actor_3_movies          .        .        .        .        .       
     ##                                                                     
     ## (Intercept)             6.422398 6.422398 6.422398 6.422398 6.422398
     ## actor_1_facebook_likes  .        .        .        .        .       
@@ -1783,6 +1932,10 @@ coef(lasso.models) #Inspecting the various coefficient estimates.
     ## filmnoir_genre          .        .        .        .        .       
     ## short_genre             .        .        .        .        .       
     ## news_genre              .        .        .        .        .       
+    ## director_movies         .        .        .        .        .       
+    ## actor_1_movies          .        .        .        .        .       
+    ## actor_2_movies          .        .        .        .        .       
+    ## actor_3_movies          .        .        .        .        .       
     ##                                                                     
     ## (Intercept)             6.422398 6.422398 6.422398 6.422398 6.422398
     ## actor_1_facebook_likes  .        .        .        .        .       
@@ -1819,6 +1972,10 @@ coef(lasso.models) #Inspecting the various coefficient estimates.
     ## filmnoir_genre          .        .        .        .        .       
     ## short_genre             .        .        .        .        .       
     ## news_genre              .        .        .        .        .       
+    ## director_movies         .        .        .        .        .       
+    ## actor_1_movies          .        .        .        .        .       
+    ## actor_2_movies          .        .        .        .        .       
+    ## actor_3_movies          .        .        .        .        .       
     ##                                                                     
     ## (Intercept)             6.422398 6.422398 6.422398 6.422398 6.422398
     ## actor_1_facebook_likes  .        .        .        .        .       
@@ -1855,6 +2012,10 @@ coef(lasso.models) #Inspecting the various coefficient estimates.
     ## filmnoir_genre          .        .        .        .        .       
     ## short_genre             .        .        .        .        .       
     ## news_genre              .        .        .        .        .       
+    ## director_movies         .        .        .        .        .       
+    ## actor_1_movies          .        .        .        .        .       
+    ## actor_2_movies          .        .        .        .        .       
+    ## actor_3_movies          .        .        .        .        .       
     ##                                                                     
     ## (Intercept)             6.422398 6.422398 6.422398 6.422398 6.422398
     ## actor_1_facebook_likes  .        .        .        .        .       
@@ -1891,6 +2052,10 @@ coef(lasso.models) #Inspecting the various coefficient estimates.
     ## filmnoir_genre          .        .        .        .        .       
     ## short_genre             .        .        .        .        .       
     ## news_genre              .        .        .        .        .       
+    ## director_movies         .        .        .        .        .       
+    ## actor_1_movies          .        .        .        .        .       
+    ## actor_2_movies          .        .        .        .        .       
+    ## actor_3_movies          .        .        .        .        .       
     ##                                                                     
     ## (Intercept)             6.422398 6.422398 6.422398 6.422398 6.422398
     ## actor_1_facebook_likes  .        .        .        .        .       
@@ -1927,6 +2092,10 @@ coef(lasso.models) #Inspecting the various coefficient estimates.
     ## filmnoir_genre          .        .        .        .        .       
     ## short_genre             .        .        .        .        .       
     ## news_genre              .        .        .        .        .       
+    ## director_movies         .        .        .        .        .       
+    ## actor_1_movies          .        .        .        .        .       
+    ## actor_2_movies          .        .        .        .        .       
+    ## actor_3_movies          .        .        .        .        .       
     ##                                                                     
     ## (Intercept)             6.422398 6.422398 6.422398 6.422398 6.422398
     ## actor_1_facebook_likes  .        .        .        .        .       
@@ -1963,6 +2132,10 @@ coef(lasso.models) #Inspecting the various coefficient estimates.
     ## filmnoir_genre          .        .        .        .        .       
     ## short_genre             .        .        .        .        .       
     ## news_genre              .        .        .        .        .       
+    ## director_movies         .        .        .        .        .       
+    ## actor_1_movies          .        .        .        .        .       
+    ## actor_2_movies          .        .        .        .        .       
+    ## actor_3_movies          .        .        .        .        .       
     ##                                                                     
     ## (Intercept)             6.422398 6.422398 6.422398 6.422398 6.422398
     ## actor_1_facebook_likes  .        .        .        .        .       
@@ -1999,6 +2172,10 @@ coef(lasso.models) #Inspecting the various coefficient estimates.
     ## filmnoir_genre          .        .        .        .        .       
     ## short_genre             .        .        .        .        .       
     ## news_genre              .        .        .        .        .       
+    ## director_movies         .        .        .        .        .       
+    ## actor_1_movies          .        .        .        .        .       
+    ## actor_2_movies          .        .        .        .        .       
+    ## actor_3_movies          .        .        .        .        .       
     ##                                                                     
     ## (Intercept)             6.422398 6.422398 6.422398 6.422398 6.422398
     ## actor_1_facebook_likes  .        .        .        .        .       
@@ -2035,6 +2212,10 @@ coef(lasso.models) #Inspecting the various coefficient estimates.
     ## filmnoir_genre          .        .        .        .        .       
     ## short_genre             .        .        .        .        .       
     ## news_genre              .        .        .        .        .       
+    ## director_movies         .        .        .        .        .       
+    ## actor_1_movies          .        .        .        .        .       
+    ## actor_2_movies          .        .        .        .        .       
+    ## actor_3_movies          .        .        .        .        .       
     ##                                                                     
     ## (Intercept)             6.422398 6.422398 6.422398 6.422398 6.422398
     ## actor_1_facebook_likes  .        .        .        .        .       
@@ -2071,6 +2252,10 @@ coef(lasso.models) #Inspecting the various coefficient estimates.
     ## filmnoir_genre          .        .        .        .        .       
     ## short_genre             .        .        .        .        .       
     ## news_genre              .        .        .        .        .       
+    ## director_movies         .        .        .        .        .       
+    ## actor_1_movies          .        .        .        .        .       
+    ## actor_2_movies          .        .        .        .        .       
+    ## actor_3_movies          .        .        .        .        .       
     ##                                                                     
     ## (Intercept)             6.422398 6.422398 6.422398 6.422398 6.422398
     ## actor_1_facebook_likes  .        .        .        .        .       
@@ -2107,6 +2292,10 @@ coef(lasso.models) #Inspecting the various coefficient estimates.
     ## filmnoir_genre          .        .        .        .        .       
     ## short_genre             .        .        .        .        .       
     ## news_genre              .        .        .        .        .       
+    ## director_movies         .        .        .        .        .       
+    ## actor_1_movies          .        .        .        .        .       
+    ## actor_2_movies          .        .        .        .        .       
+    ## actor_3_movies          .        .        .        .        .       
     ##                                                                     
     ## (Intercept)             6.422398 6.422398 6.422398 6.422398 6.422398
     ## actor_1_facebook_likes  .        .        .        .        .       
@@ -2143,6 +2332,10 @@ coef(lasso.models) #Inspecting the various coefficient estimates.
     ## filmnoir_genre          .        .        .        .        .       
     ## short_genre             .        .        .        .        .       
     ## news_genre              .        .        .        .        .       
+    ## director_movies         .        .        .        .        .       
+    ## actor_1_movies          .        .        .        .        .       
+    ## actor_2_movies          .        .        .        .        .       
+    ## actor_3_movies          .        .        .        .        .       
     ##                                                                     
     ## (Intercept)             6.422398 6.422398 6.422398 6.422398 6.422398
     ## actor_1_facebook_likes  .        .        .        .        .       
@@ -2179,6 +2372,10 @@ coef(lasso.models) #Inspecting the various coefficient estimates.
     ## filmnoir_genre          .        .        .        .        .       
     ## short_genre             .        .        .        .        .       
     ## news_genre              .        .        .        .        .       
+    ## director_movies         .        .        .        .        .       
+    ## actor_1_movies          .        .        .        .        .       
+    ## actor_2_movies          .        .        .        .        .       
+    ## actor_3_movies          .        .        .        .        .       
     ##                                                                    
     ## (Intercept)             6.422398 6.422398 6.237220e+00 5.9813493076
     ## actor_1_facebook_likes  .        .        .            .           
@@ -2215,6 +2412,10 @@ coef(lasso.models) #Inspecting the various coefficient estimates.
     ## filmnoir_genre          .        .        .            .           
     ## short_genre             .        .        .            .           
     ## news_genre              .        .        .            .           
+    ## director_movies         .        .        .            .           
+    ## actor_1_movies          .        .        .            .           
+    ## actor_2_movies          .        .        .            .           
+    ## actor_3_movies          .        .        .            .           
     ##                                                               
     ## (Intercept)             5.7740882894 12.108028263 19.263105364
     ## actor_1_facebook_likes  .             .            .          
@@ -2251,6 +2452,10 @@ coef(lasso.models) #Inspecting the various coefficient estimates.
     ## filmnoir_genre          .             .            .          
     ## short_genre             .             .            .          
     ## news_genre              .             .            .          
+    ## director_movies         .             .            .          
+    ## actor_1_movies          .             .            .          
+    ## actor_2_movies          .             .            .          
+    ## actor_3_movies          .             .            .          
     ##                                                               
     ## (Intercept)             25.439913452 30.967690284 35.884148687
     ## actor_1_facebook_likes   .            .            .          
@@ -2287,196 +2492,216 @@ coef(lasso.models) #Inspecting the various coefficient estimates.
     ## filmnoir_genre           .            .            .          
     ## short_genre              .            .            .          
     ## news_genre               .            .            .          
+    ## director_movies          .            .            .          
+    ## actor_1_movies           .            .            .          
+    ## actor_2_movies           .            .            .          
+    ## actor_3_movies           .            .            .          
     ##                                                                 
-    ## (Intercept)             40.050908227  4.361703e+01  4.629212e+01
-    ## actor_1_facebook_likes   .            .             .           
-    ## actor_2_facebook_likes   .            .             .           
-    ## actor_3_facebook_likes   .            .             .           
-    ## director_facebook_likes  .            1.018893e-06  3.350030e-06
-    ## duration                 0.005825122  6.055542e-03  6.241828e-03
-    ## budget                   .            .             .           
-    ## title_year              -0.017398108 -1.920851e-02 -2.055410e-02
-    ## facenumber_in_poster     .            .             .           
-    ## num_critic_for_reviews   0.002681114  2.874097e-03  3.027470e-03
-    ## color                    .           -4.354506e-03 -3.867388e-02
-    ## drama_genre              0.388929653  4.105192e-01  4.282860e-01
-    ## comedy_genre             .            .             .           
-    ## thriller_genre           .            .             .           
-    ## action_genre            -0.038435633 -6.934745e-02 -9.479216e-02
-    ## romance_genre            .            .             .           
-    ## adventure_genre          .            .             .           
-    ## crime_genre              .            .             .           
-    ## scifi_genre              .            .             .           
-    ## fantasy_genre            .            .             .           
-    ## horror_genre            -0.195548672 -2.284520e-01 -2.556590e-01
-    ## family_genre             .            .             .           
-    ## mystery_genre            .            .             .           
-    ## biography_genre          .            3.266846e-02  6.011368e-02
-    ## animation_genre          0.025922519  1.108894e-01  1.837624e-01
-    ## music_genre              .            .             .           
-    ## war_genre                .            .             .           
-    ## history_genre            .            .             .           
-    ## sport_genre              .            .             .           
-    ## musical_genre            .            .             .           
-    ## documentary_genre        0.454343914  5.922284e-01  7.081754e-01
-    ## western_genre            .            .             .           
-    ## filmnoir_genre           .            .             .           
-    ## short_genre              .            .             .           
-    ## news_genre               .            .             .           
+    ## (Intercept)             40.0212599463 43.415290831  4.599883e+01
+    ## actor_1_facebook_likes   .             .            .           
+    ## actor_2_facebook_likes   .             .            .           
+    ## actor_3_facebook_likes   .             .            .           
+    ## director_facebook_likes  .             .            5.333273e-07
+    ## duration                 0.0058146009  0.005975492  6.117451e-03
+    ## budget                   .             .            .           
+    ## title_year              -0.0173832834 -0.019107358 -2.040737e-02
+    ## facenumber_in_poster     .             .            .           
+    ## num_critic_for_reviews   0.0026784515  0.002856516  3.002353e-03
+    ## color                    .            -0.005766334 -4.124250e-02
+    ## drama_genre              0.3891398682  0.412109959  4.308681e-01
+    ## comedy_genre             .             .            .           
+    ## thriller_genre           .             .            .           
+    ## action_genre            -0.0384402588 -0.069659279 -9.561365e-02
+    ## romance_genre            .             .            .           
+    ## adventure_genre          .             .            .           
+    ## crime_genre              .             .            .           
+    ## scifi_genre              .             .            .           
+    ## fantasy_genre            .             .            .           
+    ## horror_genre            -0.1952969844 -0.226988045 -2.537674e-01
+    ## family_genre             .             .            .           
+    ## mystery_genre            .             .            .           
+    ## biography_genre          .             0.033240376  6.153450e-02
+    ## animation_genre          0.0263613184  0.114263622  1.892431e-01
+    ## music_genre              .             .            .           
+    ## war_genre                .             .            .           
+    ## history_genre            .             .            .           
+    ## sport_genre              .             .            .           
+    ## musical_genre            .             .            .           
+    ## documentary_genre        0.4547931600  0.595777092  7.140870e-01
+    ## western_genre            .             .            .           
+    ## filmnoir_genre           .             .            .           
+    ## short_genre              .             .            .           
+    ## news_genre               .             .            .           
+    ## director_movies          0.0003048854  0.002604470  4.429305e-03
+    ## actor_1_movies           .             .            .           
+    ## actor_2_movies           .             .            .           
+    ## actor_3_movies           .             .            .           
     ##                                                                  
-    ## (Intercept)              4.867013e+01  5.070648e+01  5.243224e+01
+    ## (Intercept)              4.827853e+01  5.024481e+01  5.190420e+01
     ## actor_1_facebook_likes   .             .             .           
     ## actor_2_facebook_likes   .             .             .           
     ## actor_3_facebook_likes   .             .             .           
-    ## director_facebook_likes  5.267318e-06  6.891091e-06  8.285204e-06
-    ## duration                 6.400596e-03  6.533327e-03  6.643780e-03
+    ## director_facebook_likes  1.719138e-06  2.695173e-06  3.538528e-06
+    ## duration                 6.245235e-03  6.349586e-03  6.434458e-03
     ## budget                   .             .             .           
-    ## title_year              -2.174942e-02 -2.277290e-02 -2.364000e-02
+    ## title_year              -2.155374e-02 -2.254220e-02 -2.337599e-02
     ## facenumber_in_poster     .             .             .           
-    ## num_critic_for_reviews   3.169472e-03  3.291525e-03  3.396049e-03
-    ## color                   -6.727561e-02 -9.145834e-02 -1.119025e-01
-    ## drama_genre              4.409516e-01  4.517093e-01  4.609732e-01
+    ## num_critic_for_reviews   3.136018e-03  3.252032e-03  3.351711e-03
+    ## color                   -7.064295e-02 -9.543659e-02 -1.163546e-01
+    ## drama_genre              4.445272e-01  4.559116e-01  4.658717e-01
     ## comedy_genre             .             .             .           
-    ## thriller_genre           .             .            -2.938061e-03
-    ## action_genre            -1.121509e-01 -1.262655e-01 -1.373825e-01
+    ## thriller_genre           .             .            -4.796648e-03
+    ## action_genre            -1.136979e-01 -1.281019e-01 -1.388857e-01
     ## romance_genre            .             .             .           
     ## adventure_genre          .             .             .           
     ## crime_genre              .             .             .           
-    ## scifi_genre             -2.499999e-02 -4.923615e-02 -6.977072e-02
+    ## scifi_genre             -2.201064e-02 -4.570430e-02 -6.573241e-02
     ## fantasy_genre            .             .             .           
-    ## horror_genre            -2.771557e-01 -2.951140e-01 -3.096090e-01
+    ## horror_genre            -2.749177e-01 -2.924852e-01 -3.061095e-01
     ## family_genre             .             .             .           
     ## mystery_genre            .             .             .           
-    ## biography_genre          8.218984e-02  1.007393e-01  1.161681e-01
-    ## animation_genre          2.473770e-01  3.017408e-01  3.472391e-01
+    ## biography_genre          8.409151e-02  1.029979e-01  1.184914e-01
+    ## animation_genre          2.541524e-01  3.097359e-01  3.558958e-01
     ## music_genre              .             .             .           
     ## war_genre                .             .             .           
     ## history_genre            .             .             .           
     ## sport_genre              .             .             .           
     ## musical_genre            .             .             .           
-    ## documentary_genre        8.050837e-01  8.873759e-01  9.568478e-01
+    ## documentary_genre        8.127672e-01  8.964476e-01  9.668717e-01
     ## western_genre            .             .             .           
     ## filmnoir_genre           .             .             .           
     ## short_genre              .             .             .           
     ## news_genre               .             .             .           
+    ## director_movies          5.643772e-03  6.672753e-03  7.562271e-03
+    ## actor_1_movies           .             .             .           
+    ## actor_2_movies           .             .             .           
+    ## actor_3_movies           .             .             .           
     ##                                                                  
-    ## (Intercept)              5.382161e+01  5.503002e+01  5.610470e+01
-    ## actor_1_facebook_likes   1.236377e-07  4.634135e-07  7.534155e-07
+    ## (Intercept)              5.323775e+01  5.438493e+01  5.542518e+01
+    ## actor_1_facebook_likes   .             1.675182e-07  4.115755e-07
     ## actor_2_facebook_likes   .             .             .           
     ## actor_3_facebook_likes   .             .             .           
-    ## director_facebook_likes  9.346578e-06  1.008788e-05  1.067063e-05
-    ## duration                 6.698462e-03  6.724645e-03  6.761584e-03
+    ## director_facebook_likes  4.045134e-06  4.345782e-06  4.507688e-06
+    ## duration                 6.433929e-03  6.428724e-03  6.443750e-03
     ## budget                   .             .             .           
-    ## title_year              -2.433053e-02 -2.492737e-02 -2.545729e-02
-    ## facenumber_in_poster    -2.226765e-03 -4.704605e-03 -6.868074e-03
-    ## num_critic_for_reviews   3.481503e-03  3.553703e-03  3.617108e-03
-    ## color                   -1.292520e-01 -1.430140e-01 -1.535509e-01
-    ## drama_genre              4.653198e-01  4.650079e-01  4.625513e-01
-    ## comedy_genre            -9.900405e-03 -2.518893e-02 -3.859887e-02
-    ## thriller_genre          -1.667006e-02 -3.649484e-02 -5.478515e-02
-    ## action_genre            -1.481996e-01 -1.593711e-01 -1.669981e-01
-    ## romance_genre            .             .            -2.179514e-03
-    ## adventure_genre          .             .            -1.238262e-02
-    ## crime_genre              8.889648e-03  2.924889e-02  4.416697e-02
-    ## scifi_genre             -8.710698e-02 -1.008712e-01 -1.114685e-01
-    ## fantasy_genre           -3.536753e-03 -2.440704e-02 -3.760286e-02
-    ## horror_genre            -3.238778e-01 -3.341119e-01 -3.471744e-01
-    ## family_genre             .             .            -1.209042e-02
+    ## title_year              -2.403527e-02 -2.460080e-02 -2.511286e-02
+    ## facenumber_in_poster    -2.156543e-03 -4.577934e-03 -6.754952e-03
+    ## num_critic_for_reviews   3.429459e-03  3.496711e-03  3.555628e-03
+    ## color                   -1.343918e-01 -1.490508e-01 -1.600743e-01
+    ## drama_genre              4.689146e-01  4.689452e-01  4.661629e-01
+    ## comedy_genre            -1.471010e-02 -3.048308e-02 -4.447082e-02
+    ## thriller_genre          -2.078312e-02 -4.121080e-02 -6.007577e-02
+    ## action_genre            -1.506442e-01 -1.619919e-01 -1.696747e-01
+    ## romance_genre            .             .            -2.281775e-03
+    ## adventure_genre          .             .            -1.417032e-02
+    ## crime_genre              7.380384e-03  2.729900e-02  4.149182e-02
+    ## scifi_genre             -8.327996e-02 -9.665554e-02 -1.067546e-01
+    ## fantasy_genre           -7.773639e-03 -2.909169e-02 -4.200010e-02
+    ## horror_genre            -3.204199e-01 -3.298720e-01 -3.431272e-01
+    ## family_genre             .             .            -1.412011e-02
     ## mystery_genre            .             .             .           
-    ## biography_genre          1.253225e-01  1.298604e-01  1.326268e-01
-    ## animation_genre          3.840933e-01  4.217112e-01  4.663799e-01
+    ## biography_genre          1.266887e-01  1.313745e-01  1.341409e-01
+    ## animation_genre          3.941925e-01  4.321479e-01  4.792863e-01
     ## music_genre              .             .             .           
     ## war_genre                .             .             .           
     ## history_genre            .             .             .           
     ## sport_genre              .             .             .           
     ## musical_genre            .             .             .           
-    ## documentary_genre        1.007676e+00  1.045731e+00  1.074101e+00
+    ## documentary_genre        1.016192e+00  1.055216e+00  1.083813e+00
     ## western_genre            .             .             .           
     ## filmnoir_genre           .             .             .           
     ## short_genre              .             .             .           
     ## news_genre               .             .             .           
+    ## director_movies          8.266314e-03  8.890269e-03  9.471024e-03
+    ## actor_1_movies           3.887969e-04  6.691494e-04  8.301782e-04
+    ## actor_2_movies           .             .             .           
+    ## actor_3_movies           .             .             .           
     ##                                                                  
-    ## (Intercept)              5.703101e+01  5.786194e+01  5.857946e+01
-    ## actor_1_facebook_likes   1.059499e-06  1.317170e-06  1.536613e-06
+    ## (Intercept)              5.629619e+01  5.708510e+01  5.777465e+01
+    ## actor_1_facebook_likes   6.753167e-07  8.980210e-07  1.091745e-06
     ## actor_2_facebook_likes   .             .             .           
-    ## actor_3_facebook_likes  -3.057770e-06 -5.832695e-06 -8.176902e-06
-    ## director_facebook_likes  1.120222e-05  1.163064e-05  1.200647e-05
-    ## duration                 6.817221e-03  6.872658e-03  6.913371e-03
+    ## actor_3_facebook_likes  -3.252634e-06 -6.077762e-06 -8.328201e-06
+    ## director_facebook_likes  4.697370e-06  4.870054e-06  4.988258e-06
+    ## duration                 6.475836e-03  6.514691e-03  6.546799e-03
     ## budget                   .             .             .           
-    ## title_year              -2.591277e-02 -2.632166e-02 -2.667470e-02
-    ## facenumber_in_poster    -8.453380e-03 -9.734463e-03 -1.082007e-02
-    ## num_critic_for_reviews   3.676727e-03  3.727985e-03  3.772067e-03
-    ## color                   -1.616865e-01 -1.687724e-01 -1.748692e-01
-    ## drama_genre              4.604095e-01  4.585179e-01  4.567576e-01
-    ## comedy_genre            -4.862930e-02 -5.728938e-02 -6.451711e-02
-    ## thriller_genre          -7.246572e-02 -8.786252e-02 -1.007687e-01
-    ## action_genre            -1.757023e-01 -1.832153e-01 -1.897623e-01
-    ## romance_genre           -1.500179e-02 -2.557549e-02 -3.440821e-02
-    ## adventure_genre         -2.356793e-02 -3.362241e-02 -4.205297e-02
-    ## crime_genre              5.454917e-02  6.313248e-02  7.075718e-02
-    ## scifi_genre             -1.212300e-01 -1.298441e-01 -1.369854e-01
-    ## fantasy_genre           -4.514785e-02 -5.146868e-02 -5.669148e-02
-    ## horror_genre            -3.628574e-01 -3.764284e-01 -3.877084e-01
-    ## family_genre            -3.482875e-02 -5.338716e-02 -6.865355e-02
+    ## title_year              -2.554062e-02 -2.592815e-02 -2.626612e-02
+    ## facenumber_in_poster    -8.356311e-03 -9.643309e-03 -1.073077e-02
+    ## num_critic_for_reviews   3.611731e-03  3.659595e-03  3.700821e-03
+    ## color                   -1.687106e-01 -1.761851e-01 -1.822441e-01
+    ## drama_genre              4.641407e-01  4.622066e-01  4.605014e-01
+    ## comedy_genre            -5.485165e-02 -6.388381e-02 -7.096663e-02
+    ## thriller_genre          -7.795450e-02 -9.369264e-02 -1.068504e-01
+    ## action_genre            -1.782624e-01 -1.860094e-01 -1.929497e-01
+    ## romance_genre           -1.533672e-02 -2.597686e-02 -3.479962e-02
+    ## adventure_genre         -2.513576e-02 -3.515550e-02 -4.360231e-02
+    ## crime_genre              5.167151e-02  5.996062e-02  6.769247e-02
+    ## scifi_genre             -1.160578e-01 -1.243914e-01 -1.311393e-01
+    ## fantasy_genre           -4.994096e-02 -5.656637e-02 -6.173400e-02
+    ## horror_genre            -3.579882e-01 -3.712575e-01 -3.824123e-01
+    ## family_genre            -3.731221e-02 -5.618206e-02 -7.127114e-02
     ## mystery_genre            .             .             .           
-    ## biography_genre          1.332163e-01  1.340422e-01  1.346516e-01
-    ## animation_genre          5.114643e-01  5.512150e-01  5.850293e-01
-    ## music_genre             -1.067771e-02 -2.833848e-02 -3.857541e-02
-    ## war_genre                .             .             3.754768e-03
+    ## biography_genre          1.345016e-01  1.353574e-01  1.358208e-01
+    ## animation_genre          5.239734e-01  5.636481e-01  5.970733e-01
+    ## music_genre             -2.404980e-03 -2.139813e-02 -3.292117e-02
+    ## war_genre                .             6.257473e-04  6.005111e-03
     ## history_genre            .             .             .           
     ## sport_genre              .             .             .           
-    ## musical_genre            .            -4.936236e-03 -1.900119e-02
-    ## documentary_genre        1.093928e+00  1.111405e+00  1.125688e+00
+    ## musical_genre            .             .            -1.198068e-02
+    ## documentary_genre        1.103897e+00  1.122011e+00  1.136012e+00
     ## western_genre            .             .             .           
     ## filmnoir_genre           .             .             .           
-    ## short_genre              1.590292e-01  4.352211e-01  6.741946e-01
+    ## short_genre              1.503405e-01  4.230941e-01  6.597426e-01
     ## news_genre               .             .             .           
+    ## director_movies          9.946770e-03  1.029560e-02  1.063899e-02
+    ## actor_1_movies           1.010965e-03  1.148050e-03  1.309595e-03
+    ## actor_2_movies           .             .             .           
+    ## actor_3_movies           .             .            -1.746985e-03
     ##                                                                  
-    ## (Intercept)              5.918542e+01  5.970354e+01  6.014252e+01
-    ## actor_1_facebook_likes   1.723937e-06  1.882902e-06  2.018058e-06
+    ## (Intercept)              5.837116e+01  5.888075e+01  5.931242e+01
+    ## actor_1_facebook_likes   1.257801e-06  1.398255e-06  1.517852e-06
     ## actor_2_facebook_likes   .             .             .           
-    ## actor_3_facebook_likes  -1.016444e-05 -1.185390e-05 -1.329000e-05
-    ## director_facebook_likes  1.232558e-05  1.259289e-05  1.282538e-05
-    ## duration                 6.945875e-03  6.972231e-03  6.995333e-03
+    ## actor_3_facebook_likes  -1.018342e-05 -1.176734e-05 -1.311368e-05
+    ## director_facebook_likes  5.076216e-06  5.151471e-06  5.211124e-06
+    ## duration                 6.577668e-03  6.603686e-03  6.626089e-03
     ## budget                   .             .             .           
-    ## title_year              -2.697278e-02 -2.722754e-02 -2.744347e-02
-    ## facenumber_in_poster    -1.173471e-02 -1.251287e-02 -1.317025e-02
-    ## num_critic_for_reviews   3.809682e-03  3.841902e-03  3.869053e-03
-    ## color                   -1.800140e-01 -1.843478e-01 -1.880680e-01
-    ## drama_genre              4.550984e-01  4.534320e-01  4.522443e-01
-    ## comedy_genre            -7.058716e-02 -7.584435e-02 -8.023404e-02
-    ## thriller_genre          -1.116764e-01 -1.208869e-01 -1.287751e-01
-    ## action_genre            -1.955177e-01 -2.004233e-01 -2.045644e-01
-    ## romance_genre           -4.182493e-02 -4.813538e-02 -5.350698e-02
-    ## adventure_genre         -4.917607e-02 -5.526054e-02 -6.042342e-02
-    ## crime_genre              7.740127e-02  8.295549e-02  8.775277e-02
-    ## scifi_genre             -1.429250e-01 -1.480496e-01 -1.523376e-01
-    ## fantasy_genre           -6.108247e-02 -6.485814e-02 -6.801128e-02
-    ## horror_genre            -3.972846e-01 -4.055789e-01 -4.124974e-01
-    ## family_genre            -8.152343e-02 -9.239876e-02 -1.017781e-01
+    ## title_year              -2.655833e-02 -2.680787e-02 -2.701933e-02
+    ## facenumber_in_poster    -1.165877e-02 -1.244750e-02 -1.311362e-02
+    ## num_critic_for_reviews   3.736274e-03  3.766581e-03  3.792114e-03
+    ## color                   -1.873504e-01 -1.916494e-01 -1.953366e-01
+    ## drama_genre              4.588547e-01  4.571813e-01  4.559954e-01
+    ## comedy_genre            -7.692490e-02 -8.211057e-02 -8.642950e-02
+    ## thriller_genre          -1.179771e-01 -1.273988e-01 -1.354549e-01
+    ## action_genre            -1.987706e-01 -2.037988e-01 -2.080285e-01
+    ## romance_genre           -4.233268e-02 -4.871753e-02 -5.415616e-02
+    ## adventure_genre         -5.071007e-02 -5.681506e-02 -6.200002e-02
+    ## crime_genre              7.428840e-02  7.980740e-02  8.456885e-02
+    ## scifi_genre             -1.370191e-01 -1.420716e-01 -1.463004e-01
+    ## fantasy_genre           -6.618634e-02 -6.997994e-02 -7.315897e-02
+    ## horror_genre            -3.919647e-01 -4.002709e-01 -4.072009e-01
+    ## family_genre            -8.372145e-02 -9.428532e-02 -1.033826e-01
     ## mystery_genre            .             .             .           
-    ## biography_genre          1.352844e-01  1.359384e-01  1.364188e-01
-    ## animation_genre          6.135987e-01  6.377670e-01  6.584728e-01
-    ## music_genre             -4.745087e-02 -5.501858e-02 -6.133281e-02
-    ## war_genre                8.698351e-03  1.298663e-02  1.656179e-02
+    ## biography_genre          1.362930e-01  1.368023e-01  1.371716e-01
+    ## animation_genre          6.251420e-01  6.489272e-01  6.693165e-01
+    ## music_genre             -4.148608e-02 -4.915979e-02 -5.555384e-02
+    ## war_genre                1.049919e-02  1.438144e-02  1.761343e-02
     ## history_genre            .             .             .           
     ## sport_genre              .             .             .           
-    ## musical_genre           -3.072396e-02 -4.065115e-02 -4.920233e-02
-    ## documentary_genre        1.135953e+00  1.143939e+00  1.150841e+00
+    ## musical_genre           -2.415131e-02 -3.411742e-02 -4.270605e-02
+    ## documentary_genre        1.145505e+00  1.152952e+00  1.159409e+00
     ## western_genre            .             .             .           
     ## filmnoir_genre           .             .             .           
-    ## short_genre              8.769295e-01  1.048958e+00  1.195414e+00
-    ## news_genre               7.450505e-02  1.612983e-01  2.349773e-01
+    ## short_genre              8.609777e-01  1.031813e+00  1.177218e+00
+    ## news_genre               7.985940e-02  1.666689e-01  2.403728e-01
+    ## director_movies          1.094151e-02  1.119435e-02  1.141553e-02
+    ## actor_1_movies           1.461439e-03  1.591153e-03  1.701362e-03
+    ## actor_2_movies           .             .             .           
+    ## actor_3_movies          -3.824121e-03 -5.588647e-03 -7.087616e-03
 
 ``` r
-#Instead of arbitrarily choosing random lambda values and calculating the MSE
-#manually, it's a better idea to perform cross-validation in order to choose
-#the best lambda over a slew of values.
-
-#Running 10-fold cross validation.
+# Validación cruzada para obtener los parámetros optimos
 set.seed(0)
 cv.lasso.out = cv.glmnet(x[train, ], y[train], lambda = grid, alpha = 1, nfolds = 10)
-plot(cv.lasso.out, main = "Lasso Regression\n")
+plot(cv.lasso.out)
 ```
 
 ![](model_supervised_files/figure-markdown_github/unnamed-chunk-7-1.png)
@@ -2495,65 +2720,65 @@ log(bestlambda.lasso)
     ## [1] -4.60517
 
 ``` r
-#What is the test MSE associated with this best value of lambda?
+# Error según cada uno de los parámetros obtenidos
 lasso.bestlambdatrain = predict(lasso.models, s = bestlambda.lasso, newx = x[test, ])
 mean((lasso.bestlambdatrain - y.test)^2)
 ```
 
-    ## [1] 0.687821
+    ## [1] 0.6839244
 
 ``` r
-#Here the MSE is much lower at approximately 89,452; a further improvement
-#on that which we have seen above.
-
-#Refit the lasso regression on the overall dataset using the best lambda value
-#from cross validation; inspect the coefficient estimates.
+# Recalcular el modelo según el error obtenido
 lasso.out = glmnet(x, y, alpha = 1)
 predict(lasso.out, type = "coefficients", s = bestlambda.lasso)
 ```
 
-    ## 35 x 1 sparse Matrix of class "dgCMatrix"
+    ## 39 x 1 sparse Matrix of class "dgCMatrix"
     ##                                     1
-    ## (Intercept)              6.014152e+01
-    ## actor_1_facebook_likes   2.017979e-06
+    ## (Intercept)              5.931146e+01
+    ## actor_1_facebook_likes   1.517813e-06
     ## actor_2_facebook_likes   .           
-    ## actor_3_facebook_likes  -1.328898e-05
-    ## director_facebook_likes  1.282824e-05
-    ## duration                 6.995649e-03
+    ## actor_3_facebook_likes  -1.311299e-05
+    ## director_facebook_likes  5.207703e-06
+    ## duration                 6.626117e-03
     ## budget                   .           
-    ## title_year              -2.744301e-02
-    ## facenumber_in_poster    -1.316915e-02
-    ## num_critic_for_reviews   3.868940e-03
-    ## color                   -1.880860e-01
-    ## drama_genre              4.523409e-01
-    ## comedy_genre            -8.020018e-02
-    ## thriller_genre          -1.288037e-01
-    ## action_genre            -2.045576e-01
-    ## romance_genre           -5.351449e-02
-    ## adventure_genre         -6.041988e-02
-    ## crime_genre              8.778644e-02
-    ## scifi_genre             -1.523055e-01
-    ## fantasy_genre           -6.798142e-02
-    ## horror_genre            -4.124443e-01
-    ## family_genre            -1.018509e-01
+    ## title_year              -2.701889e-02
+    ## facenumber_in_poster    -1.311250e-02
+    ## num_critic_for_reviews   3.792003e-03
+    ## color                   -1.953548e-01
+    ## drama_genre              4.561005e-01
+    ## comedy_genre            -8.638600e-02
+    ## thriller_genre          -1.354741e-01
+    ## action_genre            -2.080137e-01
+    ## romance_genre           -5.416589e-02
+    ## adventure_genre         -6.199642e-02
+    ## crime_genre              8.459822e-02
+    ## scifi_genre             -1.462682e-01
+    ## fantasy_genre           -7.313457e-02
+    ## horror_genre            -4.071465e-01
+    ## family_genre            -1.034405e-01
     ## mystery_genre            .           
-    ## biography_genre          1.363862e-01
-    ## animation_genre          6.585495e-01
-    ## music_genre             -6.127854e-02
-    ## war_genre                1.653373e-02
+    ## biography_genre          1.371465e-01
+    ## animation_genre          6.693931e-01
+    ## music_genre             -5.549267e-02
+    ## war_genre                1.758773e-02
     ## history_genre            .           
     ## sport_genre              .           
-    ## musical_genre           -4.925577e-02
-    ## documentary_genre        1.150885e+00
+    ## musical_genre           -4.276286e-02
+    ## documentary_genre        1.159465e+00
     ## western_genre            .           
     ## filmnoir_genre           .           
-    ## short_genre              1.195545e+00
-    ## news_genre               2.349452e-01
+    ## short_genre              1.177322e+00
+    ## news_genre               2.403476e-01
+    ## director_movies          1.141917e-02
+    ## actor_1_movies           1.701486e-03
+    ## actor_2_movies           .           
+    ## actor_3_movies          -7.087478e-03
 
 ``` r
-#Let's also inspect the MSE of our final lasso model on all our data.
+# Valor final del error MSE
 lasso.bestlambda = predict(lasso.out, s = bestlambda.lasso, newx = x)
 mean((lasso.bestlambda - y)^2)
 ```
 
-    ## [1] 0.7126899
+    ## [1] 0.7100814

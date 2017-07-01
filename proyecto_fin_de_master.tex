@@ -40,7 +40,7 @@
 
 \begin{abstract}
 %\boldmath
-\blindtext[1]
+¿Es posible predecir si una película tendrá éxito, antes de que esta vea la luz? Puede ser que una película sea popular dependiendo únicamente de la calidad de la misma, pero puede también que determinados factores como su reparto, género, país o fecha de estreno, también influyan en el número de personas a las que esta les va a gustar. En este trabajo analizaremos si las caraterísticas de una película conocidas antes de que se realice, nos permiten saber si esta tendrá éxito entre los usuarios de IMDb.
 % Note that keywords are not normally used for peerreview papers.
 \\
 \\
@@ -51,22 +51,17 @@ IMDb, Kaggle %IEEEtran, journal, \LaTeX, paper, template.
 
 \section{Introducción y objeto del análisis}
 
-\blindtext
+Para intentar predecir si una película tendrá éxito vamos a analizar las características de una película conocidas antes de que esta vea la luz y que están disponibles a través de la página web IMDb. Utilizaremos una base de datos ya existente e intentaremos utilizar estas características para saber si tienen alguna relación con la puntuación otorgada por los usuarios del portal web. 
 
-\blindtext
+En primer lugar cargaremos la información de esta base de datos y comprobaremos cuál es su calidad. También analizaremos su distribución a lo largo del tiempo y cómo influye el país, el género, el director o el reparto en la variabilidad de las puntuaciones.
+
+En base a esta información crearemos un modelo no supervisado que nos permita agrupar los datos de las películas si tener en cuenta su puntuación. A continuación crearemos varios modelos de regresión teniendo en cuenta su puntuación, para ver si somos capaces de predecir su éxito. Finalmente crearemos un sencillo recomendador, que dado el título de una película nos devuelva el título de películas similares que nos podrían llegar a gustar.
+
+El análisis de los datos que van a ser utilizados se realizará utilizando Tableau. Para la limpieza y transformacíon de los datos se utilizará R, lenguaje también utilizado para crear los modelos no supervisados y supervisados. También se utilizará R para crear el sistema de recomendacíon.  
 
 \clearpage
 
 \section{Carga de los datos y análisis descriptivo}
-Existen multitud de bases de datos de libre disposición con información general relacionada con películas. Una de estas bases de datos es La Internet Movie Database (o IMDb de manera abreviada), que muestra toda su informacion a través del portal web \href{http://www.imdb.com}{http://www.imdb.com}.
-
-Para esta base de datos en particular, el usuario tiene acceso al título de las películas, el nombre del director, las personas que han participado en su realización, el genéro, su presupuesto o el dinero recaudado, como se puede ver a continuación:
-
-\begin{figure}[h]
-\centering
-\includegraphics[width=3in,clip,keepaspectratio]{./images/imdb_data}
-\label{fig:imdb_data}
-\end{figure}
 
 A pesar IMDb sólo presenta su información a través de su portal web, hay trabajos como \cite{imdb5000} que ya han extraído los datos más relevantes utilizando, en este caso en particular, Python y su librería \href{https://scrapy.org/}{scrapy}, siguiendo los siguientes pasos:
 
@@ -98,7 +93,7 @@ A continuación se incluyen notas importantes del autor, sobre cada uno de los a
 
 \subsection{Datos generales sobre el dataset}
 
-Como primer paso vamos a analizar el dataset extraído de \href{https://www.kaggle.com/deepmatrix/imdb-5000-movie-dataset}{Kaggle}, que será el utilizado en este trabajo. Para ello se muestra en la siguiente figura el número de películas por país en nuestro dataset cada año disponible en \href{https://public.tableau.com/profile/javier6580\#!/vizhome/proyecto_fin_de_master_dataset/films_per_year}{Tableau Public}:
+Como primer paso vamos a analizar el dataset extraído de \href{https://www.kaggle.com/deepmatrix/imdb-5000-movie-dataset}{Kaggle}, que será el utilizado en este trabajo. Para ello se muestra en la siguiente figura el número de películas por país en nuestro dataset cada año, como se puede ver en \href{https://public.tableau.com/profile/javier6580\#!/vizhome/proyecto_fin_de_master_dataset/films_per_year}{Tableau Public}:
 
 \begin{figure}[h]
 \centering
@@ -137,7 +132,7 @@ $m$ = mínimo número de votos para estar en el top 250\\
 \indent
 $C$ = la media de todos los votos\\
 
-En la figura que se muestra a continuación se puede observar la distribución del rating otorgado por los usuarios en el dataset considerado. En este gráfico se han destacado las películas según su calidad, en base a los siguientes criterios disponible en \href{https://public.tableau.com/profile/javier6580\#!/vizhome/proyecto_fin_de_master_dataset/rating_distribution}{Tableau Public}:
+En la figura que se muestra a continuación se puede observar la distribución del rating otorgado por los usuarios en el dataset considerado. En este gráfico se han destacado las películas según su calidad, en base a los siguientes criterios, como se puede ver en \href{https://public.tableau.com/profile/javier6580\#!/vizhome/proyecto_fin_de_master_dataset/rating_distribution}{Tableau Public}:
 
 \begin{itemize}
   \item Verde, si las películas son muy buenas y superan una puntuación de 8.
@@ -156,57 +151,59 @@ Cabe destacar también como el top 250 de IMDb se corresponde con una puntación
 
 \subsection{Distribucion de las puntuaciones}
 
-Desde finales de la segunda guerra mundial, se ha producido un incremento gradual de las películas producidas debido al avance de la tecnología para la realización de las mismas. Además, como se pudo ver anteriormente en el número de películas producidas cada año, desde finales del siglo pasado el avance de los medios digitales ha facilitado y abaratado su distribución para multitud de productoras independientes\cite{popmatters}. Por otro lado, en la siguiente figura también se puede observar que aunque el número de trabajos ha aumentado, también ha dismunido la calidad en algunos casos disponible en \href{https://public.tableau.com/profile/javier6580\#!/vizhome/proyecto_fin_de_master_dataset/rating_year}{Tableau Public}:
+Desde finales de la segunda guerra mundial, se ha producido un incremento gradual de las películas producidas debido al avance de la tecnología para la realización de las mismas. Además, como se pudo ver anteriormente en el número de películas producidas cada año, desde finales del siglo pasado el avance de los medios digitales ha facilitado y abaratado su distribución para multitud de productoras independientes\cite{popmatters}. Por otro lado, en la siguiente figura también se puede observar que aunque el número de trabajos ha aumentado, también ha dismunido la calidad en algunos casos, como se puede ver en \href{https://public.tableau.com/profile/javier6580\#!/vizhome/proyecto_fin_de_master_dataset/rating_year}{Tableau Public}:
 
 \begin{figure*}[h]
 \centering
 \includegraphics[width=\textwidth,keepaspectratio]{./images/rating_year}
 \end{figure*}
 
-\clearpage
-
-Hay países como Kirguistán, Libia, Egipto o Irán con un reducido número de películas pero cuya puntuación es superior al resto. Por otro lado Estados Unidos, Reino Unido y Francia son los países con más películas, pero cuya calidad no siempre es mejor que las demás. Cabe destacar que en el dataset que estamos estudiando aparecen películas de la India pero no en gran cantidad, siento este país uno de los productores actuales más grande disponible en \href{https://public.tableau.com/profile/javier6580\#!/vizhome/proyecto_fin_de_master_dataset/rating_country}{Tableau Public}:
+Hay países como Kirguistán, Libia, Egipto o Irán con un reducido número de películas pero cuya puntuación es superior al resto. Por otro lado Estados Unidos, Reino Unido y Francia son los países con más películas, pero cuya calidad no siempre es mejor que las demás. Cabe destacar que en el dataset que estamos estudiando aparecen películas de la India pero no en gran cantidad, siento este país uno de los productores actuales más grande, como se puede ver en \href{https://public.tableau.com/profile/javier6580\#!/vizhome/proyecto_fin_de_master_dataset/rating_country}{Tableau Public}:
 
 \begin{figure*}[h]
 \centering
 \includegraphics[width=\textwidth,keepaspectratio]{./images/rating_country}
 \end{figure*}
 
+\clearpage
+
 \subsection{Análisis de actores y directores}
 
-Resulta interesante también analizar las puntuaciones de los actores y directores con mayor número de películas. Se puede ver a continuación como la variación de las puntuaciones de los actores es mayor que la de los directores más populares. En el caso de los actores, algunos nombre como Robert De Niro, Sylvester Stallone o Channing Tatum con buenas películas, pero también con películas de calidad mediocre. Otros actores como Matt Damon destacan por tener un gran número de películas de calidad notable y Nicolas Cage, por ejemplo, por haber realizado algunos papeles de mala calidad. Con respecto a los directores destaca Steven Spielberg como el actor mas prolífico y siempre de gran calidad y Robert Rodríguez con diferentes producciones pésimas disponible en \href{https://public.tableau.com/profile/javier6580\#!/vizhome/proyecto_fin_de_master_dataset/rating_actors}{Tableau Public 1} y \href{https://public.tableau.com/profile/javier6580\#!/vizhome/proyecto_fin_de_master_dataset/rating_directors}{Tableau Public 2}.
+Resulta interesante también analizar las puntuaciones de los actores y directores con mayor número de películas. Se puede ver a continuación como la variación de las puntuaciones de los actores es mayor que la de los directores más populares. En el caso de los actores, algunos nombres como Robert De Niro, Sylvester Stallone o Channing Tatum tienen buenas películas, pero también películas de calidad mediocre. Otros actores como Matt Damon destacan por tener un gran número de películas de calidad notable y Nicolas Cage, por ejemplo, por haber realizado algunos papeles de mala calidad, como se puede ver en \href{https://public.tableau.com/profile/javier6580\#!/vizhome/proyecto_fin_de_master_dataset/rating_actors}{Tableau Public}:
 
 \begin{figure}[h]
 \centering
-\subfigure[Actores más populares]{
-\includegraphics[width=2.6in]{./images/rating_actors}
-}
-\subfigure[Directores más populares]{
-\includegraphics[width=2.6in]{./images/rating_directors}
-}
+\includegraphics[width=3.7in,clip,keepaspectratio]{./images/rating_actors}
+\end{figure}
+
+Con respecto a los directores destaca Steven Spielberg como el actor mas prolífico y siempre de gran calidad y Robert Rodríguez con diferentes producciones pésimas, como se puede ver en \href{https://public.tableau.com/profile/javier6580\#!/vizhome/proyecto_fin_de_master_dataset/rating_directors}{Tableau Public}:
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=3.7in,clip,keepaspectratio]{./images/rating_directors}
 \end{figure}
 
 \clearpage
 
-Para saber si influye el número de likes en la puntuacíon de las películas, podemos ver en los siguientes gráficos como es más importante en los actores tener más likes para obtener mejores resultados, y sobre todo el en actor principal de la película, pero en los directores aunque con menos likes, las puntuaciones son superiores disponible en \href{https://public.tableau.com/profile/javier6580\#!/vizhome/proyecto_fin_de_master_dataset/likes_actors_rating}{Tableau Public 1} y \href{https://public.tableau.com/profile/javier6580\#!/vizhome/proyecto_fin_de_master_dataset/likes_director_rating}{Tableau Public 2}:
+Para saber si influye el número de likes en la puntuacíon de las películas, podemos ver en los siguientes gráficos como es más importante en los actores tener más likes para obtener mejores resultados, y sobre todo el en actor principal de la película, como se puede ver en \href{https://public.tableau.com/profile/javier6580\#!/vizhome/proyecto_fin_de_master_dataset/likes_actors_rating}{Tableau Public}:
 
 \begin{figure}[h]
 \centering
-\subfigure[Número de likes de los actores]{
-\centering
-\includegraphics[width=2.6in]{./images/likes_actors_rating}
-}
-\subfigure[Número de likes de los directores]{
-\centering
-\includegraphics[width=2.6in]{./images/likes_director_rating}
-}
+\includegraphics[width=3in,clip,keepaspectratio]{./images/likes_actors_rating}
 \end{figure}
 
-%\clearpage
+En los directores aunque con menos likes, las puntuaciones son superiores cuanto mayor es la gente a la que le gustan, como se puede ver en \href{https://public.tableau.com/profile/javier6580\#!/vizhome/proyecto_fin_de_master_dataset/likes_director_rating}{Tableau Public}:
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=3in,clip,keepaspectratio]{./images/likes_director_rating}
+\end{figure}
+
+\clearpage
 
 \subsection{Análisis de presupuesto y duración}
 
-Para saber si influye el presupuesto y la duración de las películas en la puntuación obtenida en IMDb, se puede ver como a mayor dinero invertido menor es la dispersión en las puntuaciones, y aquellas películas que son mejores tienen una duración de menos de una hora o de longitud más larga posible disponible en \href{https://public.tableau.com/profile/javier6580\#!/vizhome/proyecto_fin_de_master_dataset/rating_budget}{Tableau Public 1} y \href{https://public.tableau.com/profile/javier6580\#!/vizhome/proyecto_fin_de_master_dataset/rating_budget}{Tableau Public 2}:
+Para saber si influye el presupuesto y la duración de las películas en la puntuación obtenida en IMDb, se puede ver como a mayor dinero invertido menor es la dispersión en las puntuaciones, y aquellas películas que son mejores tienen una duración de menos de una hora o lo más larga posible, como se puede ver en \href{https://public.tableau.com/profile/javier6580\#!/vizhome/proyecto_fin_de_master_dataset/rating_budget}{Tableau Public 1} y \href{https://public.tableau.com/profile/javier6580\#!/vizhome/proyecto_fin_de_master_dataset/rating_budget}{Tableau Public 2}:
 
 \begin{figure}[h]
 \centering
@@ -220,36 +217,35 @@ Para saber si influye el presupuesto y la duración de las películas en la punt
 }
 \end{figure}
 
-\clearpage
-
-La combinación de estos dos factores nos muestra que una gran duración y presupuesto moderado resulta en mejores películas y como las películas de entre media hora y una hora también tienen gran aceptación entre el público disponible en \href{https://public.tableau.com/profile/javier6580\#!/vizhome/proyecto_fin_de_master_dataset/budget_duration}{Tableau Public}:
+La combinación de estos dos factores nos muestra que una gran duración y presupuesto moderado resulta en mejores películas y como las películas de entre media hora y una hora también tienen gran aceptación entre el público, como se puede ver en \href{https://public.tableau.com/profile/javier6580\#!/vizhome/proyecto_fin_de_master_dataset/budget_duration}{Tableau Public}:
 
 \begin{figure}[h]
 \centering
 \includegraphics[width=4in,clip,keepaspectratio]{./images/budget_duration}
 \end{figure}
 
-Como curiosidad se puede ver como ha variado la duración de las películas a lo largo del tiempo\cite{justgeek}, podemos representar los ragos de duración anualmente y ver como son cada vez más populares las películas con una duración de entre 90 y 120 minutos disponible en \href{https://public.tableau.com/profile/javier6580\#!/vizhome/proyecto_fin_de_master_dataset/duration_year}{Tableau Public}:
+\clearpage
+
+Como curiosidad se puede ver cómo ha variado la duración de las películas a lo largo del tiempo\cite{justgeek}, podemos representar los ragos de duración anualmente y ver como son cada vez más populares las películas con una duración de entre 90 y 120 minutos, disponible en \href{https://public.tableau.com/profile/javier6580\#!/vizhome/proyecto_fin_de_master_dataset/duration_year}{Tableau Public}:
 
 \begin{figure}[h]
 \centering
 \includegraphics[width=4in,clip,keepaspectratio]{./images/duration_year}
 \end{figure}
 
-%\clearpage
-
-\clearpage
 
 \subsection{Análisis del género de las películas}
 
-Para saber si el género de las películas influye en el rating de las mismas se muestra a continuación como aquellos generos menos populares son los que mayor puntuación reciben y el drama, que es el género más popular, se situa tras de estos, disponible en \href{https://public.tableau.com/profile/javier6580\#!/vizhome/proyecto_fin_de_master_dataset/rating_genre}{Tableau Public} y el script utilizado para dividir el género en \href{https://github.com/pozueco/proyecto_fin_de_master/blob/master/split_genres.md}{R Markdown}:
+Para saber si el género de las películas influye en el rating de las mismas se muestra a continuación cómo aquellos géneros menos populares son los que mayor puntuación reciben y el drama, que es el género más popular, se situa tras de estos, disponible en \href{https://public.tableau.com/profile/javier6580\#!/vizhome/proyecto_fin_de_master_dataset/rating_genre}{Tableau Public} y el script utilizado para dividir el género en \href{https://github.com/pozueco/proyecto_fin_de_master/blob/master/split_genres.md}{R Markdown}:
 
 \begin{figure}[h]
 \centering
 \includegraphics[width=4.5in,clip,keepaspectratio]{./images/rating_genre}
 \end{figure}
 
-Es interesante también ver como han evolucionado los géneros más populares a lo largo del tiempo, para ver como la acción, el thriller o la comedia son cada vez más populares y otros como el drama y el romance, ya no tanto, disponible en \href{https://public.tableau.com/profile/javier6580\#!/vizhome/proyecto_fin_de_master_genre/rating_genre}{Tableau Public}:
+\clearpage
+
+Es interesante también ver como han evolucionado los géneros más populares a lo largo del tiempo, para ver como la acción, el thriller o la comedia son cada vez más populares y otros como el drama y el romance, ya no tanto, como se puede ver en \href{https://public.tableau.com/profile/javier6580\#!/vizhome/proyecto_fin_de_master_genre/rating_genre}{Tableau Public}:
 
 \begin{figure}[h]
 \centering
@@ -264,7 +260,7 @@ En primer lugar se ha realizado un análisis de la calidad del dataset para sabe
 
 \subsection{Modelo no supervisado}
 
-A continuación se seleccionan los datos para la construcción del modelo no supervisado solamente con las siguientes columnas, y se eliminan las files con datos no definidos con \href{https://github.com/pozueco/proyecto_fin_de_master/blob/master/clean_dataset.md}{R Markdown}:
+A continuación se seleccionan los datos para la construcción del modelo no supervisado solamente con las siguientes columnas y se eliminan las filas con datos no definidos con \href{https://github.com/pozueco/proyecto_fin_de_master/blob/master/clean_dataset.md}{R Markdown}. También se han eliminado todas las películas que no pertenecen a USA, ya que no siempre se realiza el cambio de moneda y el presupuesto no se puede utilizar para la construcción del modelo:
 
 \begin{itemize}
   \item Actor 1 Facebook Likes, Actor 2 Facebook Likes y Actor 3 Facebook Likes 
@@ -275,7 +271,7 @@ A continuación se seleccionan los datos para la construcción del modelo no sup
 
 \subsection{Modelo supervisado}
 
-Para la construción de los modelos de regresión se utilizarán las siguientes columnas y eliminándose como en el caso anterior las files con datos no definidos con \href{https://github.com/pozueco/proyecto_fin_de_master/blob/master/clean_dataset.md}{R Markdown}. Cabe destacar que se ha creado una columna por género de la película con el valor 0 o 1 si la película pertenece a ese género, una columna con el valor 0 o 1 si la película es el blanco y negro o en color, y una columna para el director, el actor 1, el actor 2 y el actor 3, con el número de películas en las que participan:
+Para la construción de los modelos de regresión se utilizarán las siguientes columnas y eliminándose como en el caso anterior las filas con datos no definidos y los países que no son USA, utilizando \href{https://github.com/pozueco/proyecto_fin_de_master/blob/master/clean_dataset.md}{R Markdown}. Cabe destacar, en base a \cite{cleansing}, que se ha creado una columna por género de la película con el valor 0 o 1 si la película pertenece a ese género, una columna con el valor 0 o 1 si la película es el blanco y negro o en color, y una columna para el director, el actor 1, el actor 2 y el actor 3, con el número de películas en las que participan:
 
 \begin{itemize}
   \item Actor 1 Facebook Likes, Actor 2 Facebook Likes y Actor 3 Facebook Likes
@@ -289,23 +285,17 @@ Para la construción de los modelos de regresión se utilizarán las siguientes 
   \item Genre
   \item Director Movies
   \item Actor 1 Movies, Actor 2 Movies y Actor 3 Movies
-  \end{itemize}
-
-\clearpage
-
-\subsection{Recomendador}
-
-\blindtext
+\end{itemize}
 
 \clearpage
 
 \section{Análisis exploratorio apoyado en algún método NO supervisado}
 
-Para la creación del modelo no supervisado se utilizará el conjunto de datos generado anteriormente y se calculará el número óptimo de clusters según \href{https://github.com/pozueco/proyecto_fin_de_master/blob/master/model_no_supervised.md}{R Markdown}:
+Para la creación del modelo no supervisado se utilizará el conjunto de datos generado anteriormente y se calculará el número óptimo de clusters con \href{https://github.com/pozueco/proyecto_fin_de_master/blob/master/model_no_supervised.md}{R Markdown}:
 
 \begin{figure}[h]
 \centering
-\includegraphics[width=2.5in,clip,keepaspectratio]{./model_no_supervised_files/figure-markdown_github/unnamed-chunk-2-1}
+\includegraphics[width=2in,clip,keepaspectratio]{./model_no_supervised_files/figure-markdown_github/unnamed-chunk-2-1}
 \end{figure}
 
 En la siguiente imagen se puede ver la relación entre los distintos clusters generados según el número óptimo calculado previamente, que en este caso es 4:
@@ -314,6 +304,8 @@ En la siguiente imagen se puede ver la relación entre los distintos clusters ge
 \centering
 \includegraphics[width=5in,clip,keepaspectratio]{./model_no_supervised_files/figure-markdown_github/unnamed-chunk-2-2}
 \end{figure}
+
+En base al análisis no supervisado, se han creados grupos de películas en base principalmente al presupuesto utilizado. 
 
 \clearpage
 
@@ -326,37 +318,59 @@ Para la creación del modelo no supervisado se utilizará el conjunto de datos g
 \includegraphics[width=6in,clip,keepaspectratio]{./model_supervised_files/figure-markdown_github/unnamed-chunk-3-1}
 \end{figure}
 
+Según la matriz de correlación anterior, existe una gran influencia entre los atributos Cast Total Facebook Likes y Actor 1 Facebook Likes, por lo que se ha eliminado el primero para la construcción de los siguientes modelos de regresión.
+
 \clearpage
 
-Según la matriz de correlación anterior, existe una gran influencia entre los atributos Cast Total Facebook Likes y Actor 1 Facebook Likes, por lo que se ha eliminado esta primera para la construcción de los siguientes modelos de regresión.
-
-El primero de ellos será un modelo de regresión Ridge\cite{glmnet} el cual será optimizado para obtener los mejores parámetros que minimicen el error del modelo obtenido con \href{https://github.com/pozueco/proyecto_fin_de_master/blob/master/model_supervised.md}{R Markdown}:
-
+El primero de ellos será un modelo de regresión Ridge\cite{glmnet} que será optimizado para obtener el valor del parámetro lambda que hará que se obtengan los mejores resultados en cuanto al valor del error MSE, utilizando \href{https://github.com/pozueco/proyecto_fin_de_master/blob/master/model_supervised.md}{R Markdown}. En la primera imagen se pueden ver las diferentes curvas del modelo considerado con respecto a cada uno de los valores del parámetro a optimiar, y en la segunda imagen el error obtenido con cada valor del parámetro. El error del parámetro óptimo es $0.707641$:
 
 \begin{figure}[h]
 \centering
-\subfigure[Número de likes de los actores]{
+\subfigure[Diferentes curvas del modelo]{
 \centering
 \includegraphics[width=2.6in]{./model_supervised_files/figure-markdown_github/unnamed-chunk-6-1}
 }
-\subfigure[Número de likes de los directores]{
+\subfigure[Error de cada uno del parámetro lambda]{
 \centering
 \includegraphics[width=2.6in]{./model_supervised_files/figure-markdown_github/unnamed-chunk-6-2}
 }
 \end{figure}
 
-El segundo de ellos será un modelo de regresión Lasso\cite{glmnet} el cual también será optimizado para obtener los mejores parámetros que minimicen el error del modelo obtenido con \href{https://github.com/pozueco/proyecto_fin_de_master/blob/master/model_supervised.md}{R Markdown}:
+El segundo que se va a construir será un modelo de regresión Lasso\cite{glmnet} que también será optimizado para obtener el mejor valor del parámetro lambda a utilizar, para minimizar el error MSE con \href{https://github.com/pozueco/proyecto_fin_de_master/blob/master/model_supervised.md}{R Markdown}. Se puede observar en la figura mostrada a continuación que el mejor valor del parámetro lambda arroja un error MSE de $0.7100814$, con lo cual se obtienen resultados ligeramente peores que con el anterior modelo:
 
 \begin{figure}[h]
 \centering
-\includegraphics[width=3in,clip,keepaspectratio]{./model_supervised_files/figure-markdown_github/unnamed-chunk-7-1}
+\includegraphics[width=3.5in,clip,keepaspectratio]{./model_supervised_files/figure-markdown_github/unnamed-chunk-7-1}
 \end{figure}
 
 \clearpage
 
 \section{Creación de un sistema de recomendación}
 
-\blindtext
+Por último vamos a crear un sencillo recomendador en base al trabajo de \cite{recommender}. Este recomendador se basa en el cálculo de la similitud de un conjunto de películas con una dada y teniendo en cuenta una serie de atributos:
+
+\begin{equation}
+similarity = \cos(\theta) = \frac{A \cdot B}{\parallel A \parallel \parallel B \parallel} = \frac{\sum_{i=1}^{n} A_{i} \times B_{i}}{\sqrt{\sum_{i=1}^{n} (A_{i})^{2}} \times \sqrt{\sum_{i=1}^{n} (B_{i})^{2}}}
+\end{equation}
+
+En nuestro caso dado el título de una película, vamos a obtener aquellas películas que tengan en común algún actor o el director, y calcularemos su similitud teniendo en cuenta la puntuación en IMDb y su género, como se puede ver en \href{https://github.com/pozueco/proyecto_fin_de_master/blob/master/recommender.md}{R Markdown}:
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=4in,clip,keepaspectratio]{./images/recommender1}
+\end{figure}
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=4in,clip,keepaspectratio]{./images/recommender2}
+\end{figure}
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=4in,clip,keepaspectratio]{./images/recommender3}
+\end{figure}
+
+En el ejemplo anterior se pueden ver los resultados de nuestro recomendador para la película "The Matrix", en el que se muestra por order de similitud, las películas recomendadas con su título y año. 
 
 \clearpage
 
@@ -386,6 +400,12 @@ Z.~Brown, \href{http://www.justgeek.de/watching-all-the-movies-ever-made/}{Watch
 
 \bibitem{glmnet}
 T.~Hastie and J.~Qian, \href{https://web.stanford.edu/~hastie/glmnet/glmnet_alpha.html}{Glmnet Vignette}, \relax Stanford University, 2014.
+
+\bibitem{cleansing}
+A.~Sharma, \href{https://www.kaggle.com/arjoonn/movie-recommendations}{Movie Recommendations}, \relax Kaggle, 2017.
+
+\bibitem{recommender}
+M.~Chaware, \href{http://justanotherdataenthusiast.blogspot.co.uk/2015/12/basic-recommender-system-using-imdb-data.html}{Basic Recommender System using IMDb Data}, \relax Just Another Data Blog, 2015.
 
 \end{thebibliography}
 
@@ -425,6 +445,8 @@ T.~Hastie and J.~Qian, \href{https://web.stanford.edu/~hastie/glmnet/glmnet_alph
 \newgeometry{left=2.5cm,right=2.5cm,top=2cm,bottom=2.5cm,footnotesep=0.5cm}
 
 \section{Calidad del dataset} \label{anexo:I}
+
+Datos disponibles en \href{https://public.tableau.com/profile/javier6580\#!/vizhome/proyecto_fin_de_master_dataset/dataset_quality}{Tableau Public}:
 
 \begin{figure}[h]
 \centering
