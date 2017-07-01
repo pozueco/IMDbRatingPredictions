@@ -7,7 +7,7 @@ output:
     variant: markdown_github
 ---
 
-# Creaci?n del recomendador de pel?culas
+# Creación del recomendador de pel?culas
 
 Leemos los datos desde el fichero de pel?culas original:
 
