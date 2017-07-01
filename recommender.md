@@ -1,7 +1,7 @@
-Creaci?n del recomendador de pel?culas
+Creación del recomendador de películas
 ======================================
 
-Leemos los datos desde el fichero de pel?culas original:
+Leemos los datos desde el fichero de películas original:
 
 ``` r
 fileMovies <- file("./movie_metadata_original.csv","r") 
@@ -10,7 +10,7 @@ close(fileMovies)
 head(moviesDataset[2827,1:20])
 ```
 
-Limpiamos los datos y nos quedamos s?lo con aquellas columnas utilizadas por el recomendador:
+Limpiamos los datos y nos quedamos sólo con aquellas columnas utilizadas por el recomendador:
 
 ``` r
 # new data frame only with selected columns
@@ -63,7 +63,7 @@ moviesRecommender$short_genre = ifelse(grepl("Short",moviesRecommender$genres), 
 moviesRecommender$news_genre = ifelse(grepl("News",moviesRecommender$genres), 1, 0)
 ```
 
-En nuestro recomendador, en base al t?tulo de la pel?cula buscaremos las pel?culas que tengan en com?n alg?n actor o el director, y calcularemos la similitud con nuestra pel?cula en base a la puntuaci?n en IMDb y el g?nero de las pel?culas:
+En nuestro recomendador, en base al título de la película buscaremos las pel?culas que tengan en común algún actor o el director, y calcularemos la similitud con nuestra película en base a la puntuación en IMDb y el género de las películas:
 
 ``` r
 # title of the film to recommend
